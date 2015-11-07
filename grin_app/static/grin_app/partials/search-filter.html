@@ -1,0 +1,102 @@
+<div style="margin-top: 0.5rem;">
+</div>
+  
+<div class="row">
+
+  <div class="col-md-2">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+	Results:
+	<span ng-if="! model.geoJson.updating">
+	  {{ model.geoJson.data.length | number}}
+	</span>
+      </div>
+      <div class="panel-body">
+
+	<form class="form-inline"
+	      ng-submit="onSetMaxRecs(model.maxRecs)">
+	  <label>
+	    Limit # to:
+	  </label>
+	  <input type="text"
+		 ng-model="model.maxRecs"
+		 ng-change="onSetMaxRecs(model.maxRecs)"
+		 size="4"
+		 maxlength="4">
+	  </input>
+	</form>
+	<span ng-if="model.geoJson.updating">
+	  <img src="/static/grin_app/images/ajax-loader.gif"></img>
+	  Loading...
+	</span>
+      </div>
+    </div>
+  </div>
+   
+  <div class="col-md-5">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+	Taxon Search
+      </div>
+      <div class="panel-body">
+	<form class="form-inline" ng-submit="onTaxonFilter(model.taxonFilter)">
+	  <input id="taxon-filter"
+		 type="text" autofocus
+		 size="40"
+		 maxlength="256"
+		 ng-model="model.taxonFilter">
+	  </input>
+	  <button type="submit" class="btn btn-sm btn-default">
+	    <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+	    Go
+	  </button>
+	  <div class="checkbox">
+	    <label>
+	      <input type="checkbox"
+		     ng-model="model.limitToGeocoded"
+		     ng-change="onLimitToGeocoded(model.limitToGeocoded)">
+	      </input>
+	      Limit to geocoded accessions
+	    </label>
+	    <label>
+	      <input type="checkbox"
+		     ng-model="model.limitToMapExtent"
+		     ng-change="onLimitToMapExtent(model.limitToMapExtent)">
+	      </input>
+	      Limit to current map extent
+	    </label>
+	  </div>
+	</form>
+      </div>
+    </div>
+  </div>
+ 
+  <div class="col-md-5">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+	Geographic Coordinates
+      </div>
+      <div class="panel-body">
+	<form class="form-inline" ng-submit="onSetCenter()">
+	  <div class="form-group">
+	    <label for="lat">Lat:</label>
+	    <input id="lat"
+		   type="text"
+		   ng-model="model.center.lat"
+		   size="8"></input>
+	    <label for="lng">Lng:</label>
+	    <input id="lng"
+		   type="text"
+		   ng-model="model.center.lng"
+		   size="8"></input>
+	    <button type="submit" class="btn btn-sm btn-default">
+	      <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>
+	      Go
+	    </button>
+	  </div>
+	</form>
+      </div>
+    </div>
+  </div>
+</div>
+

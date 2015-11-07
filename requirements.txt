@@ -1,0 +1,5 @@
+Django==1.8.5
+django-extensions==1.5.7
+petl==1.0.11
+psycopg2==2.6.1
+six==1.10.0

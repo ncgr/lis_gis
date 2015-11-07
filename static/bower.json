@@ -1,0 +1,28 @@
+{
+  "name": "lis_germplasm",
+  "authors": [
+    "Alex Rice <agr@ncgr.org>"
+  ],
+  "description": "",
+  "main": "",
+  "moduleType": [],
+  "license": "MIT",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "~1.4.7",
+    "bootstrap": "~3.3.5",
+    "lodash": "~3.10.1",
+    "leaflet": "~0.7.7",
+    "angular-bootstrap": "~0.14.3",
+    "angular-cookies": "~1.4.7",
+    "angular-sanitize": "~1.4.7"
+  }
+}
