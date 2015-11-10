@@ -16,15 +16,7 @@ function($scope, $state, $http, geoJsonService) {
     geoJsonService : geoJsonService,  // array of geoJson objects
     center : DEFAULT_CENTER,
   };
-  
-  $scope.updateMarkersForBounds = function() {
-    var map = $scope.model.map;
-    // adjust the bounds for prime meridian and dateline
-    // crossover. leaflet has a wrap() function for this
-    var bounds = map.getBounds();
-    geoJsonService.setBounds(bounds, true);
-  };
-
+ 
   $scope.init = function() {
     /* initialize the default leaflet-js viewport. use a not-too-busy
        basemap, and center around the Iowa/Illinois area.  TODO: save
@@ -64,20 +56,20 @@ function($scope, $state, $http, geoJsonService) {
       
     });
     $scope.model.map.whenReady(function() {
-      $scope.updateMarkersForBounds();
+      updateMarkersForBounds();
     });
     $scope.model.map.on('zoomend', function(e) {
-      $scope.updateMarkersForBounds();
+      updateMarkersForBounds();
     });
     $scope.model.map.on('resize', function(e) {
-      $scope.updateMarkersForBounds();
+      updateMarkersForBounds();
     });
     $scope.model.map.on('dragend', function(e) {
-      $scope.updateMarkersForBounds();
+      updateMarkersForBounds();
     });
   };
 
-  $scope.panToMarkers = function() {
+  function panToMarkers() {
     /* use a centroid -ish algorithm to pan to the markers. this
      avoids a signed bounds calculation as well. */
     console.log('panToMarkers');
@@ -100,14 +92,22 @@ function($scope, $state, $http, geoJsonService) {
     
     var latlng = L.latLng(avgLat, avgLng);
     $scope.model.map.panTo(latlng);
-  };
-  
+  }
+
+  function updateMarkersForBounds() {
+    var map = $scope.model.map;
+    // adjust the bounds for prime meridian and dateline
+    // crossover. leaflet has a wrap() function for this
+    var bounds = map.getBounds();
+    geoJsonService.setBounds(bounds, true);
+  }
+
   function filterNonGeocoded(featureData, layer) {
     /* GeoJson spec allows null coordinates (e.g. non-geocoded
      * accessions in our situation). However leafletjs errors on the
      * null coordinates, so filter them out here */
     return (featureData.geometry.coordinates !== null);
-  };
+  }
   
   $scope.init();
   
