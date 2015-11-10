@@ -23,6 +23,7 @@ function($scope, $state, $http, geoJsonService) {
       'zoom' : DEFAULT_ZOOM,
       'minZoom' : MIN_ZOOM,
     });
+    
     geoJsonService.map = $scope.model.map;
     geoJsonService.setCenter($scope.model.center, false);
     L.tileLayer(
@@ -57,21 +58,7 @@ function($scope, $state, $http, geoJsonService) {
     $scope.model.map.on('dragend', function(e) {
       updateMarkersForBounds();
     });
-
-    tryClientGeolocation();
   };
-  
-  function tryClientGeolocation() {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(function(position) {
-	$scope.model.center = {
-	  lat : position.coords.latitude,
-	  lng : position.coords.longitude,
-	};
-	geoJsonService.setCenter($scope.model.center, true);
-      });
-    }
-  }
   
   function panToMarkers() {
     /* use a centroid -ish algorithm to pan to the markers. this

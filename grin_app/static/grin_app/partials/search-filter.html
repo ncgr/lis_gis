@@ -75,6 +75,7 @@
     <div class="panel panel-default">
       <div class="panel-heading">
 	Geographic Coordinates
+
       </div>
       <div class="panel-body">
 	<form class="form-inline" ng-submit="onSetCenter()">
@@ -93,8 +94,16 @@
 	      <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>
 	      Go
 	    </button>
+	    or
+	    <button type="submit" class="btn btn-sm btn-default"
+		    ng-click="onGeoLocate()">
+	      <span class="glyphicon glyphicon-map-marker"
+		    aria-hidden="true"></span>
+	      My Location
+	    </button>
 	  </div>
 	</form>
+
       </div>
     </div>
   </div>

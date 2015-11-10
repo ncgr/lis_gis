@@ -48,5 +48,18 @@ function($scope, $state, $http, geoJsonService) {
     geoJsonService.setTaxonQuery(q, true);
   };
   
+  $scope.onGeoLocate = function() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function(position) {
+	$scope.model.center = {
+	  lat : position.coords.latitude,
+	  lng : position.coords.longitude,
+	};
+	geoJsonService.setCenter($scope.model.center, true);
+	console.log($scope.model.center);
+      });
+    }
+  };
+  
   $scope.init();		 
 });
