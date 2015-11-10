@@ -6,7 +6,7 @@
 app.controller('mapController',
 function($scope, $state, $http, geoJsonService) {
 		 
-  var DEFAULT_CENTER = { 'lat' : 21.15, 'lng' : 80.42 };
+  var DEFAULT_POS = { 'lat' : 21.15, 'lng' : 80.42 };
   var DEFAULT_ZOOM = 6;
   var MIN_ZOOM = 3;
   
@@ -14,20 +14,17 @@ function($scope, $state, $http, geoJsonService) {
     map : null,  // the leaflet map
     geoJsonLayer : null,
     geoJsonService : geoJsonService,  // array of geoJson objects
-    center : DEFAULT_CENTER,
+    center : DEFAULT_POS,
   };
  
   $scope.init = function() {
-    /* initialize the default leaflet-js viewport. use a not-too-busy
-       basemap, and center around the Iowa/Illinois area.  TODO: save
-       initial bounds in a cookie instead of harcoding lat and lng. */
     $scope.model.map = L.map('map', {
-      'center' : [ DEFAULT_CENTER.lat, DEFAULT_CENTER.lng ],
+      'center' : [$scope.model.center.lat, $scope.model.center.lng],
       'zoom' : DEFAULT_ZOOM,
       'minZoom' : MIN_ZOOM,
     });
     geoJsonService.map = $scope.model.map;
-    geoJsonService.setCenter(DEFAULT_CENTER, false);
+    geoJsonService.setCenter($scope.model.center, false);
     L.tileLayer(
       'http://{s}.tile.thunderforest.com/landscape/{z}/{x}/{y}.png', {
 	noWrap: true,
@@ -47,13 +44,6 @@ function($scope, $state, $http, geoJsonService) {
     geoJsonService.subscribe($scope, 'updated', function() {
       $scope.model.geoJsonLayer.clearLayers();
       $scope.model.geoJsonLayer.addData(geoJsonService.data);
-      // pan to new bounds if we have fts results out of map extent
-      
-      // TODO:  this breaks drag- and zoom interaction with the map
-      //if(geoJsonService.taxonQuery && (! geoJsonService.limitToMapExtent)) {
-      //$scope.panToMarkers();
-    //}
-      
     });
     $scope.model.map.whenReady(function() {
       updateMarkersForBounds();
@@ -67,17 +57,29 @@ function($scope, $state, $http, geoJsonService) {
     $scope.model.map.on('dragend', function(e) {
       updateMarkersForBounds();
     });
-  };
 
+    tryClientGeolocation();
+  };
+  
+  function tryClientGeolocation() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function(position) {
+	$scope.model.center = {
+	  lat : position.coords.latitude,
+	  lng : position.coords.longitude,
+	};
+	geoJsonService.setCenter($scope.model.center, true);
+      });
+    }
+  }
+  
   function panToMarkers() {
     /* use a centroid -ish algorithm to pan to the markers. this
      avoids a signed bounds calculation as well. */
-    console.log('panToMarkers');
     var avgLat = 0;
     var avgLng = 0;
     var count = 0;
     _.each(geoJsonService.data, function(d) {
-      console.log(d);
       if(d.properties.latdec) {
 	avgLat += d.properties.latdec;
 	avgLng += d.properties.longdec;
@@ -86,10 +88,6 @@ function($scope, $state, $http, geoJsonService) {
     });
     avgLat /= count;
     avgLng /= count;
-    console.log(count);
-    console.log(avgLat);
-    console.log(avgLng);
-    
     var latlng = L.latLng(avgLat, avgLng);
     $scope.model.map.panTo(latlng);
   }
@@ -106,7 +104,7 @@ function($scope, $state, $http, geoJsonService) {
      * null coordinates, so filter them out here */
     return (featureData.geometry.coordinates !== null);
   }
-  
+
   $scope.init();
   
 });
