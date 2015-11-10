@@ -156,15 +156,23 @@ def _search_response(rows):
     # logger.info('results: %d' % len(rows))
     for rec in rows:
         # fix up properties which are not json serializable
-        rec['colldate'] = str(rec['colldate']) 
-        geo_json.append({
+        rec['colldate'] = str(rec['colldate'])
+        # geojson can have null coords, so output this for
+        # non-geocoded search results (e.g. full text search with
+        # limit to geocoded turned off)
+        if rec['longdec'] == 0 and rec['latdec'] == 0:
+            coords = None
+        else:
+            coords = [rec['longdec'], rec['latdec']]
+        geo_json_frag = {
             'type' : 'Feature',
             'geometry' : {
                 'type' : 'Point',
-                'coordinates' : [rec['longdec'], rec['latdec']],
+                'coordinates' : coords
             },
             'properties' : rec  # rec happens to be a dict of properties. yay
-        })
+        }
+        geo_json.append(geo_json_frag)
     resp = HttpResponse(json.dumps(geo_json),
                         content_type='application/json')
     return resp

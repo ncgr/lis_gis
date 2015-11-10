@@ -42,12 +42,13 @@ function($scope, $state, $http, geoJsonService) {
     	attribution: '&copy; <a href="http://www.opencyclemap.org">OpenCycleMap</a>, &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
       }).addTo($scope.model.map);
     $scope.model.geoJsonLayer = L.geoJson($scope.model.geoJsonService.data, {
-      style: function (feature) {
+      style: function (featureData) {
         return {color: '#eee'};
       },
-      onEachFeature: function (feature, layer) {
-        layer.bindPopup(feature.properties.taxon);
-      }
+      onEachFeature: function (featureData, layer) {
+        layer.bindPopup(featureData.properties.taxon);
+      },
+      filter: filterNonGeocoded,
     });
     $scope.model.geoJsonLayer.addTo($scope.model.map);
     
@@ -99,6 +100,13 @@ function($scope, $state, $http, geoJsonService) {
     
     var latlng = L.latLng(avgLat, avgLng);
     $scope.model.map.panTo(latlng);
+  };
+  
+  function filterNonGeocoded(featureData, layer) {
+    /* GeoJson spec allows null coordinates (e.g. non-geocoded
+     * accessions in our situation). However leafletjs errors on the
+     * null coordinates, so filter them out here */
+    return (featureData.geometry.coordinates !== null);
   };
   
   $scope.init();
