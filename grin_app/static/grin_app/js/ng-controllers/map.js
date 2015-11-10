@@ -6,7 +6,7 @@
 app.controller('mapController',
 function($scope, $state, $http, geoJsonService) {
 		 
-  var DEFAULT_CENTER = { 'lat' : 42, 'lng' : -100 };
+  var DEFAULT_CENTER = { 'lat' : 21.15, 'lng' : 80.42 };
   var DEFAULT_ZOOM = 6;
   var MIN_ZOOM = 3;
   

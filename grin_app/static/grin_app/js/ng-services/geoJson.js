@@ -7,8 +7,10 @@ app.service('geoJsonService', function($http, $rootScope) {
   s.map = null; // the leaflet map, assigned by mapController
   s.bounds = null;
   s.center = null;
-  s.limitToMapExtent = true;
-  s.limitToGeocoded = true;
+
+  /* default values for search filters */
+  s.limitToMapExtent = false;  // affects taxon search only
+  s.limitToGeocoded = false;   // affects taxon search only
   s.maxRecs = MAX_RECS;
   s.taxonQuery = null;
     
