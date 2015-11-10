@@ -30,7 +30,7 @@ function($scope, $state, $http, geoJsonService) {
     geoJsonService.setCenter(DEFAULT_CENTER, false);
     L.tileLayer(
       'http://{s}.tile.thunderforest.com/landscape/{z}/{x}/{y}.png', {
-	noWrap : true,
+	noWrap: true,
     	attribution: '&copy; <a href="http://www.opencyclemap.org">OpenCycleMap</a>, &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
       }).addTo($scope.model.map);
     $scope.model.geoJsonLayer = L.geoJson($scope.model.geoJsonService.data, {
@@ -96,8 +96,6 @@ function($scope, $state, $http, geoJsonService) {
 
   function updateMarkersForBounds() {
     var map = $scope.model.map;
-    // adjust the bounds for prime meridian and dateline
-    // crossover. leaflet has a wrap() function for this
     var bounds = map.getBounds();
     geoJsonService.setBounds(bounds, true);
   }
