@@ -1,2 +1,22 @@
-<div id="map">
+<div id="map" style="margin-bottom: 0.5rem;">
+</div>
+
+<div ng-if="!model.baseMapSelect">
+  <button class="btn btn-sm btn-default"
+	  ng-click="model.baseMapSelect = ! model.baseMapSelect">
+    Change Basemap
+  </button>
+</div>
+
+<div class="panel panel-info"
+     ng-if="model.baseMapSelect">
+  <div class="panel-heading">Select a basemap:</div>
+  <div class="panel-body">
+    <div ng-repeat="(key,value) in model.baseMaps">
+      <button class="btn btn-sm btn-info" ng-click="onSelectBaseMap(key)">
+	Go
+      </button>
+      {{key}}
+    </div>
+  </div>
 </div>
