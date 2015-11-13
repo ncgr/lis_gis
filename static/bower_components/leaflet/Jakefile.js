@@ -12,28 +12,38 @@ To run the tests, run "jake test".
 For a custom build, open build/build.html in the browser and follow the instructions.
 */
 
-var build = require('./build/build.js');
+var build = require('./build/build.js'),
+    version = require('./src/Leaflet.js').version;
 
-function hint(msg, paths) {
+function hint(msg, args) {
 	return function () {
 		console.log(msg);
-		jake.exec('node node_modules/jshint/bin/jshint -c ' + paths,
+		jake.exec('node node_modules/eslint/bin/eslint.js ' + args,
 				{printStdout: true}, function () {
 			console.log('\tCheck passed.\n');
 			complete();
 		});
-	}
+	};
 }
 
-desc('Check Leaflet source for errors with JSHint');
-task('lint', {async: true}, hint('Checking for JS errors...', 'build/hintrc.js src'));
+desc('Check Leaflet source for errors with ESLint');
+task('lint', {async: true}, hint('Checking for JS errors...', 'src --config .eslintrc'));
 
-desc('Check Leaflet specs source for errors with JSHint');
-task('lintspec', {async: true}, hint('Checking for specs JS errors...', 'spec/spec.hintrc.js spec/suites'));
+desc('Check Leaflet specs source for errors with ESLint');
+task('lintspec', {async: true}, hint('Checking for specs JS errors...', 'spec/suites --config spec/.eslintrc'));
 
 desc('Combine and compress Leaflet source files');
-task('build', {async: true}, function () {
-	build.build(complete);
+task('build', {async: true}, function (compsBase32, buildName) {
+	var v;
+
+	jake.exec('git log -1 --pretty=format:"%h"', {breakOnError: false}, function () {
+		build.build(complete, v, compsBase32, buildName);
+
+	}).on('stdout', function (data) {
+		v = version + ' (' + data.toString() + ')';
+	}).on('error', function () {
+		v = version;
+	});
 });
 
 desc('Run PhantomJS tests');

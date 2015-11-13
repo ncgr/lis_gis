@@ -20,9 +20,13 @@
     "angular": "~1.4.7",
     "bootstrap": "~3.3.5",
     "lodash": "~3.10.1",
-    "leaflet": "~0.7.7",
+    "leaflet": "1.0.0-beta.2",
     "angular-bootstrap": "~0.14.3",
     "angular-cookies": "~1.4.7",
-    "angular-sanitize": "~1.4.7"
+    "angular-sanitize": "~1.4.7",
+    "angular-ui-router": "~0.2.15"
+  },
+  "resolutions": {
+    "leaflet": "1.0.0-beta.2"
   }
 }
