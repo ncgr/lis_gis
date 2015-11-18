@@ -1,10 +1,16 @@
+<span ng-if="model.geoJson.updating">
+  <img src="/static/grin_app/images/ajax-loader.gif"></img>
+  Loading...
+</span>
+
 <div class="alert alert-warning"
      style="margin-top: 0.5rem"
      ng-if="! model.geoJson.updating && ! model.geoJson.data.length">
   Sorry, no results found.
 </div>
-
-<div style="margin-top: 0.5rem" ng-if="model.geoJson.data.length">
+  
+<div style="margin-top: 0.5rem"
+     ng-if="! model.geoJson.updating && model.geoJson.data.length">
   <table class="table table-striped">
     <tr>
       <th>accession</th>

@@ -10,7 +10,6 @@ app.service('geoJsonService', function($http, $rootScope) {
 
   /* default values for search filters */
   s.limitToMapExtent = false;  // affects taxon search only
-  s.limitToGeocoded = false;   // affects taxon search only
   s.maxRecs = MAX_RECS;
   s.taxonQuery = null;
     
@@ -36,11 +35,6 @@ app.service('geoJsonService', function($http, $rootScope) {
     s.maxRecs = max;
     s.search();
   };
-
-  s.setLimitToGeocoded = function(bool) {
-    s.limitToGeocoded = bool;
-    s.search();
-  };
   
   s.setLimitToMapExtent = function(bool) {
     s.limitToMapExtent = bool;   
@@ -64,7 +58,6 @@ app.service('geoJsonService', function($http, $rootScope) {
   	sw_lat : s.bounds._southWest.lat,
   	sw_lng : s.bounds._southWest.lng,
 	limit_geo_bounds : s.limitToMapExtent,
-	limit_to_geocoded : s.limitToGeocoded,
 	limit: s.maxRecs,
       }
     }).then(

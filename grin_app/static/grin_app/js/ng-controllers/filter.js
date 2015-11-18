@@ -9,7 +9,6 @@ function($scope, $state, $http, geoJsonService) {
   $scope.model = {
     geoJson: geoJsonService,
     maxRecs : geoJsonService.maxRecs,
-    limitToGeocoded : geoJsonService.limitToGeocoded,
     limitToMapExtent : geoJsonService.limitToMapExtent,
     taxonFilter : null,
     searchOptions: false,
@@ -23,10 +22,6 @@ function($scope, $state, $http, geoJsonService) {
   $scope.onSetMaxRecs = function(max) {
     geoJsonService.setMaxRecs(max, true);
     $scope.model.alert = null;
-  };
-
-  $scope.onLimitToGeocoded = function(bool) {
-    geoJsonService.setLimitToGeocoded(bool, true);
   };
 
   $scope.onLimitToMapExtent = function(bool) {

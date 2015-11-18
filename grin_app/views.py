@@ -15,15 +15,11 @@ SELECT_COLS = ('gid', 'taxon', 'latdec', 'longdec', 'accenumb', 'elevation',
                'cropname', 'collsite', 'colldate')
 WHERE_FRAGS = {
     'q' : {
-        'include' : lambda p: p,
+        'include' : lambda p: p.get('q', None),
         'sql' :  "taxon_fts @@ plainto_tsquery('english', %(q)s)",
     },
-    'limit_to_geocoded' : {
-        'include' : lambda p: p == 'true',
-        'sql' : 'geographic_coord IS NOT NULL',
-    },
     'limit_geo_bounds' : {
-        'include' : lambda p: p == 'true',
+        'include' : lambda p: p.get('limit_geo', None) == 'true' or not p.get('q', False),
         'sql' : '''ST_Contains(
            ST_MakeEnvelope(%(minx)s, %(miny)s, %(maxx)s, %(maxy)s, %(srid)s),
            geographic_coord::geometry
@@ -56,7 +52,7 @@ def search(req):
     assert 'limit' in params, 'missing limit param'
     where_clauses = []
     for key, val in WHERE_FRAGS.items():
-        if val['include'](params.get(key, None)):
+        if val['include'](params):
             where_clauses.append(val['sql'])
     if len(where_clauses) == 0:
         where_sql = ''
@@ -99,8 +95,8 @@ def _search_response(rows):
         # fix up properties which are not json serializable
         rec['colldate'] = str(rec['colldate'])
         # geojson can have null coords, so output this for
-        # non-geocoded search results (e.g. full text search with
-        # limit to geocoded turned off)
+        # non-geocoded search results (e.g. full text search w/ limit
+        # to current map extent turned off
         if rec['longdec'] == 0 and rec['latdec'] == 0:
             coords = None
         else:

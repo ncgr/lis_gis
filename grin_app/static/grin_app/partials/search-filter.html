@@ -13,13 +13,6 @@
       <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
     </button>
   </span>
-  <span ng-if="model.taxonFilter && model.limitToGeocoded" class="badge">
-    limit search to geocoded accessions
-    <button class="btn btn-xs btn-default"
-	    ng-click="model.limitToGeocoded = false; onLimitToGeocoded(model.limitToGeocoded);">
-      <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-    </button>
-  </span>
   <span ng-if="model.taxonFilter && model.limitToMapExtent" class="badge">
     limt search to current map extent
     <button class="btn btn-xs btn-default"
@@ -79,13 +72,6 @@
 	      <div class="checkbox">
 		<label>
 		  <input type="checkbox"
-			 ng-model="model.limitToGeocoded"
-			 ng-change="onLimitToGeocoded(model.limitToGeocoded)">
-		  </input>
-		  Limit to geocoded accessions
-		</label>
-		<label>
-		  <input type="checkbox"
 			 ng-model="model.limitToMapExtent"
 			 ng-change="onLimitToMapExtent(model.limitToMapExtent)">
 		  </input>
@@ -97,7 +83,7 @@
 	</div>
       </div>
       
-      <div class="col-md-3">
+      <div class="col-md-5">
 	<div class="panel panel-default">
 	  <div class="panel-heading">
 	    Limit Search Results To:
@@ -124,13 +110,14 @@
 	      decrease for speed.</p>
 	  </div>
 	</div>
-	
+      </div>
+      <div class="col-md-2">
+	<button class="btn btn-success"
+		ng-click="model.searchOptions = false; model.alert = ''">
+	  OK
+	</button>    
       </div>
     </div>
-    <button class="btn btn-success"
-	    ng-click="model.searchOptions = false">
-      OK
-    </button>    
   </div>
 </div>
 
