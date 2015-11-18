@@ -26,13 +26,18 @@
       <td ng-bind-html="rec.properties.taxon | highlight: model.searchHilite"></td>
       <td ng-bind-html="rec.properties.cropname"></td>
       <td>
-	<span ng-if="rec.properties.longdec"
-	      class="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
+	<span ng-if="rec.geometry.coordinates"
+	      class="glyphicon glyphicon-map-marker"
+	      aria-hidden="true"></span>
       </td>
       <td ng-bind-html="rec.properties.collsite">
       </td>
-      <td>{{rec.properties.colldate}}</td>
-      <td>{{rec.properties.elevation | number }}</td>
+      <td class="nowrap">{{rec.properties.colldate}}</td>
+      <td>
+	<span ng-if="rec.properties.elevation">
+	  {{rec.properties.elevation | number }}
+	</span>
+      </td>
     </tr>
   </table>
 </div>
