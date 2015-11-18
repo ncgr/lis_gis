@@ -89,13 +89,21 @@ app.service('geoJsonService', function($http, $rootScope) {
   s.colorFeature = function(feature) {
     /* try to match the genus and species against the LIS colors json */
     var key = feature.properties.taxon;
-    return _.get(s.colorCache, key, 'grey');
+    var val = _.get(s.colorCache, key, false);
+    if(val) { return val; }
+    var result = _.filter(s.colorCache, function(v,k) {
+      return key.indexOf(k) !== -1;
+    });
+    if(result.length) {
+      return result[0];
+    }
+    return 'grey';
   };
   
   s.explainResults = function() {
     if(s.data.length === s.maxRecs) {
-      if(! s.taxonQuery || s.limitToMapExtent) {
-	return 'Your # max results are listed below, but may appear to be '+
+      if(s.limitToMapExtent) {
+	return 'Your max # of results are listed below, but may appear to be '+
 	'clustered at the center of the map. Try zooming the map in, '+
 	  'or add other search parameters, or increase the max results.';
       }

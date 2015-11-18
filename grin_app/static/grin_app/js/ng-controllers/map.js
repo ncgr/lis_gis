@@ -75,7 +75,8 @@ function($scope, $state, geoJsonService) {
 	});
       },
       onEachFeature: function (featureData, layer) {
-        layer.bindPopup(featureData.properties.taxon);
+        layer.bindPopup(featureData.properties.accenumb +
+			'<br/>' + featureData.properties.taxon);
       },
       filter: filterNonGeocoded,
     });

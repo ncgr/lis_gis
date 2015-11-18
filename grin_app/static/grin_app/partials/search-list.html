@@ -48,7 +48,11 @@
       <th>elev&nbsp;(m.)</th>
     </tr>
     <tr ng-repeat="rec in model.geoJson.data">
-      <td class="nowrap">{{rec.properties.accenumb}}</td>
+      <td class="nowrap">
+	<button class="btn btn-xs btn-default">
+	  {{rec.properties.accenumb}}
+	</button>
+      </td>
       <td class="nowrap">
 	<span class="badge"
 	      style="background-color: {{ model.geoJson.colorFeature(rec)}};">
