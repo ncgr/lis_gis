@@ -6,36 +6,63 @@
 <div class="alert alert-warning"
      style="margin-top: 0.5rem"
      ng-if="! model.geoJson.updating && ! model.geoJson.data.length">
-  Sorry, no results found.
+
+  <span ng-if="model.geoJson.taxonQuery && model.geoJson.limitToMapExtent">
+    <strong>{{model.geoJson.taxonQuery}}</strong> :
+    No results found for this query, within the current map extent.
+  </span>
+  <span ng-if="model.geoJson.taxonQuery && ! model.geoJson.limitToMapExtent">
+    <strong>{{model.geoJson.taxonQuery}}</strong> : 
+    No results found for this query.
+  </span>
+  <span ng-if="! model.geoJson.taxonQuery">
+    No results found within the current map extent. Try zooming
+    out, or view a different region.
+  </span>
 </div>
-  
+
+<div class="alert alert-warning" style="margin-top: 0.5rem"
+     ng-if="! model.geoJson.updating && model.geoJson.data.length === model.geoJson.maxRecs">
+  <strong>Results: {{model.geoJson.data.length}}</strong>
+  {{model.geoJson.explainResults()}}
+</div>
+
+<div style="margin-top: 0.5rem"
+     ng-if="! model.geoJson.updating && model.geoJson.data.length !== model.geoJson.maxRecs">
+  <strong>Results:
+    {{model.geoJson.data.length}}
+  </strong>
+</div>
+
 <div style="margin-top: 0.5rem"
      ng-if="! model.geoJson.updating && model.geoJson.data.length">
   <table class="table table-striped">
     <tr>
       <th>accession</th>
       <th>taxon</th>
-      <th>crop&nbsp;name</th>
-      <th><!-- column having a map marker icon, if geocoded --></th>
+      <th class="nowrap">crop name</th>
       <th>country</th>
+      <th><!-- column having a map marker icon, if geocoded --></th>
       <th>collection site</th>
       <th>date</th>
       <th>elev&nbsp;(m.)</th>
     </tr>
     <tr ng-repeat="rec in model.geoJson.data">
-      <td>{{rec.properties.accenumb}}</td>
-      <td ng-bind-html="rec.properties.taxon | highlight: model.searchHilite"></td>
-      <td ng-bind-html="rec.properties.cropname"></td>
-      <td>
-	<span ng-if="rec.geometry.coordinates"
-	      class="glyphicon glyphicon-map-marker"
-	      aria-hidden="true"></span>
+      <td class="nowrap">{{rec.properties.accenumb}}</td>
+      <td class="nowrap"
+	   ng-bind-html="rec.properties.taxon | highlight: model.searchHilite"></td>
+      <td class="nowrap"
+	  ng-bind-html="rec.properties.cropname"></td>
+      <td class="nowrap">{{rec.properties.origcty}}</td>
+      <td><span ng-if="rec.geometry.coordinates"
+		class="glyphicon glyphicon-map-marker"
+		aria-hidden="true"></span>
       </td>
-      <td>{{rec.properties.origcty}}</td>
+      
       <td ng-bind-html="rec.properties.collsite">
       </td>
       <td class="nowrap">{{rec.properties.colldate}}</td>
-      <td>
+      <td class="nowrap">
 	<span ng-if="rec.properties.elevation">
 	  {{rec.properties.elevation | number }}
 	</span>

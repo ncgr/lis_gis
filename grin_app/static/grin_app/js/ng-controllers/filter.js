@@ -29,6 +29,8 @@ function($scope, $state, $http, geoJsonService) {
   };
 
   $scope.onTaxonFilter = function(q) {
+    $scope.model.autofocusField = null;
+    $scope.model.alert = null;
     geoJsonService.setTaxonQuery(q, true);
   };
 

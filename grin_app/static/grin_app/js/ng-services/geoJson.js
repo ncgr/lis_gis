@@ -74,7 +74,19 @@ app.service('geoJsonService', function($http, $rootScope) {
       });
   };
 
-    
+  s.explainResults = function() {
+    if(s.data.length === s.maxRecs) {
+      if(! s.taxonQuery || s.limitToMapExtent) {
+	return 'Your # max results are listed below, but may appear to be '+
+	'clustered at the center of the map. Try zooming the map in, '+
+	  'or add other search parameters, or increase the max results.';
+      }
+      return 'Your # max results are listed below. Try zooming the map in, '+
+	  'or add other search parameters, or increase the max results.';
+    }
+    return null;
+  };
+  
   /* pub/sub event model adapted from here :
      http://www.codelord.net/2015/05/04/angularjs-notifying-about-changes-from-services-to-controllers/
   */

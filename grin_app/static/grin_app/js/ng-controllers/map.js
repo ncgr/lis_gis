@@ -24,13 +24,15 @@ function($scope, $state, $http, geoJsonService) {
       'ESRI - NatGeo (default, reference map)' : function() {
 	return L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}', {
 	  attribution: 'Tiles &copy; Esri &mdash; National Geographic, Esri, DeLorme, NAVTEQ, UNEP-WCMC, USGS, NASA, ESA, METI, NRCAN, GEBCO, NOAA, iPC',
-	  maxZoom: 16
+	  maxZoom: 16,
+	  noWrap: true,
 	});
       },
       'OpenTopoMap (terrain map)' : function() {
 	return L.tileLayer('http://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
     	  maxZoom: 16,
-    	  attribution: 'Map data: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+    	  attribution: 'Map data: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)',
+	  noWrap: true,
 	});
       },
       'MapQuest (aerial imagery)' : function() {
@@ -38,7 +40,8 @@ function($scope, $state, $http, geoJsonService) {
     	  type: 'sat',
     	  ext: 'jpg',
     	  attribution: 'Tiles Courtesy of <a href="http://www.mapquest.com/">MapQuest</a> &mdash; Portions Courtesy NASA/JPL-Caltech and U.S. Depart. of Agriculture, Farm Service Agency',
-    	  subdomains: '1234'
+    	  subdomains: '1234',
+	  noWrap: true,
 	});
       }
     },
