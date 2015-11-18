@@ -14,7 +14,7 @@ SRID = 4326  # this needs to match the SRID on the location field in psql.
 TWO_PLACES = Decimal('0.01')
 ACCESSION_TAB = 'lis_germplasm.grin_accession'
 SELECT_COLS = ('gid', 'taxon', 'latdec', 'longdec', 'accenumb', 'elevation',
-               'cropname', 'collsite', 'colldate')
+               'cropname', 'collsite', 'colldate', 'origcty')
 WHERE_FRAGS = {
     'q' : {
         'include' : lambda p: p.get('q', None),

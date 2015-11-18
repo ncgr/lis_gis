@@ -16,7 +16,8 @@
       <th>accession</th>
       <th>taxon</th>
       <th>crop&nbsp;name</th>
-      <th></th>
+      <th><!-- column having a map marker icon, if geocoded --></th>
+      <th>country</th>
       <th>collection site</th>
       <th>date</th>
       <th>elev&nbsp;(m.)</th>
@@ -30,6 +31,7 @@
 	      class="glyphicon glyphicon-map-marker"
 	      aria-hidden="true"></span>
       </td>
+      <td>{{rec.properties.origcty}}</td>
       <td ng-bind-html="rec.properties.collsite">
       </td>
       <td class="nowrap">{{rec.properties.colldate}}</td>
