@@ -64,6 +64,29 @@ def index(req):
     '''
     return render(req, 'grin_app/index.html')
 
+
+def accession_detail(req):
+    '''Return all columns for this accesion record.'''
+    assert req.method == 'GET', 'GET request method required'
+    params = req.GET.dict()
+    assert 'accenumb' in params, 'missing accenumb param'
+    # fix me: name the columns dont select *
+    sql= '''
+    SELECT * FROM %s  WHERE accenumb = %s
+     ''' % (ACCESSION_TAB, '%(accenumb)s')
+    cursor = connection.cursor()
+    logger.info(cursor.mogrify(sql, params))
+    cursor.execute(sql, params)
+    rows = _dictfetchall(cursor)
+    return _search_response(rows)
+    # columns = [col[0] for col in cursor.description]
+    # rows = cursor.fetchall()
+    # result = dict(zip(columns, rows))
+    # result_json = json.dumps(result[0])
+    # response = HttpResponse(result_json, content_type='application/json')
+    # return response
+
+
 def countries(req):
     '''Return a json array of countries for search filtering ui.'''
     cursor = connection.cursor()
@@ -130,10 +153,14 @@ def _search_response(rows):
     # logger.info('results: %d' % len(rows))
     for rec in rows:
         # fix up properties which are not json serializable
-        if rec['colldate']:
+        if rec.get('colldate', None):
             rec['colldate'] = str(rec['colldate'])
         else:
             rec['colldate'] = None
+        if rec.get('acqdate', None):
+            rec['acqdate'] = str(rec['acqdate'])
+        else:
+            rec['acqdate'] = None
         # geojson can have null coords, so output this for
         # non-geocoded search results (e.g. full text search w/ limit
         # to current map extent turned off

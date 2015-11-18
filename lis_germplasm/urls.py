@@ -20,5 +20,6 @@ urlpatterns = [
     url(r'^$', 'grin_app.views.index'),
     url(r'^search$', 'grin_app.views.search'),
     url(r'^countries$', 'grin_app.views.countries'),
+    url(r'^accession_detail$', 'grin_app.views.accession_detail'),
     url(r'^admin/', include(admin.site.urls)),
 ]
