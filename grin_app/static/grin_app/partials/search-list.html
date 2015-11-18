@@ -1,24 +1,32 @@
-<table class="table table-striped">
-  <tr>
-    <th>accession</th>
-    <th>taxon</th>
-    <th>crop&nbsp;name</th>
-    <th></th>
-    <th>collection site</th>
-    <th>date</th>
-    <th>elev&nbsp;(m.)</th>
-  </tr>
-  <tr ng-repeat="rec in model.geoJson.data">
-    <td>{{rec.properties.accenumb}}</td>
-    <td ng-bind-html="rec.properties.taxon | highlight: model.searchHilite"></td>
-    <td ng-bind-html="rec.properties.cropname"></td>
-    <td>
-      <span ng-if="rec.properties.longdec"
-	    class="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
-    </td>
-    <td ng-bind-html="rec.properties.collsite">
-    </td>
-    <td>{{rec.properties.colldate}}</td>
-    <td>{{rec.properties.elevation | number }}</td>
-  </tr>
-</table>
+<div class="alert alert-warning"
+     style="margin-top: 0.5rem"
+     ng-if="! model.geoJson.updating && ! model.geoJson.data.length">
+  Sorry, no results found.
+</div>
+
+<div style="margin-top: 0.5rem" ng-if="model.geoJson.data.length">
+  <table class="table table-striped">
+    <tr>
+      <th>accession</th>
+      <th>taxon</th>
+      <th>crop&nbsp;name</th>
+      <th></th>
+      <th>collection site</th>
+      <th>date</th>
+      <th>elev&nbsp;(m.)</th>
+    </tr>
+    <tr ng-repeat="rec in model.geoJson.data">
+      <td>{{rec.properties.accenumb}}</td>
+      <td ng-bind-html="rec.properties.taxon | highlight: model.searchHilite"></td>
+      <td ng-bind-html="rec.properties.cropname"></td>
+      <td>
+	<span ng-if="rec.properties.longdec"
+	      class="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
+      </td>
+      <td ng-bind-html="rec.properties.collsite">
+      </td>
+      <td>{{rec.properties.colldate}}</td>
+      <td>{{rec.properties.elevation | number }}</td>
+    </tr>
+  </table>
+</div>

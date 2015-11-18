@@ -12,11 +12,13 @@ function($scope, $state, $http, geoJsonService) {
   var DEFAULT_BASEMAP = 'ESRI - NatGeo (default, reference map)';
   
   $scope.model = {
+    geoJson : geoJsonService,
     map : null,  // the leaflet map
     geoJsonLayer : null,
     geoJsonService : geoJsonService,  // array of geoJson objects
     center : DEFAULT_POS,
-    baseMapSelect : false,  // show basemap selector ui
+    geoCoordsSelect : false, // show geocoords selector ui
+    baseMapSelect : false,   // show basemap selector ui
     baseMapLayer : null,
     baseMaps : {
       'ESRI - NatGeo (default, reference map)' : function() {
@@ -56,7 +58,7 @@ function($scope, $state, $http, geoJsonService) {
     // add the default basemap
     $scope.model.baseMapLayer = $scope.model.baseMaps[DEFAULT_BASEMAP]();
     $scope.model.baseMapLayer.addTo($scope.model.map);
-    
+   
     $scope.model.geoJsonLayer = L.geoJson($scope.model.geoJsonService.data, {
       style: function (featureData) {
         return {color: '#eee'};
@@ -69,6 +71,13 @@ function($scope, $state, $http, geoJsonService) {
     $scope.model.geoJsonLayer.addTo($scope.model.map);
     
     geoJsonService.subscribe($scope, 'updated', function() {
+
+      var center = geoJsonService.map.getCenter();
+      $scope.model.center = {
+	lat: center.lat.toFixed(2),
+	lng: center.lng.toFixed(2),
+      };
+      
       $scope.model.geoJsonLayer.clearLayers();
       $scope.model.geoJsonLayer.addData(geoJsonService.data);
     });
@@ -94,6 +103,28 @@ function($scope, $state, $http, geoJsonService) {
     var baseMap = $scope.model.baseMaps[name]();
     baseMap.addTo($scope.model.map);
     $scope.model.baseMapLayer = baseMap;
+    $scope.model.baseMapSelect = false;
+  };
+  
+  $scope.onSetCenter = function() {
+    // user updated lat/long form values
+    geoJsonService.setCenter($scope.model.center, true);
+    $scope.model.geoCoordsSelect = false;
+  };
+  
+  $scope.onGeoLocate = function() {
+    // user hit go to my location button
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function(position) {
+	$scope.model.center = {
+	  lat : position.coords.latitude,
+	  lng : position.coords.longitude,
+	};
+	geoJsonService.setCenter($scope.model.center, true);
+	console.log($scope.model.center);
+      });
+    }
+    $scope.model.geoCoordsSelect = false;
     $scope.model.baseMapSelect = false;
   };
   

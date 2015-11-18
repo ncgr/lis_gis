@@ -4,6 +4,7 @@
 var app = angular.module('grin',
 			 ['ngCookies',
 			  'ngSanitize',
+			  'mp.autoFocus',
 			  'ui.bootstrap',
 			  'ui.router']);
 

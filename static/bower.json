@@ -20,13 +20,14 @@
     "angular": "~1.4.7",
     "bootstrap": "~3.3.5",
     "lodash": "~3.10.1",
-    "leaflet": "1.0.0-beta.2",
+    "leaflet": "0.7.7",
     "angular-bootstrap": "~0.14.3",
     "angular-cookies": "~1.4.7",
     "angular-sanitize": "~1.4.7",
-    "angular-ui-router": "~0.2.15"
+    "angular-ui-router": "~0.2.15",
+    "angular-auto-focus": "~1.0.4"
   },
   "resolutions": {
-    "leaflet": "1.0.0-beta.2"
+    "leaflet": "0.7.7"
   }
 }

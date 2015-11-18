@@ -8,32 +8,21 @@ function($scope, $state, $http, geoJsonService) {
 		 
   $scope.model = {
     geoJson: geoJsonService,
-    center : { lat: null, lng: null },
     maxRecs : geoJsonService.maxRecs,
     limitToGeocoded : geoJsonService.limitToGeocoded,
     limitToMapExtent : geoJsonService.limitToMapExtent,
     taxonFilter : null,
+    searchOptions: false,
+    autofocusField : null,
+    alert : null,
   };
 
-
-  $scope.init = function() {
-    geoJsonService.subscribe($scope, 'updated', function() {
-      var center = geoJsonService.map.getCenter();
-      $scope.model.center = {
-	lat: center.lat.toFixed(2),
-	lng: center.lng.toFixed(2),
-      };
-      //$scope.model.maxRecs = geoJsonService.maxRecs;
-    });
-  };
+  // $scope.init = function() {
+  // };
   
-  $scope.onSetCenter = function() {
-    // user updated lat/long form values
-    geoJsonService.setCenter($scope.model.center, true);
-  };
-
   $scope.onSetMaxRecs = function(max) {
     geoJsonService.setMaxRecs(max, true);
+    $scope.model.alert = null;
   };
 
   $scope.onLimitToGeocoded = function(bool) {
@@ -47,19 +36,13 @@ function($scope, $state, $http, geoJsonService) {
   $scope.onTaxonFilter = function(q) {
     geoJsonService.setTaxonQuery(q, true);
   };
-  
-  $scope.onGeoLocate = function() {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(function(position) {
-	$scope.model.center = {
-	  lat : position.coords.latitude,
-	  lng : position.coords.longitude,
-	};
-	geoJsonService.setCenter($scope.model.center, true);
-	console.log($scope.model.center);
-      });
-    }
+
+  $scope.onRemoveMaxResults = function() {
+    $scope.model.autofocusField = 'maxRecs';
+    $scope.model.searchOptions = true;
+    $scope.model.alert='Max results: You can set the limit of search results, '+
+      ' but cannot remove the limit.';
   };
-  
-  $scope.init();		 
+ 
+  //$scope.init();		 
 });

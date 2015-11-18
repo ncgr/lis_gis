@@ -1,22 +1,76 @@
-<div id="map" style="margin-bottom: 0.5rem;">
+<div id="map">
 </div>
 
-<div ng-if="!model.baseMapSelect">
+<div style="margin-top: 0.5rem;">
+  
   <button class="btn btn-sm btn-default"
-	  ng-click="model.baseMapSelect = ! model.baseMapSelect">
-    Change Basemap
+	  ng-click="model.baseMapSelect = true; model.geoCoordsSelect = false;">
+    <span class="glyphicon glyphicon-picture"></span>
+    Change base map
   </button>
+  
+  <button class="btn btn-sm btn-default"
+	  ng-click="model.geoCoordsSelect = true; model.baseMapSelect = false;">
+    <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>    
+    Go to geographic coordinates
+  </button>
+  
+  <button type="submit" class="btn btn-sm btn-default"
+	  ng-click="onGeoLocate()">
+    <span class="glyphicon glyphicon-map-marker"
+	  aria-hidden="true"></span>
+    Go to my location
+  </button>
+
+  <span ng-if="model.geoJson.updating">
+    <img src="/static/grin_app/images/ajax-loader.gif"></img>
+    Loading...
+  </span>
+  
 </div>
 
 <div class="panel panel-info"
-     ng-if="model.baseMapSelect">
-  <div class="panel-heading">Select a basemap:</div>
+     ng-if="model.baseMapSelect"  style="margin-top: 0.5rem;">
+  <div class="panel-heading">
+    <span class="glyphicon glyphicon-picture"></span>
+    Select a basemap:
+  </div>
   <div class="panel-body">
     <div ng-repeat="(key,value) in model.baseMaps">
-      <button class="btn btn-sm btn-info" ng-click="onSelectBaseMap(key)">
+      <button class="btn btn-sm btn-success" ng-click="onSelectBaseMap(key)">
 	Go
       </button>
       {{key}}
     </div>
   </div>
 </div>
+
+<div class="panel panel-info"
+     ng-if="model.geoCoordsSelect" style="margin-top: 0.5rem;">
+  <div class="panel-heading">
+    <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>
+    Center map at Geographic Coordinates:
+  </div>
+  <div class="panel-body">
+    <form class="form-inline" ng-submit="onSetCenter()">
+      <div class="form-group">
+	<label for="lat">Latitude:</label>
+	<input id="lat"
+	       type="text"
+	       ng-model="model.center.lat"
+	       size="8"></input>
+	<label for="lng">Longitude:</label>
+	<input id="lng"
+	       type="text"
+	       ng-model="model.center.lng"
+	       size="8"></input>
+	<button type="submit" class="btn btn-sm btn-success">
+	  <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>
+	  Go
+	</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+

@@ -10,6 +10,37 @@ from django.core.context_processors import csrf
 
 SRID = 4326
 
+ACCESSION_TAB = 'lis_germplasm.grin_accession'
+SELECT_COLS = ('gid', 'taxon', 'latdec', 'longdec', 'accenumb', 'elevation',
+               'cropname', 'collsite', 'colldate')
+WHERE_FRAGS = {
+    'q' : {
+        'include' : lambda p: p,
+        'sql' :  "taxon_fts @@ plainto_tsquery('english', %(q)s)",
+    },
+    'limit_to_geocoded' : {
+        'include' : lambda p: p == 'true',
+        'sql' : 'geographic_coord IS NOT NULL',
+    },
+    'limit_geo_bounds' : {
+        'include' : lambda p: p == 'true',
+        'sql' : '''ST_Contains(
+           ST_MakeEnvelope(%(minx)s, %(miny)s, %(maxx)s, %(maxy)s, %(srid)s),
+           geographic_coord::geometry
+           )''',
+    },
+}
+
+ORDER_BY_FRAG = '''
+ ORDER BY ST_Distance(
+  geographic_coord::geometry,
+  ST_Centroid(
+   ST_MakeEnvelope(%(minx)s, %(miny)s, %(maxx)s, %(maxy)s, %(srid)s)
+  )
+ ) ASC
+'''
+LIMIT_FRAG = 'LIMIT %(limit)s'
+
 logger = logging.getLogger(__name__)
 
 def index(req):
@@ -23,83 +54,32 @@ def search(req):
     assert req.method == 'GET', 'GET request method required'
     params = req.GET
     assert 'limit' in params, 'missing limit param'
-    if params.get('q'):
-        return _search_fts(params)
-    return _search_geo_only(params)
-   
-
-def _search_fts(params):
-    '''Full text search on taxon, optionally including map bounds and
-    other params.'''
-    assert 'q' in params, 'missing q param'
-    if params.get('limit_geo_bounds') == 'true':  # this is a string not Bool.
-        return _search_fts_geo_bounds(params)
+    where_clauses = []
+    for key, val in WHERE_FRAGS.items():
+        if val['include'](params.get(key, None)):
+            where_clauses.append(val['sql'])
+    if len(where_clauses) == 0:
+        where_sql = ''
     else:
-        return _search_fts_no_geo_bounds(params)
+        where_sql = 'WHERE %s' % ' AND '.join(where_clauses)
+    cols_sql = ' , '.join(SELECT_COLS)
     
-
-def _search_fts_no_geo_bounds(params):
-    '''Full text search, with no topology check on current map bounds. The
-    bounds are used for sorting the results.'''
-    logger.info('_search_fts_no_geo_bounds')
-    sql = '''
-    SELECT gid, taxon, genus, species, latdec, longdec, accenumb, elevation,
-           cropname, collsite, colldate, collsrc
-    FROM genus
-    WHERE taxon_fts @@ plainto_tsquery('english', %(q)s)
-    [geocoding-clause]
-    ORDER BY ST_Distance(
-        geographic_coord::geometry,
-        ST_Centroid(
-         ST_MakeEnvelope(%(minx)s, %(miny)s, %(maxx)s, %(maxy)s, %(srid)s)
-        )
-    ) ASC
-    LIMIT %(limit)s
-    '''
-    if params.get('limit_to_geocoded') == 'true':
-        sql = sql.replace('[geocoding-clause]',
-                          'AND geographic_coord IS NOT NULL', 1)
+    if int(params['limit']) == 0:
+        use_limit = ''
     else:
-        sql = sql.replace('[geocoding-clause]','', 1)
-    cursor = connection.cursor()
-    sql_params = {
-        'q' : params['q'],
-        'minx' : float(params['sw_lng']),
-        'miny' : float(params['sw_lat']),
-        'maxx' : float(params['ne_lng']),
-        'maxy' : float(params['ne_lat']),
-        'limit': int(params['limit']),
-        'srid' : SRID,
-    }
-    cursor.execute(sql, sql_params)
-    rows = _dictfetchall(cursor)
-    return _search_response(rows)
-
-
-def _search_fts_geo_bounds(params):
-    '''Full text search, within the current geographic bounds.'''
-    logger.info('_search_fts_geo_bounds')
-    sql = '''
-    SELECT gid, taxon, genus, species, latdec, longdec, accenumb, elevation,
-           cropname, collsite, colldate, collsrc
-    FROM genus
-    WHERE taxon_fts @@ plainto_tsquery('english', %(q)s)
-    AND geographic_coord IS NOT NULL
-    AND ST_Contains(
-      ST_MakeEnvelope(%(minx)s, %(miny)s, %(maxx)s, %(maxy)s, %(srid)s),
-      geographic_coord::geometry
+        use_limit = LIMIT_FRAG
+        
+    sql = '''SELECT %s FROM %s %s %s %s''' % (
+        cols_sql,
+        ACCESSION_TAB,
+        where_sql,
+        ORDER_BY_FRAG,
+        use_limit,
     )
-    ORDER BY ST_Distance(
-        geographic_coord::geometry,
-        ST_Centroid(
-         ST_MakeEnvelope(%(minx)s, %(miny)s, %(maxx)s, %(maxy)s, %(srid)s)
-        )
-    ) ASC
-    LIMIT %(limit)s
-    '''
+    logger.info(sql)
     cursor = connection.cursor()
     sql_params = {
-        'q' : params['q'],
+        'q' : params.get('q', None),
         'minx' : float(params['sw_lng']),
         'miny' : float(params['sw_lat']),
         'maxx' : float(params['ne_lng']),
@@ -110,46 +90,7 @@ def _search_fts_geo_bounds(params):
     cursor.execute(sql, sql_params)
     rows = _dictfetchall(cursor)
     return _search_response(rows)
-
-
-def _search_geo_only(params):
-    '''Search by map bounds only'''
-    logger.info('_search_geo_only')
-    assert 'ne_lat' in params, 'missing ne_lat param'
-    assert 'ne_lng' in params, 'missing ne_lng param'
-    assert 'sw_lat' in params, 'missing sw_lat param'
-    assert 'sw_lng' in params, 'missing sw_lng param'
-    assert 'limit' in params, 'missing limit param'
-    sql = '''
-    SELECT gid, taxon, genus, species, latdec, longdec, accenumb, elevation,
-           cropname, collsite, colldate, collsrc
-    FROM genus
-    WHERE geographic_coord IS NOT NULL
-    AND ST_Contains(
-      ST_MakeEnvelope(%(minx)s, %(miny)s, %(maxx)s, %(maxy)s, %(srid)s),
-      geographic_coord::geometry
-    )
-    ORDER BY ST_Distance(
-        geographic_coord::geometry,
-        ST_Centroid(
-         ST_MakeEnvelope(%(minx)s, %(miny)s, %(maxx)s, %(maxy)s, %(srid)s)
-        )
-    ) ASC
-    LIMIT %(limit)s
-    '''
-    cursor = connection.cursor()
-    sql_params = {
-        'minx' : float(params['sw_lng']),
-        'miny' : float(params['sw_lat']),
-        'maxx' : float(params['ne_lng']),
-        'maxy' : float(params['ne_lat']),
-        'limit': int(params['limit']),
-        'srid' : SRID,
-    }
-    cursor.execute(sql, sql_params)
-    rows = _dictfetchall(cursor)
-    return _search_response(rows)
-
+   
 
 def _search_response(rows):
     geo_json = []
