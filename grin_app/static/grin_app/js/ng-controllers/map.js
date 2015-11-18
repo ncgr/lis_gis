@@ -4,7 +4,7 @@
 "use strict";
 
 app.controller('mapController',
-function($scope, $state, $http, geoJsonService) {
+function($scope, $state, geoJsonService) {
 		 
   var DEFAULT_POS = { 'lat' : 21.15, 'lng' : 80.42 };
   var DEFAULT_ZOOM = 6;
@@ -20,6 +20,7 @@ function($scope, $state, $http, geoJsonService) {
     geoCoordsSelect : false, // show geocoords selector ui
     baseMapSelect : false,   // show basemap selector ui
     baseMapLayer : null,
+    countries : [],
     baseMaps : {
       'ESRI - NatGeo (default, reference map)' : function() {
 	return L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}', {
@@ -61,10 +62,17 @@ function($scope, $state, $http, geoJsonService) {
     // add the default basemap
     $scope.model.baseMapLayer = $scope.model.baseMaps[DEFAULT_BASEMAP]();
     $scope.model.baseMapLayer.addTo($scope.model.map);
-   
+
     $scope.model.geoJsonLayer = L.geoJson($scope.model.geoJsonService.data, {
-      style: function (featureData) {
-        return {color: '#eee'};
+      pointToLayer: function (feature, latlng) {
+        return L.circleMarker(latlng, {
+	  radius: 8,
+	  fillColor: geoJsonService.colorFeature(feature),
+	  color: "#000",
+	  weight: 1,
+	  opacity: 1,
+	  fillOpacity: 0.8
+	});
       },
       onEachFeature: function (featureData, layer) {
         layer.bindPopup(featureData.properties.taxon);
@@ -74,7 +82,6 @@ function($scope, $state, $http, geoJsonService) {
     $scope.model.geoJsonLayer.addTo($scope.model.map);
     
     geoJsonService.subscribe($scope, 'updated', function() {
-
       var center = geoJsonService.map.getCenter();
       $scope.model.center = {
 	lat: center.lat.toFixed(2),
@@ -130,7 +137,7 @@ function($scope, $state, $http, geoJsonService) {
     $scope.model.geoCoordsSelect = false;
     $scope.model.baseMapSelect = false;
   };
-  
+
   function panToMarkers() {
     /* use a centroid -ish algorithm to pan to the markers. this
      avoids a signed bounds calculation as well. */

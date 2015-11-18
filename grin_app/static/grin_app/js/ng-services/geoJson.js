@@ -1,5 +1,7 @@
 app.service('geoJsonService', function($http, $rootScope) {
 
+  var COLORS_URL = '/static/grin_app/js/colors.json';
+  
   var MAX_RECS = 200;
   var s = {}; // service/singleton we will return 
   s.updating = false;
@@ -7,10 +9,12 @@ app.service('geoJsonService', function($http, $rootScope) {
   s.map = null; // the leaflet map, assigned by mapController
   s.bounds = null;
   s.center = null;
-
+  s.colors = {};
+  
   /* default values for search filters */
-  s.limitToMapExtent = false;  // affects taxon search only
+  s.limitToMapExtent = true;
   s.maxRecs = MAX_RECS;
+  s.country = null;
   s.taxonQuery = null;
     
   // array of event names we are publishing  
@@ -31,6 +35,11 @@ app.service('geoJsonService', function($http, $rootScope) {
     }
   };
 
+  s.setCountry = function(cty) {
+    s.country = cty;
+    s.search();
+  };
+  
   s.setMaxRecs = function(max) {
     s.maxRecs = max;
     s.search();
@@ -58,6 +67,7 @@ app.service('geoJsonService', function($http, $rootScope) {
   	sw_lat : s.bounds._southWest.lat,
   	sw_lng : s.bounds._southWest.lng,
 	limit_geo_bounds : s.limitToMapExtent,
+	country : s.country,
 	limit: s.maxRecs,
       }
     }).then(
@@ -73,7 +83,15 @@ app.service('geoJsonService', function($http, $rootScope) {
   	console.log(resp);
       });
   };
-
+  
+  s.colorCache = null;
+  
+  s.colorFeature = function(feature) {
+    /* try to match the genus and species against the LIS colors json */
+    var key = feature.properties.taxon;
+    return _.get(s.colorCache, key, 'grey');
+  };
+  
   s.explainResults = function() {
     if(s.data.length === s.maxRecs) {
       if(! s.taxonQuery || s.limitToMapExtent) {
@@ -85,6 +103,23 @@ app.service('geoJsonService', function($http, $rootScope) {
 	  'or add other search parameters, or increase the max results.';
     }
     return null;
+  };
+
+  s.init = function() {
+    $http.get(COLORS_URL).then(function(resp) {
+      // success function
+      s.colors = resp.data;
+      s.colorCache = {};
+      _.each(s.colors, function(v,k) {
+	if(v.color) {
+	  var key = v.genus + ' '+ v.species;
+	  s.colorCache[key] = v.color;
+	}
+      });
+      s.notify('updated');
+    }, function(resp) {
+      // error function
+    });
   };
   
   /* pub/sub event model adapted from here :
@@ -101,5 +136,7 @@ app.service('geoJsonService', function($http, $rootScope) {
   s.notify = function(eventName) {
     $rootScope.$emit('geoJsonService_'+eventName);
   };
+
+  s.init();
   return s;
 });

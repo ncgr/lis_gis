@@ -1,6 +1,7 @@
 import logging
 import simplejson as json
 import decimal
+import re
 from decimal import Decimal
 from django.db import connection
 from django.shortcuts import render
@@ -15,19 +16,7 @@ TWO_PLACES = Decimal('0.01')
 ACCESSION_TAB = 'lis_germplasm.grin_accession'
 SELECT_COLS = ('gid', 'taxon', 'latdec', 'longdec', 'accenumb', 'elevation',
                'cropname', 'collsite', 'colldate', 'origcty')
-WHERE_FRAGS = {
-    'q' : {
-        'include' : lambda p: p.get('q', None),
-        'sql' :  "taxon_fts @@ plainto_tsquery('english', %(q)s)",
-    },
-    'limit_geo_bounds' : {
-        'include' : lambda p: p.get('limit_geo_bounds', None) == 'true' or not p.get('q', False),
-        'sql' : '''ST_Contains(
-           ST_MakeEnvelope(%(minx)s, %(miny)s, %(maxx)s, %(maxy)s, %(srid)s),
-           geographic_coord::geometry
-           )''',
-    },
-}
+
 ORDER_BY_FRAG = '''
  ORDER BY ST_Distance(
   geographic_coord::geometry,
@@ -37,14 +26,60 @@ ORDER_BY_FRAG = '''
  ) ASC
 '''
 LIMIT_FRAG = 'LIMIT %(limit)s'
+COUNTRY_REGEX = re.compile(r'[a-z]{3,3}', re.I)
 
 logger = logging.getLogger(__name__)
 
+
+def _include_geo_bounds(p):
+    if p.get('q', None):
+        if p.get('limit_geo_bounds', None) == 'true':
+            return True
+        else:
+            return False
+    if p.get('country', None):
+        return False
+    return True
+
+WHERE_FRAGS = {
+    'q' : {
+        'include' : lambda p: p.get('q', None),
+        'sql' :  "taxon_fts @@ plainto_tsquery('english', %(q)s)",
+    },
+    'country' : {
+        'include' : lambda p: p.get('country', None),
+        'sql' :  'origcty = %(country)s',
+    },
+    'limit_geo_bounds' : {
+        'include' :  lambda p: p.get('limit_geo_bounds', None) == 'true',
+        'sql' : '''ST_Contains(
+           ST_MakeEnvelope(%(minx)s, %(miny)s, %(maxx)s, %(maxy)s, %(srid)s),
+           geographic_coord::geometry
+           )''',
+    },
+}
 
 def index(req):
     '''Render the index template, which will boot up angular-js.
     '''
     return render(req, 'grin_app/index.html')
+
+def countries(req):
+    '''Return a json array of countries for search filtering ui.'''
+    cursor = connection.cursor()
+    sql = '''
+    SELECT DISTINCT origcty
+    FROM lis_germplasm.grin_accession 
+    ORDER by origcty
+    '''
+    cursor.execute(sql)
+    # flatten into array, and filter out bogus records like '' or
+    # 3 number codes.
+    countries = [row[0] for row in cursor.fetchall()
+                 if COUNTRY_REGEX.match(row[0])]
+    result = json.dumps(countries)
+    response = HttpResponse(result, content_type='application/json')
+    return response
 
 
 def search(req):
@@ -76,6 +111,7 @@ def search(req):
     cursor = connection.cursor()
     sql_params = {
         'q' : params.get('q', None),
+        'country' : params.get('country', None),
         'minx' : float(params['sw_lng']),
         'miny' : float(params['sw_lat']),
         'maxx' : float(params['ne_lng']),

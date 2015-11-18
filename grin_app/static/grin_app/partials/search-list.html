@@ -49,8 +49,14 @@
     </tr>
     <tr ng-repeat="rec in model.geoJson.data">
       <td class="nowrap">{{rec.properties.accenumb}}</td>
-      <td class="nowrap"
-	   ng-bind-html="rec.properties.taxon | highlight: model.searchHilite"></td>
+      <td class="nowrap">
+	<span class="badge"
+	      style="background-color: {{ model.geoJson.colorFeature(rec)}};">
+	  &nbsp;
+	</span>
+	<span ng-bind-html="rec.properties.taxon | highlight: model.searchHilite">
+	</span>
+      </td>
       <td class="nowrap"
 	  ng-bind-html="rec.properties.cropname"></td>
       <td class="nowrap">{{rec.properties.origcty}}</td>

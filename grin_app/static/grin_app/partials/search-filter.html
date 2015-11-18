@@ -6,29 +6,40 @@
     Search
   </button>
 
-  <span ng-if="model.taxonFilter" class="badge">
-    {{ model.taxonFilter }}
+  <!-- make a removable badge for each current search filter  -->
+  <span ng-if="model.geoJson.taxonQuery" class="badge">
+    {{ model.geoJson.taxonQuery }}
     <button class="btn btn-xs btn-default"
 	    ng-click="model.taxonFilter = ''; onTaxonFilter(model.taxonFilter)">
       <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
     </button>
   </span>
-  <span ng-if="model.taxonFilter && model.limitToMapExtent" class="badge">
-    limt search to current map extent
+  
+  <span ng-if="model.geoJson.limitToMapExtent"
+	class="badge">
+    limit search to current map extent
     <button class="btn btn-xs btn-default"
 	    ng-click="model.limitToMapExtent = false; onLimitToMapExtent(model.limitToMapExtent)">
       <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
     </button>
   </span>
-  <span ng-if="model.maxRecs" class="badge">
-    max results: {{ model.maxRecs | number }}
+  
+  <span ng-if="model.geoJson.maxRecs" class="badge">
+    max results: {{ model.geoJson.maxRecs | number }}
     <button class="btn btn-xs btn-default"
 	    ng-click="onRemoveMaxResults()">
       <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
     </button>
   </span>
-
-
+  
+  <span ng-if="model.geoJson.country" class="badge">
+    country: {{ model.geoJson.country }}
+    <button class="btn btn-xs btn-default"
+	    ng-click="model.country = null; onSetCountry(model.country);">
+      <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+    </button>
+  </span>
+  
 </div>
 
 <div class="panel panel-info"
@@ -37,13 +48,14 @@
   <div class="panel-heading">
     <span class="glyphicon glyphicon-search"></span>
     Search parameters:
+   
   </div>
   <div class="panel-body">
     <div class="alert alert-warning" ng-if="model.alert">
       {{model.alert}}
     </div>
     <div class="row">
-      <div class="col-md-5">
+      <div class="col-md-4">
 	<div class="panel panel-default">
 	  <div class="panel-heading">
 	    Taxon Search
@@ -54,7 +66,7 @@
 	      <input id="taxon-filter"
 		     type="text"
 		     ng-attr-auto-focus="! model.autofocusField || model.autofocusField === 'taxonFilter'"
-		     size="30"
+		     size="20"
 		     maxlength="256"
 		     ng-model="model.taxonFilter">
 	      </input>
@@ -69,24 +81,63 @@
 		      aria-hidden="true"></span>
 		Clear
 	      </button>
-	      <div class="checkbox">
-		<label>
-		  <input type="checkbox"
-			 ng-model="model.limitToMapExtent"
-			 ng-change="onLimitToMapExtent(model.limitToMapExtent)">
-		  </input>
-		  Limit to current map extent
-		</label>
-	      </div>
+	     
 	    </form>
 	  </div>
 	</div>
       </div>
-      
-      <div class="col-md-5">
+      <div class="col-md-2">
 	<div class="panel panel-default">
 	  <div class="panel-heading">
-	    Limit Search Results To:
+	    Extent
+	  </div>
+	  <div class="panel-body">	
+	    <div class="checkbox">
+	      <label>
+		<input type="checkbox"
+		       ng-model="model.limitToMapExtent"
+		       ng-change="onLimitToMapExtent(model.limitToMapExtent)">
+		</input>
+		Limit to current map extent
+	      </label>
+	    </div>
+	  </div>
+	</div>
+      </div>
+      <div class="col-md-3">
+	<div class="panel panel-default">
+	  <div class="panel-heading">
+	    Country Search
+	  </div>
+	  <div class="panel-body">
+	    <form class="form-inline"
+		  ng-submit="onSetCountry(model.country)">
+	      <label>
+		Limit to accessions in:
+	      </label>
+	      <select class="form-control"
+		      ng-model="model.country">
+		<option value="">Country</option>
+		  
+		<option ng-repeat="country in model.countries"
+			value="{{country}}">
+		  {{country}}
+		</option>
+	      </select>
+	      <button type="submit" class="btn btn-sm btn-default">
+		<span class="glyphicon glyphicon-search"
+		      aria-hidden="true"></span>
+		Go
+	      </button>
+	    </form>
+	  </div>
+	</div>
+      </div>
+       
+      <div class="col-md-3">
+	<div class="panel panel-default">
+	  <div class="panel-heading">
+	    Limit Search Results #:
 	  </div>
 	  <div class="panel-body">
 	    <form class="form-inline"
@@ -111,13 +162,14 @@
 	  </div>
 	</div>
       </div>
-      <div class="col-md-2">
-	<button class="btn btn-success"
-		ng-click="model.searchOptions = false; model.alert = ''">
-	  OK
-	</button>    
-      </div>
+     
     </div>
+
+    <button class="btn btn-success"
+	    ng-click="model.searchOptions = false; model.alert = ''">
+      OK
+    </button>  
   </div>
+  
 </div>
 
