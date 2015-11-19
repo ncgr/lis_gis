@@ -75,8 +75,12 @@ function($scope, $state, geoJsonService) {
 	});
       },
       onEachFeature: function (featureData, layer) {
-        layer.bindPopup(featureData.properties.accenumb +
-			'<br/>' + featureData.properties.taxon);
+	var content = featureData.properties.accenumb +
+	    '<br/>' + featureData.properties.taxon;
+	var popup = L.popup();
+	popup.setContent(content);
+	popup.accnumb = featureData.properties.accenumb;
+        layer.bindPopup(popup);
       },
       filter: filterNonGeocoded,
     });
@@ -107,6 +111,10 @@ function($scope, $state, geoJsonService) {
     });
   };
 
+  $scope.onMarkerDetail = function(accDetail) {
+    console.log(accDetail);
+  };
+  
   $scope.onSelectBaseMap = function(name) {
     var map = $scope.model.map;
     if(map.hasLayer($scope.model.baseMapLayer)) {

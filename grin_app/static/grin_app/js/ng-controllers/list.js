@@ -15,11 +15,27 @@ function($scope,
   $scope.model = {
     geoJson: geoJsonService,
     searchHilite: null,
+    hiliteAccNumb : null,
   };
   
   $scope.init = function() {
     geoJsonService.subscribe($scope, 'updated', function() {
       $scope.model.searchHilite = geoJsonService.taxonQuery;
+    });
+    
+    geoJsonService.map.on('popupopen', function(e) {
+      // the accession number, in some use cases, is stored as a
+      // property on the popup
+      var accNum = e.popup.accnumb;
+      if( ! accNum) {
+	return;
+      }
+      hiliteAccNumbInTable(accNum);
+      $scope.$apply();
+    });
+    
+    geoJsonService.map.on('popupclose', function(e) {
+      $scope.model.hiliteAccNumb = null;
     });
   };
 
@@ -67,6 +83,23 @@ function($scope,
     });
   };
 
+  function hiliteAccNumbInTable(accNum) {
+    // splice the record to beginning of geoJson dataset
+    var accession = _.find(geoJsonService.data, function(d) {
+      return (d.properties.accenumb === accNum);
+    });
+    if( ! accession) {
+      return;
+    }
+    var idx = _.indexOf(geoJsonService.data, accession);
+    if(idx === -1) {
+      return;
+    }
+    geoJsonService.data.splice(idx, 1);
+    geoJsonService.data.splice(0, 0, accession);
+    $scope.model.hiliteAccNumb = accNum;
+  };
+  
   function onGoExternalLISTaxon(accDetail)  {
     /* redirect to legumeinfo.org/organism */
     var url = 'http://legumeinfo.org/organism/' +
@@ -95,6 +128,7 @@ function($scope,
 	  .setContent(content)
 	  .openOn(geoJsonService.map);
       handler(); // unsubscribe the callback
+      hiliteAccNumbInTable(accDetail.properties.accenumb);
     });
     geoJsonService.setCenter(center, true);
   }

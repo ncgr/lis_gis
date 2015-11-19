@@ -54,7 +54,7 @@ app.service('geoJsonService', function($http, $rootScope) {
     s.taxonQuery = q;
     s.search();
   };
-  
+    
   s.search = function() {
     s.updating = true;
     $http({

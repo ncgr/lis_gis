@@ -1,4 +1,16 @@
-#map { height: 350px; }
-.number { width: 80px; }
-.hilite-text { background: #fff380; }
-.nowrap { white-space: nowrap; }
+#map {
+    height: 350px;
+}
+.number {
+    width: 80px;
+}
+.hilite-text {
+    background: #fff380;
+}
+.nowrap {
+    white-space: nowrap;
+}
+.hilite-row { 
+    background: #fff380 !important;
+    border: 3px dashed #aaa;
+}   
