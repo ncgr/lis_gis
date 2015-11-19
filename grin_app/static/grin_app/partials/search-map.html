@@ -1,28 +1,21 @@
-<div id="map">
-</div>
+<button class="btn btn-sm btn-default"
+	ng-click="model.baseMapSelect = true; model.geoCoordsSelect = false;">
+  <span class="glyphicon glyphicon-picture"></span>
+  Change base map
+</button>
 
-<div style="margin-top: 0.5rem;">
-  
-  <button class="btn btn-sm btn-default"
-	  ng-click="model.baseMapSelect = true; model.geoCoordsSelect = false;">
-    <span class="glyphicon glyphicon-picture"></span>
-    Change base map
-  </button>
-  
-  <button class="btn btn-sm btn-default"
-	  ng-click="model.geoCoordsSelect = true; model.baseMapSelect = false;">
-    <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>    
-    Go to geographic coordinates
-  </button>
-  
-  <button type="submit" class="btn btn-sm btn-default"
-	  ng-click="onGeoLocate()">
-    <span class="glyphicon glyphicon-map-marker"
-	  aria-hidden="true"></span>
-    Go to my location
-  </button>
+<button class="btn btn-sm btn-default"
+	ng-click="model.geoCoordsSelect = true; model.baseMapSelect = false;">
+  <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>    
+  Go to geographic coordinates
+</button>
 
-</div>
+<button type="submit" class="btn btn-sm btn-default"
+	ng-click="onGeoLocate()">
+  <span class="glyphicon glyphicon-map-marker"
+	aria-hidden="true"></span>
+  Go to my location
+</button>
 
 <div class="panel panel-info"
      ng-if="model.baseMapSelect"  style="margin-top: 0.5rem;">
@@ -68,4 +61,6 @@
   </div>
 </div>
 
+<div id="map" style="margin-top: 0.2rem;">
+</div>
 

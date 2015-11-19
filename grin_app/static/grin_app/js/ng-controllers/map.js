@@ -92,6 +92,7 @@ function($scope, $state, geoJsonService) {
       $scope.model.geoJsonLayer.clearLayers();
       $scope.model.geoJsonLayer.addData(geoJsonService.data);
     });
+    
     $scope.model.map.whenReady(function() {
       updateMarkersForBounds();
     });

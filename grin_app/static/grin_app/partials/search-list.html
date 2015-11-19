@@ -41,10 +41,10 @@
       <th>accession</th>
       <th>taxon</th>
       <th class="nowrap">crop name</th>
-      <th>country</th>
+      <th>orig country</th>
       <th><!-- column having a map marker icon, if geocoded --></th>
       <th>collection site</th>
-      <th>date</th>
+      <th>acq date</th>
       <th>elev&nbsp;(m.)</th>
     </tr>
     <tr ng-repeat="rec in model.geoJson.data">
@@ -69,10 +69,9 @@
 		class="glyphicon glyphicon-map-marker"
 		aria-hidden="true"></span>
       </td>
-      
       <td ng-bind-html="rec.properties.collsite">
       </td>
-      <td class="nowrap">{{rec.properties.colldate}}</td>
+      <td class="nowrap">{{rec.properties.acqdate}}</td>
       <td class="nowrap">
 	<span ng-if="rec.properties.elevation">
 	  {{rec.properties.elevation | number }}
@@ -87,18 +86,153 @@
   <div class="modal-header">
     <h3 class="modal-title">
       Accession: {{acc.properties.accenumb}}
-      <button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
     </h3>
   </div>
   <div class="modal-body">
-    <table class="table table-striped">
-      <tr ng-repeat="(k,v) in acc.properties">
-	<td ng-bind-html="k"></td>
-	<td ng-bind-html="v"></td>
+
+    <button class="btn btn-primary" type="button" ng-click="onOK()">
+      <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+      OK
+    </button>
+    
+    <button ng-if="acc.geometry.coordinates"
+	    class="btn btn-success" type="button" ng-click="onGoMap()">
+      <span class="glyphicon glyphicon-map-marker"
+	    aria-hidden="true"></span>
+      View {{acc.properties.accenumb}} on Map
+    </button>
+    
+    <button class="btn btn-default" type="button" ng-click="onGoLISGRIN()">
+      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>      
+      Search LIS GRIN Connect for {{acc.properties.accenumb}}
+    </button>
+     
+    <button ng-if="acc.properties.genus && acc.properties.species"
+	    ng-click="onGoLISTaxon()"	    
+	    class="btn btn-default" type="button">
+      <span class="glyphicon glyphicon-leaf"
+	    aria-hidden="true"></span>
+      View {{acc.properties.genus}} {{acc.properties.species}} at LIS
+    </button>
+    
+    <table class="table table-striped" style="margin-top: 0.5rem;">
+      <tr>
+	<td>accession #</td>
+	<td>
+	  {{acc.properties.accenumb}}
+	</td>
+      </tr>
+      <tr ng-if="acc.properties.accename">
+	<td>accename</td>
+	<td>{{acc.properties.accename}}</td>
+      </tr>      
+      <tr ng-if="acc.properties.taxon">
+	<td>taxon</td>
+	<td ng-bind-html="acc.properties.taxon"></td>
+      </tr>
+      <tr ng-if="acc.properties.subtaxa">
+	<td>subtaxa</td>
+	<td ng-bind-html="acc.properties.subtaxa"></td>
+      </tr>
+      <tr ng-if="acc.properties.genus">
+	<td>genus</td>
+	<td ng-bind-html="acc.properties.genus"></td>
+      </tr>
+      <tr ng-if="acc.properties.species">
+	<td>species</td>
+	<td ng-bind-html="acc.proeprties.species"></td>
+      </tr>
+      <tr ng-if="acc.properties.cropname">
+	<td>cropname</td>
+	<td ng-bind-html="acc.properties.cropname"></td>
+      </tr>
+      <tr ng-if="acc.properties.origcty">
+	<td>origcty</td>
+	<td>{{acc.properties.origcty}}</td>
+      </tr>
+      <tr ng-if="acc.properties.acqdate">
+	<td>acqdate</td>
+	<td>{{acc.properties.acqdate}}</td>
+      </tr>
+      <tr ng-if="acc.properties.colldate">
+	<td>colldate</td>
+	<td>{{acc.properties.colldate}}</td>
+      </tr>      
+      <tr ng-if="acc.properties.collsite">
+	<td>collsite</td>
+	<td ng-bind-html=>{{acc.properties.collsite}}</td>
+      </tr>
+      <tr ng-if="acc.geometry.coordinates">
+	<td>geographic coordinates</td>
+	<td>
+	  latitude: {{acc.geometry.coordinates[1]}}
+	  longitude: {{acc.geometry.coordinates[0]}}
+	</td>
+      </tr>
+       <tr ng-if="acc.properties.remarks">
+	<td>remarks</td>
+	<td ng-bind-html="acc.properties.remarks"></td>
+      </tr>      
+      <tr ng-if="acc.properties.history">
+	<td>history</td>
+	<td ng-bind-html="acc.properties.history"></td>
+      </tr>      
+      <tr ng-if="acc.properties.elevation">
+	<td>elevation (m.)</td>
+	<td>{{acc.properties.elevation}}</td>
+      </tr>
+      <tr ng-if="acc.properties.collnumb">
+	<td>collnumb</td>
+	<td>{{acc.properties.collnumb}}</td>
+      </tr>
+      <tr ng-if="acc.properties.collcode">
+	<td>collcode</td>
+	<td>{{acc.properties.collcode}}</td>
+      </tr>
+      <tr ng-if="acc.properties.spauthor">
+	<td>spauthor</td>
+	<td>{{acc.properties.spauthor}}</td>
+      </tr>
+      <tr ng-if="acc.properties.subtauthor">
+	<td>subtauthor</td>
+	<td>{{acc.properties.subtauthor}}</td>
+      </tr>
+      <tr ng-if="acc.properties.avail">
+	<td>avail</td>
+	<td>{{acc.properties.avail}}</td>
+      </tr>
+      <tr ng-if="acc.properties.instcode">
+	<td>instcode</td>
+	<td>{{acc.properties.instcode}}</td>
+      </tr>
+      <tr ng-if="acc.properties.bredcode">
+	<td>bredcode</td>
+	<td>{{acc.properties.bredcode}}</td>
+      </tr>
+      <tr ng-if="acc.properties.ancest">
+	<td>ancest</td>
+	<td>{{acc.properties.ancest}}</td>
+      </tr>
+      <tr ng-if="acc.properties.donorcode">
+	<td>donorcode</td>
+	<td>{{acc.properties.donorcode}}</td>
+      </tr>
+      <tr ng-if="acc.properties.donornumb">
+	<td>donornumb</td>
+	<td>{{acc.properties.donornumb}}</td>
+      </tr>
+      <tr ng-if="acc.properties.duplsite">
+	<td>duplsite</td>
+	<td>{{acc.properties.duplsite}}</td>
+      </tr>      
+      <tr ng-if="acc.properties.storage">
+	<td>storage</td>
+	<td>{{acc.properties.storage}}</td>
+      </tr>
+      <tr ng-if="acc.properties.released">
+	<td>released</td>
+	<td>{{acc.properties.released}}</td>
       </tr>
     </table>
-  </div>
-  <div class="modal-footer">
-    <button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
   </div>
 </script>

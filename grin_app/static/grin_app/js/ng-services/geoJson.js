@@ -139,6 +139,7 @@ app.service('geoJsonService', function($http, $rootScope) {
     }
     var handler = $rootScope.$on('geoJsonService_'+eventName, callback);
     scope.$on('$destroy', handler);
+    return handler;
   };
   
   s.notify = function(eventName) {

@@ -15,7 +15,7 @@ SRID = 4326  # this needs to match the SRID on the location field in psql.
 TWO_PLACES = Decimal('0.01')
 ACCESSION_TAB = 'lis_germplasm.grin_accession'
 SELECT_COLS = ('gid', 'taxon', 'latdec', 'longdec', 'accenumb', 'elevation',
-               'cropname', 'collsite', 'colldate', 'origcty')
+               'cropname', 'collsite', 'acqdate', 'origcty')
 
 ORDER_BY_FRAG = '''
  ORDER BY ST_Distance(
@@ -153,14 +153,14 @@ def _search_response(rows):
     # logger.info('results: %d' % len(rows))
     for rec in rows:
         # fix up properties which are not json serializable
-        if rec.get('colldate', None):
-            rec['colldate'] = str(rec['colldate'])
-        else:
-            rec['colldate'] = None
         if rec.get('acqdate', None):
             rec['acqdate'] = str(rec['acqdate'])
         else:
             rec['acqdate'] = None
+        if rec.get('colldate', None):
+            rec['colldate'] = str(rec['colldate'])
+        else:
+            rec['colldate'] = None
         # geojson can have null coords, so output this for
         # non-geocoded search results (e.g. full text search w/ limit
         # to current map extent turned off
