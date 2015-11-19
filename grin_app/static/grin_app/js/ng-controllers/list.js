@@ -72,13 +72,13 @@ function($scope,
     var url = 'http://legumeinfo.org/organism/' +
 	encodeURIComponent(accDetail.properties.genus) + '/' +
 	encodeURIComponent(accDetail.properties.species);
-    $window.location.href = url;
+    $window.open(url, 'LIS');
   }
 
   function onGoExternalLISGRIN(accDetail) {
     var url = 'http://legumeinfo.org/grinconnect/query?grin_acc_no='+
 	encodeURIComponent(accDetail.properties.accenumb);
-    $window.location.href = url;
+    $window.open(url, 'LIS');
   }
   
   function onGoInternalMap(accDetail) {
