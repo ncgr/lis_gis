@@ -29,7 +29,7 @@ function($scope, $state, $http, geoJsonService) {
   };
   
   $scope.onSetMaxRecs = function(max) {
-    geoJsonService.setMaxRecs(max, true);
+    geoJsonService.setMaxRecs(Number(max), true);
     $scope.model.alert = null;
     $scope.model.searchOptions = false;    
   };

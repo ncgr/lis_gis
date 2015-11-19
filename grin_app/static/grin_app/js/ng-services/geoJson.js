@@ -30,6 +30,7 @@ app.service('geoJsonService', function($http, $rootScope) {
   s.setCenter = function(center, search) {
     s.map.panTo(center);
     s.bounds = s.map.getBounds();
+    s.center = center;
     if(search) {
       s.search();
     }
@@ -54,7 +55,22 @@ app.service('geoJsonService', function($http, $rootScope) {
     s.taxonQuery = q;
     s.search();
   };
-    
+
+  s.getBoundsOfGeoJSONPoints = function() {
+    /* Calculate a center and radius which all the geojson points fall
+     * within */
+    var boundsArr = [];
+    _.each(s.data, function(d) {
+      if(d.geometry.coordinates)  {
+	// convert from geojson simple coords to leafletjs simple coords
+	boundsArr.push([d.geometry.coordinates[1],
+			d.geometry.coordinates[0]]);
+      }
+    });
+    var bounds = new L.LatLngBounds(boundsArr);
+    return bounds;
+  };
+  
   s.search = function() {
     s.updating = true;
     $http({
@@ -102,13 +118,9 @@ app.service('geoJsonService', function($http, $rootScope) {
   
   s.explainResults = function() {
     if(s.data.length === s.maxRecs) {
-      if(s.limitToMapExtent) {
-	return 'Your max # of results are listed below, but may appear to be '+
+      return 'Your max # of results are listed below, but may appear to be '+
 	'clustered at the center of the map. Try zooming the map in, '+
-	  'or add other search parameters, or increase the max results.';
-      }
-      return 'Your # max results are listed below. Try zooming the map in, '+
-	  'or add other search parameters, or increase the max results.';
+	'or add other search parameters, or increase the max results.';
     }
     return null;
   };

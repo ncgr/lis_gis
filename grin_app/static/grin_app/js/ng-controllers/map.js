@@ -20,6 +20,7 @@ function($scope, $state, geoJsonService) {
     geoCoordsSelect : false, // show geocoords selector ui
     baseMapSelect : false,   // show basemap selector ui
     baseMapLayer : null,
+    maxResultsCircle : null,
     countries : [],
     baseMaps : {
       'ESRI - NatGeo (default, reference map)' : function() {
@@ -92,9 +93,9 @@ function($scope, $state, geoJsonService) {
 	lat: center.lat.toFixed(2),
 	lng: center.lng.toFixed(2),
       };
-      
       $scope.model.geoJsonLayer.clearLayers();
       $scope.model.geoJsonLayer.addData(geoJsonService.data);
+      addMaxResultsSymbology();
     });
     
     $scope.model.map.whenReady(function() {
@@ -147,6 +148,27 @@ function($scope, $state, geoJsonService) {
     $scope.model.geoCoordsSelect = false;
     $scope.model.baseMapSelect = false;
   };
+
+  function addMaxResultsSymbology() {
+    if($scope.maxResultsCircle) {
+      geoJsonService.map.removeLayer($scope.maxResultsCircle);
+    }
+    if(geoJsonService.data.length !== geoJsonService.maxRecs) {
+      return;
+    }
+    var bounds = geoJsonService.getBoundsOfGeoJSONPoints();
+    if($scope.maxResultsCircle) {
+      geoJsonService.map.removeLayer($scope.maxResultsCircle);
+    }
+    var sw = bounds.getSouthWest();
+    var ne = bounds.getNorthEast();
+    var meters = sw.distanceTo(ne) * 0.5;
+    $scope.maxResultsCircle = L.circle(bounds.getCenter(),meters, {
+      color: 'rgb(245, 231, 158)',
+      fill: false,
+      opacity: 0.75,
+    }).addTo(geoJsonService.map);
+  }
 
   function panToMarkers() {
     /* use a centroid -ish algorithm to pan to the markers. this
