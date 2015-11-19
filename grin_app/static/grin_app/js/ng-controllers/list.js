@@ -66,7 +66,7 @@ function($scope,
 	case 'ok':
 	  break;
 	case 'go-internal-map':
-	  onGoInternalMap(accDetail);
+	  $scope.onGoInternalMap(accDetail);
 	  break;
 	case 'go-external-lis-taxon':
 	  onGoExternalLISTaxon(accDetail);
@@ -114,7 +114,7 @@ function($scope,
     $window.open(url, 'LIS');
   }
   
-  function onGoInternalMap(accDetail) {
+  $scope.onGoInternalMap = function(accDetail) {
     // convert from geoJson point to leafletjs point
     var lng = accDetail.geometry.coordinates[0];
     var lat = accDetail.geometry.coordinates[1];

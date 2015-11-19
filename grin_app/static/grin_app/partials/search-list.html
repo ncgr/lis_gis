@@ -66,9 +66,13 @@
       <td class="nowrap"
 	  ng-bind-html="rec.properties.cropname"></td>
       <td class="nowrap">{{rec.properties.origcty}}</td>
-      <td><span ng-if="rec.geometry.coordinates"
+      <td>
+	<button class="btn btn-xs btn-default"
+		ng-click="onGoInternalMap(rec)">
+	  <span ng-if="rec.geometry.coordinates"
 		class="glyphicon glyphicon-map-marker"
 		aria-hidden="true"></span>
+	</button>
       </td>
       <td ng-bind-html="rec.properties.collsite">
       </td>
