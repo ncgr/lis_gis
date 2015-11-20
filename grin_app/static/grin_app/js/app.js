@@ -99,7 +99,7 @@ app.run(function(geoJsonService, $timeout, $rootScope) {
 
 app.tour = function () {
   var tour = {
-    id: 'tour',
+    id: 'lis-germplasm-mapper',
     steps: [
       {
         title: 'Welcome',
