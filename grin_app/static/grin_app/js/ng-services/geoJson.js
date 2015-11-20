@@ -115,16 +115,7 @@ app.service('geoJsonService', function($http, $rootScope) {
     }
     return 'grey';
   };
-  
-  s.explainResults = function() {
-    if(s.data.length === s.maxRecs) {
-      return 'Your max # of results are listed below, but may appear to be '+
-	'clustered at the center of the map. Try zooming the map in, '+
-	'or add other search parameters, or increase the max results.';
-    }
-    return null;
-  };
-
+ 
   s.init = function() {
     $http.get(COLORS_URL).then(function(resp) {
       // success function
