@@ -8,7 +8,6 @@ app.service('geoJsonService', function($http, $rootScope) {
   s.data = []; // an array of geoJson features
   s.map = null; // the leaflet map, Note: this belongs to
 		// mapController! don't update it in this service.
-  s.center = L.latLng(0,0); 
   s.bounds = L.latLngBounds(L.latLng(0,0), L.latLng(0,0));
   s.colors = {};
   
@@ -18,7 +17,7 @@ app.service('geoJsonService', function($http, $rootScope) {
   s.country = null;
   s.taxonQuery = null;
     
-  // array of event names we are publishing  
+  // array of event names we are publishing
   s.events = ['updated', 'willUpdate'];
   
   s.setBounds = function(bounds, search) {
@@ -32,18 +31,6 @@ app.service('geoJsonService', function($http, $rootScope) {
     }
   };
   
-  s.setCenter = function(center, search) {
-    var c = L.latLng(center.lat, center.lng);
-    if(s.center.equals(c) && s.data.length > 0) {
-      // early out of the center is already set to same, and we have results.
-      return;
-    }
-    s.center = c;
-    if(search) {
-      s.search();
-    }
-  };
-
   s.setCountry = function(cty) {
     s.country = cty;
     s.search();

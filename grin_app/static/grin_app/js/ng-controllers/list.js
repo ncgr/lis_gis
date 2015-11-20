@@ -153,10 +153,21 @@ function($scope,
 	unsub(); // dispose of the callback
       }, 0);
     });
+    
     // force the search to update (even if already centered at this
     // position, we definitely want the above callback to run)
-    geoJsonService.center = L.latLng(0,0); // hack
-    geoJsonService.setCenter(center, true);
+    var c = L.latLng(lat, lng);
+    if(c.equals(geoJsonService.map.getCenter())) {
+      // the map is already centered at this coordinate. this is kind
+      // of a hack, but force the update via the geoJsonService
+      geoJsonService.bounds = L.latLngBounds(L.latLng(0,0), L.latLng(0,0));
+      geoJsonService.setBounds(geoJsonService.map.getBounds(), true);
+    }
+    else {
+      // drive the update via the map, to get the new bounds from it's
+      // update event.
+      geoJsonService.map.panTo(c);
+    }
   };
   
   $scope.init();

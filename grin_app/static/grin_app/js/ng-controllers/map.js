@@ -89,13 +89,13 @@ function($scope, $state, $timeout, geoJsonService) {
     geoJsonService.subscribe($scope, 'updated', function() {
       // update map and scope.model with any changes in bounds in the
       // bounds, or the center of the geoJsonService
-      if(! $scope.model.map.getBounds().equals(geoJsonService.bounds)
-	 || ! $scope.model.map.getCenter().equals(geoJsonService.center)) {
-	$scope.model.map.panTo(geoJsonService.center);
+      if(! $scope.model.map.getBounds().equals(geoJsonService.bounds)) {
+	$scope.model.map.fitBounds(geoJsonService.bounds);
       }
+      var mapCenter = $scope.model.map.getCenter();
       $scope.model.center = {
-	lat: geoJsonService.center.lat.toFixed(2),
-	lng: geoJsonService.center.lng.toFixed(2),
+	lat: mapCenter.lat.toFixed(2),
+	lng: mapCenter.lng.toFixed(2),
       };
       // remove previous map markers, and then update with the new geojson
       $scope.model.geoJsonLayer.clearLayers();
@@ -121,7 +121,6 @@ function($scope, $state, $timeout, geoJsonService) {
 	var mapBounds = $scope.model.map.getBounds();
 	if(! mapBounds.equals(geoJsonService.bounds)) {
 	  // update geoJsonService to new bounds, and trigger a search.
-	  geoJsonService.setCenter(mapCenter, false);
 	  geoJsonService.setBounds(mapBounds, true);
 	}
       },0);
@@ -129,7 +128,6 @@ function($scope, $state, $timeout, geoJsonService) {
     
     geoJsonService.map = $scope.model.map;
     geoJsonService.setBounds($scope.model.map.getBounds(), false);
-    geoJsonService.setCenter($scope.model.map.getCenter(), false);
     geoJsonService.search();
   };
   
@@ -146,7 +144,7 @@ function($scope, $state, $timeout, geoJsonService) {
   
   $scope.onSetCenter = function() {
     // user updated lat/long form values
-    geoJsonService.setCenter($scope.model.center, true);
+    $scope.model.map.panTo($scope.model.center);
     $scope.model.geoCoordsSelect = false;
   };
   
@@ -158,7 +156,7 @@ function($scope, $state, $timeout, geoJsonService) {
 	  lat : position.coords.latitude,
 	  lng : position.coords.longitude,
 	};
-	geoJsonService.setCenter($scope.model.center, true);
+	$scope.model.map.panTo($scope.model.center);	
       });
     }
     $scope.model.geoCoordsSelect = false;
