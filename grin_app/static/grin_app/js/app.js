@@ -84,6 +84,19 @@ app.run( function($http, $cookies, $state) {
   $state.transitionTo('search');
 });
 
+app.run(function(geoJsonService, $timeout, $rootScope) {
+  /* after the ui and search results have finished loading, start the
+   * hopscotch tour. the tour needs to bind to dom elements by id, so
+   * it cannot be started before angular compiles the html */
+  if(! hopscotch.getState()) {
+    // no saved state, so user has not seen the your yet.
+    var handler = geoJsonService.subscribe($rootScope, 'updated', function() {
+      $timeout(app.tour, 500); // want it to appear after the map renders
+      handler(); // unsubscribe
+    });
+  }
+});
+
 app.tour = function () {
   var tour = {
     id: 'tour',
@@ -159,15 +172,10 @@ app.tour = function () {
         content: 'Click this button anytime to re-open this tour of the web app. Thanks!',
         target: 'tour-btn',
         placement: 'bottom',
-      },                 
+      },
     ],
     showPrevButton: true,
   };
   hopscotch.startTour(tour, 0);
 };
 
-app.run(function($timeout) {
-  $timeout(function() {
-    app.tour();
-  }, 1000);
-});
