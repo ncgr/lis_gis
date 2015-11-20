@@ -83,7 +83,6 @@ function($scope, $state, geoJsonService) {
 	    '<br/>' + feature.properties.taxon;
 	var popup = L.popup();
 	popup.setContent(content);
-	popup.accenumb = feature.properties.accenumb;
         layer.bindPopup(popup);
       },
       filter: filterNonGeocoded,

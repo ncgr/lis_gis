@@ -23,10 +23,10 @@ function($scope,
       $scope.model.searchHilite = geoJsonService.taxonQuery;
     });
     
-    geoJsonService.map.on('popupopen', function(e,l) {
+    geoJsonService.map.on('popupopen', function(e) {
       // the accession number, in some use cases, is stored as a
       // property on the popup.
-      var accNum = e.popup.accenumb;
+      var accNum = e.popup.getContent().split('<')[0];
       if( ! accNum) {
 	return;
       }
