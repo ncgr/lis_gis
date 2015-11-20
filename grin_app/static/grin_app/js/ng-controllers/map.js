@@ -63,7 +63,6 @@ function($scope, $state, $timeout, geoJsonService) {
     // add the default basemap
     $scope.model.baseMapLayer = $scope.model.baseMaps[DEFAULT_BASEMAP]();
     $scope.model.baseMapLayer.addTo($scope.model.map);
-
     $scope.model.geoJsonLayer = L.geoJson($scope.model.geoJsonService.data, {
       pointToLayer: function (feature, latlng) {
 	// create circle marker and tag it with the accession #.
@@ -96,22 +95,20 @@ function($scope, $state, $timeout, geoJsonService) {
 	lng: center.lng.toFixed(2),
       };
       $scope.model.geoJsonLayer.clearLayers();
-      $scope.model.geoJsonLayer.addData(geoJsonService.data);
-      addMaxResultsSymbology();
+      $scope.model.geoJsonLayer.addData($scope.model.geoJsonService.data);
+      $timeout(addMaxResultsSymbology, 0);
+      $timeout(fixMarkerZOrder, 0);
     });
     
     $scope.model.map.whenReady(function() {
-      $timeout(updateMarkersForBounds, 0);
+      $timeout(updateSearchForBounds, 0);
     });
-    $scope.model.map.on('zoomend', function(e) {
-      $timeout(updateMarkersForBounds, 0);
-    });
-    $scope.model.map.on('resize', function(e) {
-      $timeout(updateMarkersForBounds, 0);
-    });
-    $scope.model.map.on('dragend', function(e) {
-      $timeout(updateMarkersForBounds, 0);
-    });
+    $scope.model.map.on('moveend', function(e) {
+      // moveend fires at the end of drag and zoom events as well.
+      // don't subscribe to those events because it was causing
+      // multiple queries to be issued for same extent.
+      $timeout(updateSearchForBounds, 0);
+    });    
   };
   
   $scope.onSelectBaseMap = function(name) {
@@ -140,7 +137,6 @@ function($scope, $state, $timeout, geoJsonService) {
 	  lng : position.coords.longitude,
 	};
 	geoJsonService.setCenter($scope.model.center, true);
-	console.log($scope.model.center);
       });
     }
     $scope.model.geoCoordsSelect = false;
@@ -150,6 +146,16 @@ function($scope, $state, $timeout, geoJsonService) {
   $scope.onTour = function() {
     app.tour();
   };
+
+  function fixMarkerZOrder() {
+    // workaround for leaflet not having correct z ordering for
+    // the layers as added
+    $scope.model.map.eachLayer(function(l) {
+      if(_.has(l, 'feature.properties')) {
+	l.bringToBack();
+      }
+    });
+  }
   
   function addMaxResultsSymbology() {
     if($scope.maxResultsCircle) {
@@ -191,7 +197,13 @@ function($scope, $state, $timeout, geoJsonService) {
     $scope.model.map.panTo(latlng);
   }
 
-  function updateMarkersForBounds() {
+  function fixZOrderOfMarkers() {
+    /* leaflet doesn't seem to layer the markers in the correct order
+     * for some reason. */
+  }
+  
+  function updateSearchForBounds() {
+    /* request geojson service to update search results for new bounds */
     var map = $scope.model.map;
     var bounds = map.getBounds();
     geoJsonService.setBounds(bounds, true);

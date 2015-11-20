@@ -23,7 +23,7 @@ ORDER_BY_FRAG = '''
   ST_Centroid(
    ST_MakeEnvelope(%(minx)s, %(miny)s, %(maxx)s, %(maxy)s, %(srid)s)
   )
- ) ASC
+ ) ASC, taxon, gid
 '''
 LIMIT_FRAG = 'LIMIT %(limit)s'
 COUNTRY_REGEX = re.compile(r'[a-z]{3,3}', re.I)
