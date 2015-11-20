@@ -1,21 +1,33 @@
-<button class="btn btn-sm btn-default"
+<button id="change-base-map-btn"
+	class="btn btn-sm btn-default"
 	ng-click="model.baseMapSelect = true; model.geoCoordsSelect = false;">
   <span class="glyphicon glyphicon-picture"></span>
   Change base map
 </button>
 
 <button class="btn btn-sm btn-default"
+	id="enter-coords-btn"
 	ng-click="model.geoCoordsSelect = true; model.baseMapSelect = false;">
   <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>    
   Go to geographic coordinates
 </button>
 
-<button type="submit" class="btn btn-sm btn-default"
+<button id="geolocate-btn"
+	type="submit" class="btn btn-sm btn-default"
 	ng-click="onGeoLocate()">
   <span class="glyphicon glyphicon-map-marker"
 	aria-hidden="true"></span>
   Go to my location
 </button>
+
+<button id="tour-btn"
+	type="submit" class="btn btn-sm btn-default"
+	ng-click="onTour()">
+  <span class="glyphicon glyphicon-question-sign"
+	aria-hidden="true"></span>
+  View Tour/Help
+</button>
+
 
 <div class="panel panel-info"
      ng-if="model.baseMapSelect"  style="margin-top: 0.5rem;">

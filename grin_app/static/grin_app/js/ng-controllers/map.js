@@ -149,6 +149,10 @@ function($scope, $state, geoJsonService) {
     $scope.model.baseMapSelect = false;
   };
 
+  $scope.onTour = function() {
+    app.tour();
+  };
+  
   function addMaxResultsSymbology() {
     if($scope.maxResultsCircle) {
       geoJsonService.map.removeLayer($scope.maxResultsCircle);

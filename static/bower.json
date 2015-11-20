@@ -25,7 +25,8 @@
     "angular-cookies": "~1.4.7",
     "angular-sanitize": "~1.4.7",
     "angular-ui-router": "~0.2.15",
-    "angular-auto-focus": "~1.0.4"
+    "angular-auto-focus": "~1.0.4",
+    "hopscotch": "~0.2.5"
   },
   "resolutions": {
     "leaflet": "0.7.7"

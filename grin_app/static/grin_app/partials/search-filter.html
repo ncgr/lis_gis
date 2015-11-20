@@ -1,11 +1,13 @@
 <div style="margin-top: 0.5rem;">
   
-  <button class="btn btn-sm btn-default"
+  <button id="tour-start"
+	  class="btn btn-sm btn-default"
 	  ng-click="model.searchOptions = ! model.searchOptions ; model.autofocusField = 'taxonFilter';">
     <span class="glyphicon glyphicon-search" aria-hidden="true"></span>  
     Search
   </button>
 
+  <span id="current-search-filters">
   <!-- make a removable badge for each current search filter  -->
   <span ng-if="model.geoJson.taxonQuery" class="badge">
     {{ model.geoJson.taxonQuery }}
@@ -39,7 +41,7 @@
       <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
     </button>
   </span>
-  
+  </span>
 </div>
 
 <div class="panel panel-info"

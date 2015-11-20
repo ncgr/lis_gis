@@ -84,3 +84,90 @@ app.run( function($http, $cookies, $state) {
   $state.transitionTo('search');
 });
 
+app.tour = function () {
+  var tour = {
+    id: 'tour',
+    steps: [
+      {
+        title: 'Welcome',
+        content: 'This is a short tour of the LIS Germplasm map viewer. This web app allows you to search and locate germplasm accessions for legume genera.',
+        target: 'tour-start',
+        placement: 'top',
+      },
+      {
+        title: 'Map Frame',
+        content: 'You can drag the map to pan the extent, and use your mouse-wheel to zoom in and out, or use the [+/-] buttons. (The same as google maps and many other web maps). Try it!',
+        target: 'map',
+        placement: 'bottom',
+      },
+      {
+        title: 'Map Markers',
+        content: 'Click on a circular map marker to select this accession and get more details.  Try it!',
+	target: 'map',
+        placement: 'bottom',
+      },          
+      {
+        title: 'Results Table',
+        content: 'The accessions shown here are automatically synced with the search results, and with the map frame.',
+        target: 'results-list',
+        placement: 'top',
+      },
+      {
+        title: 'Accession Id Buttons',
+        content: 'Click on an accession id to get more details, including links out to search other resources. Try it!',
+        target: 'tour-accession-btn',
+        placement: 'top',
+      },
+      {
+        title: 'Locator Buttons',
+        content: 'Click on the  <span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span> location icon to select, center and reveal this accession on the map.  Try it!',
+        target: 'tour-coords-btn',
+        placement: 'top',
+      },
+      {
+        title: 'Set Search Parameters',
+        content: 'Click on the Search button to reveal search settings. Then click OK to close the search parameters panel. Try it!',
+        target: 'tour-start',
+        placement: 'top',
+      }, 
+      {
+        title: 'Your Search Filters',
+        content: 'Your current search filters are always listed here. You can click the  <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> to remove any filter. Your map view and results listing are updated automatically.  Try it!',
+        target: 'current-search-filters',
+        placement: 'top',
+      },
+      {
+        title: 'Change Base Map',
+        content: 'You can adjust the base map for a different appearance, if desired. This does not effect your search results!',
+        target: 'change-base-map-btn',
+        placement: 'bottom',
+      },    
+      {
+        title: 'Geographic Coordinates',
+        content: 'Click this button to view the current center of the map in latitude and longitude. Or enter new coordinates to go there. Remember: the search results are updated automatically.',
+        target: 'enter-coords-btn',
+        placement: 'bottom',
+      },      
+      {
+        title: 'Geolocate',
+        content: 'Click this button to go to your current geolocation (note: you may be prompted to allow this request by your browser). Remember: the search results are updated automatically.',
+        target: 'geolocate-btn',
+        placement: 'bottom',
+      },
+      {
+        title: 'Revisit this tour',
+        content: 'Click this button anytime to re-open this tour of the web app. Thanks!',
+        target: 'tour-btn',
+        placement: 'bottom',
+      },                 
+    ],
+    showPrevButton: true,
+  };
+  hopscotch.startTour(tour, 0);
+};
+
+app.run(function($timeout) {
+  $timeout(function() {
+    app.tour();
+  }, 1000);
+});
