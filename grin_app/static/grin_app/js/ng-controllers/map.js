@@ -196,11 +196,6 @@ function($scope, $state, $timeout, geoJsonService) {
     var latlng = L.latLng(avgLat, avgLng);
     $scope.model.map.panTo(latlng);
   }
-
-  function fixZOrderOfMarkers() {
-    /* leaflet doesn't seem to layer the markers in the correct order
-     * for some reason. */
-  }
   
   function updateSearchForBounds() {
     /* request geojson service to update search results for new bounds */
