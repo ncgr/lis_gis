@@ -123,16 +123,6 @@
     </button>
     
     <table class="table table-striped" style="margin-top: 0.5rem;">
-      <tr>
-	<td>accession #</td>
-	<td>
-	  {{acc.properties.accenumb}}
-	</td>
-      </tr>
-      <tr ng-if="acc.properties.accename">
-	<td>accename</td>
-	<td>{{acc.properties.accename}}</td>
-      </tr>      
       <tr ng-if="acc.properties.taxon">
 	<td>taxon</td>
 	<td ng-bind-html="acc.properties.taxon"></td>
@@ -147,15 +137,11 @@
       </tr>
       <tr ng-if="acc.properties.species">
 	<td>species</td>
-	<td ng-bind-html="acc.proeprties.species"></td>
+	<td ng-bind-html="acc.properties.species"></td>
       </tr>
       <tr ng-if="acc.properties.cropname">
 	<td>cropname</td>
 	<td ng-bind-html="acc.properties.cropname"></td>
-      </tr>
-      <tr ng-if="acc.properties.origcty">
-	<td>origcty</td>
-	<td>{{acc.properties.origcty}}</td>
       </tr>
       <tr ng-if="acc.properties.acqdate">
 	<td>acqdate</td>
@@ -164,10 +150,14 @@
       <tr ng-if="acc.properties.colldate">
 	<td>colldate</td>
 	<td>{{acc.properties.colldate}}</td>
-      </tr>      
+      </tr>
+       <tr ng-if="acc.properties.origcty">
+	<td>origcty</td>
+	<td>{{acc.properties.origcty}}</td>
+      </tr>
       <tr ng-if="acc.properties.collsite">
 	<td>collsite</td>
-	<td ng-bind-html=>{{acc.properties.collsite}}</td>
+	<td ng-bind-html="acc.properties.collsite"></td>
       </tr>
       <tr ng-if="acc.geometry.coordinates">
 	<td>geographic coordinates</td>
@@ -239,6 +229,10 @@
       <tr ng-if="acc.properties.released">
 	<td>released</td>
 	<td>{{acc.properties.released}}</td>
+      </tr>
+       <tr ng-if="acc.properties.accename">
+	<td>accename</td>
+	<td>{{acc.properties.accename}}</td>
       </tr>
     </table>
   </div>
