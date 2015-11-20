@@ -25,6 +25,7 @@ function($scope,
     });
     
     geoJsonService.map.on('popupopen', function(e) {
+      // use timeout to enter ng async event
       $timeout(function() {
 	// the accession number, in some use cases, is stored as a
 	// property on the popup.
@@ -39,6 +40,7 @@ function($scope,
     geoJsonService.map.on('popupclose', function(e) {
       // the accession number, in some use cases, is stored as a
       // property on the popup.
+      // use timeout to enter ng async event      
       $timeout(function() {
 	$scope.model.hiliteAccNumb = null;	
       }, 0);
@@ -118,34 +120,44 @@ function($scope,
   }
   
   $scope.onGoInternalMap = function(accDetail) {
+    /* user hit a map marker buton in the results table */
+    
     // convert from geoJson point to leafletjs point
     var accNum = accDetail.properties.accenumb;
     var lng = accDetail.geometry.coordinates[0];
     var lat = accDetail.geometry.coordinates[1];
     var center = { 'lat' : lat, 'lng' : lng };
-    var handler = geoJsonService.subscribe($scope, 'updated', function() {
-      // register a callback for after map is scrolled to new center
-      var content = accNum +
-	  '<br/>' + accDetail.properties.taxon;
-      var popup = L.popup()
-	  .setLatLng(center)
-	  .setContent(content)
-	  .openOn(geoJsonService.map);
-      handler(); // unsubscribe the callback
-      hiliteAccNumbInTable(accNum);
-      // bring the matching marker forward in the map view
-      var marker = _.find(geoJsonService.map._layers, function(l) {
-	if(_.has(l, 'feature.properties.accenumb')) {
-	  return (l.feature.properties.accenumb === accNum);
+
+    // register callback from geoJsonService after search is updated
+    // for new extent.
+    var unsub = geoJsonService.subscribe($scope, 'updated', function() {
+      $timeout(function() {
+	// display a popup
+	var content = accNum +
+    	    '<br/>' + accDetail.properties.taxon;
+	var popup = L.popup()
+    	    .setLatLng(center)
+    	    .setContent(content)
+    	    .openOn(geoJsonService.map);
+	hiliteAccNumbInTable(accNum);
+	// bring the matching marker forward in the map view
+	var marker = _.find(geoJsonService.map._layers, function(l) {
+    	  if(_.has(l, 'feature.properties.accenumb')) {
+    	    return (l.feature.properties.accenumb === accNum);
+    	  }
+    	  return false;
+	});
+	if(marker) {
+    	  marker.bringToFront();
 	}
-	return false;
-      });
-      if(marker) {
-	marker.bringToFront();
-      }
+	unsub(); // dispose of the callback
+      }, 0);
     });
+    // force the search to update (even if already centered at this
+    // position, we definitely want the above callback to run)
+    geoJsonService.center = L.latLng(0,0); // hack
     geoJsonService.setCenter(center, true);
-  }
+  };
   
   $scope.init();
   

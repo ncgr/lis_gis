@@ -6,9 +6,10 @@ app.service('geoJsonService', function($http, $rootScope) {
   var s = {}; // service/singleton we will return 
   s.updating = false;
   s.data = []; // an array of geoJson features
-  s.map = null; // the leaflet map, assigned by mapController
-  s.bounds = null;
-  s.center = null;
+  s.map = null; // the leaflet map, Note: this belongs to
+		// mapController! don't update it in this service.
+  s.center = L.latLng(0,0); 
+  s.bounds = L.latLngBounds(L.latLng(0,0), L.latLng(0,0));
   s.colors = {};
   
   /* default values for search filters */
@@ -21,6 +22,10 @@ app.service('geoJsonService', function($http, $rootScope) {
   s.events = ['updated', 'willUpdate'];
   
   s.setBounds = function(bounds, search) {
+    if(s.bounds.equals(bounds) && s.data.length > 0) {
+      // early out if the bounds is already set to same, and we have results
+      return;
+    }
     s.bounds = bounds;
     if(search) {
       s.search();
@@ -28,9 +33,12 @@ app.service('geoJsonService', function($http, $rootScope) {
   };
   
   s.setCenter = function(center, search) {
-    s.map.panTo(center);
-    s.bounds = s.map.getBounds();
-    s.center = center;
+    var c = L.latLng(center.lat, center.lng);
+    if(s.center.equals(c) && s.data.length > 0) {
+      // early out of the center is already set to same, and we have results.
+      return;
+    }
+    s.center = c;
     if(search) {
       s.search();
     }

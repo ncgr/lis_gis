@@ -57,9 +57,7 @@ function($scope, $state, $timeout, geoJsonService) {
       'minZoom' : MIN_ZOOM,
     });
     
-    geoJsonService.map = $scope.model.map;
-    geoJsonService.setCenter($scope.model.center, false);
-
+    
     // add the default basemap
     $scope.model.baseMapLayer = $scope.model.baseMaps[DEFAULT_BASEMAP]();
     $scope.model.baseMapLayer.addTo($scope.model.map);
@@ -89,26 +87,50 @@ function($scope, $state, $timeout, geoJsonService) {
     $scope.model.geoJsonLayer.addTo($scope.model.map);
     
     geoJsonService.subscribe($scope, 'updated', function() {
-      var center = geoJsonService.map.getCenter();
+      // update map and scope.model with any changes in bounds in the
+      // bounds, or the center of the geoJsonService
+      if(! $scope.model.map.getBounds().equals(geoJsonService.bounds)
+	 || ! $scope.model.map.getCenter().equals(geoJsonService.center)) {
+	$scope.model.map.panTo(geoJsonService.center);
+      }
       $scope.model.center = {
-	lat: center.lat.toFixed(2),
-	lng: center.lng.toFixed(2),
+	lat: geoJsonService.center.lat.toFixed(2),
+	lng: geoJsonService.center.lng.toFixed(2),
       };
+      // remove previous map markers, and then update with the new geojson
       $scope.model.geoJsonLayer.clearLayers();
       $scope.model.geoJsonLayer.addData($scope.model.geoJsonService.data);
       $timeout(addMaxResultsSymbology, 0);
       $timeout(fixMarkerZOrder, 0);
     });
-    
-    $scope.model.map.whenReady(function() {
-      $timeout(updateSearchForBounds, 0);
-    });
+
     $scope.model.map.on('moveend', function(e) {
-      // moveend fires at the end of drag and zoom events as well.
-      // don't subscribe to those events because it was causing
-      // multiple queries to be issued for same extent.
-      $timeout(updateSearchForBounds, 0);
-    });    
+      /* moveend fires at the end of drag and zoom events as well.
+       * don't subscribe to those events because it was causing
+       * multiple queries to be issued for same extent. */
+      
+      // timeout to force this to be asynchronous
+      $timeout(function() {
+	var mapCenter = $scope.model.map.getCenter();
+	$scope.model.center = {
+	  lat: mapCenter.lat.toFixed(2),
+	  lng: mapCenter.lng.toFixed(2),
+	};
+	// check if map and geoJsonService differ in extent (e.g. if
+	// user is driving the map)
+	var mapBounds = $scope.model.map.getBounds();
+	if(! mapBounds.equals(geoJsonService.bounds)) {
+	  // update geoJsonService to new bounds, and trigger a search.
+	  geoJsonService.setCenter(mapCenter, false);
+	  geoJsonService.setBounds(mapBounds, true);
+	}
+      },0);
+    });
+    
+    geoJsonService.map = $scope.model.map;
+    geoJsonService.setBounds($scope.model.map.getBounds(), false);
+    geoJsonService.setCenter($scope.model.map.getCenter(), false);
+    geoJsonService.search();
   };
   
   $scope.onSelectBaseMap = function(name) {
@@ -159,14 +181,14 @@ function($scope, $state, $timeout, geoJsonService) {
   
   function addMaxResultsSymbology() {
     if($scope.maxResultsCircle) {
-      geoJsonService.map.removeLayer($scope.maxResultsCircle);
+      $scope.model.map.removeLayer($scope.maxResultsCircle);
     }
     if(geoJsonService.data.length !== geoJsonService.maxRecs) {
       return;
     }
     var bounds = geoJsonService.getBoundsOfGeoJSONPoints();
     if($scope.maxResultsCircle) {
-      geoJsonService.map.removeLayer($scope.maxResultsCircle);
+      $scope.model.map.removeLayer($scope.maxResultsCircle);
     }
     var sw = bounds.getSouthWest();
     var ne = bounds.getNorthEast();
@@ -175,33 +197,7 @@ function($scope, $state, $timeout, geoJsonService) {
       color: 'rgb(245, 231, 158)',
       fill: false,
       opacity: 0.75,
-    }).addTo(geoJsonService.map);
-  }
-
-  function panToMarkers() {
-    /* use a centroid -ish algorithm to pan to the markers. this
-     avoids a signed bounds calculation as well. */
-    var avgLat = 0;
-    var avgLng = 0;
-    var count = 0;
-    _.each(geoJsonService.data, function(d) {
-      if(d.properties.latdec) {
-	avgLat += d.properties.latdec;
-	avgLng += d.properties.longdec;
-	count += 1;
-      }
-    });
-    avgLat /= count;
-    avgLng /= count;
-    var latlng = L.latLng(avgLat, avgLng);
-    $scope.model.map.panTo(latlng);
-  }
-  
-  function updateSearchForBounds() {
-    /* request geojson service to update search results for new bounds */
-    var map = $scope.model.map;
-    var bounds = map.getBounds();
-    geoJsonService.setBounds(bounds, true);
+    }).addTo($scope.model.map);
   }
 
   function filterNonGeocoded(featureData, layer) {
