@@ -10,7 +10,7 @@ __pycache__/
 env/
 build/
 develop-eggs/
-dist/
+# dist/ bower_components needs this --alex
 downloads/
 eggs/
 .eggs/
