@@ -4,7 +4,7 @@
 "use strict";
 
 app.controller('mapController',
-function($scope, $state, geoJsonService) {
+function($scope, $state, $timeout, geoJsonService) {
 		 
   var DEFAULT_POS = { 'lat' : 21.15, 'lng' : 80.42 };
   var DEFAULT_ZOOM = 6;
@@ -101,16 +101,16 @@ function($scope, $state, geoJsonService) {
     });
     
     $scope.model.map.whenReady(function() {
-      updateMarkersForBounds();
+      $timeout(updateMarkersForBounds, 0);
     });
     $scope.model.map.on('zoomend', function(e) {
-      updateMarkersForBounds();
+      $timeout(updateMarkersForBounds, 0);
     });
     $scope.model.map.on('resize', function(e) {
-      updateMarkersForBounds();
+      $timeout(updateMarkersForBounds, 0);
     });
     $scope.model.map.on('dragend', function(e) {
-      updateMarkersForBounds();
+      $timeout(updateMarkersForBounds, 0);
     });
   };
   

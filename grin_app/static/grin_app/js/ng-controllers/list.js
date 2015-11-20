@@ -10,6 +10,7 @@ function($scope,
 	 $sanitize,
 	 $uibModal,
 	 $window,
+	 $timeout,
 	 geoJsonService) {
   
   $scope.model = {
@@ -24,18 +25,23 @@ function($scope,
     });
     
     geoJsonService.map.on('popupopen', function(e) {
-      // the accession number, in some use cases, is stored as a
-      // property on the popup.
-      var accNum = e.popup.getContent().split('<')[0];
-      if( ! accNum) {
-	return;
-      }
-      hiliteAccNumbInTable(accNum);
-      $scope.$apply();
+      $timeout(function() {
+	// the accession number, in some use cases, is stored as a
+	// property on the popup.
+	var accNum = e.popup.getContent().split('<')[0];
+	if( ! accNum) {
+	  return;
+	}
+	hiliteAccNumbInTable(accNum);
+      }, 0);
     });
     
     geoJsonService.map.on('popupclose', function(e) {
-      $scope.model.hiliteAccNumb = null;
+      // the accession number, in some use cases, is stored as a
+      // property on the popup.
+      $timeout(function() {
+	$scope.model.hiliteAccNumb = null;	
+      }, 0);
     });
   };
 
@@ -45,9 +51,7 @@ function($scope,
     $http({
       url : 'accession_detail',
       method : 'GET',
-      params : {
-	accenumb : acc,
-      },
+      params : { accenumb : acc },
     }).then(function(resp) {
       // success callback
       accDetail = resp.data[0];
