@@ -66,7 +66,9 @@ function($scope, $state, geoJsonService) {
 
     $scope.model.geoJsonLayer = L.geoJson($scope.model.geoJsonService.data, {
       pointToLayer: function (feature, latlng) {
+	// create circle marker and tag it with the accession #.
         return L.circleMarker(latlng, {
+	  id : feature.accenumb,
 	  radius: 8,
 	  fillColor: geoJsonService.colorFeature(feature),
 	  color: "#000",
@@ -75,12 +77,13 @@ function($scope, $state, geoJsonService) {
 	  fillOpacity: 0.8
 	});
       },
-      onEachFeature: function (featureData, layer) {
-	var content = featureData.properties.accenumb +
-	    '<br/>' + featureData.properties.taxon;
+      onEachFeature: function (feature, layer) {
+	// bind a popup to each 
+	var content = feature.properties.accenumb +
+	    '<br/>' + feature.properties.taxon;
 	var popup = L.popup();
 	popup.setContent(content);
-	popup.accnumb = featureData.properties.accenumb;
+	popup.accenumb = feature.properties.accenumb;
         layer.bindPopup(popup);
       },
       filter: filterNonGeocoded,
@@ -110,10 +113,6 @@ function($scope, $state, geoJsonService) {
     $scope.model.map.on('dragend', function(e) {
       updateMarkersForBounds();
     });
-  };
-
-  $scope.onMarkerDetail = function(accDetail) {
-    console.log(accDetail);
   };
   
   $scope.onSelectBaseMap = function(name) {

@@ -23,10 +23,10 @@ function($scope,
       $scope.model.searchHilite = geoJsonService.taxonQuery;
     });
     
-    geoJsonService.map.on('popupopen', function(e) {
+    geoJsonService.map.on('popupopen', function(e,l) {
       // the accession number, in some use cases, is stored as a
-      // property on the popup
-      var accNum = e.popup.accnumb;
+      // property on the popup.
+      var accNum = e.popup.accenumb;
       if( ! accNum) {
 	return;
       }
@@ -97,11 +97,10 @@ function($scope,
     }
     geoJsonService.data.splice(idx, 1);
     geoJsonService.data.splice(0, 0, accession);
-    $scope.model.hiliteAccNumb = accNum;
+    $scope.model.hiliteAccNumb = accNum;    
   };
   
   function onGoExternalLISTaxon(accDetail)  {
-    /* redirect to legumeinfo.org/organism */
     var url = 'http://legumeinfo.org/organism/' +
 	encodeURIComponent(accDetail.properties.genus) + '/' +
 	encodeURIComponent(accDetail.properties.species);
@@ -116,19 +115,30 @@ function($scope,
   
   $scope.onGoInternalMap = function(accDetail) {
     // convert from geoJson point to leafletjs point
+    var accNum = accDetail.properties.accenumb;
     var lng = accDetail.geometry.coordinates[0];
     var lat = accDetail.geometry.coordinates[1];
     var center = { 'lat' : lat, 'lng' : lng };
     var handler = geoJsonService.subscribe($scope, 'updated', function() {
       // register a callback for after map is scrolled to new center
-      var content = accDetail.properties.accenumb +
+      var content = accNum +
 	  '<br/>' + accDetail.properties.taxon;
       var popup = L.popup()
 	  .setLatLng(center)
 	  .setContent(content)
 	  .openOn(geoJsonService.map);
       handler(); // unsubscribe the callback
-      hiliteAccNumbInTable(accDetail.properties.accenumb);
+      hiliteAccNumbInTable(accNum);
+      // bring the matching marker forward in the map view
+      var marker = _.find(geoJsonService.map._layers, function(l) {
+	if(_.has(l, 'feature.properties.accenumb')) {
+	  return (l.feature.properties.accenumb === accNum);
+	}
+	return false;
+      });
+      if(marker) {
+	marker.bringToFront();
+      }
     });
     geoJsonService.setCenter(center, true);
   }
