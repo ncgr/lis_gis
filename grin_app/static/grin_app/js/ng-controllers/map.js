@@ -190,12 +190,14 @@ function($scope, $state, $timeout, geoJsonService) {
     }
     var sw = bounds.getSouthWest();
     var ne = bounds.getNorthEast();
-    var meters = sw.distanceTo(ne) * 0.5;
-    $scope.maxResultsCircle = L.circle(bounds.getCenter(),meters, {
-      color: 'rgb(245, 231, 158)',
-      fill: false,
-      opacity: 0.75,
-    }).addTo($scope.model.map);
+    if(sw && ne) {
+      var meters = sw.distanceTo(ne) * 0.5;
+      $scope.maxResultsCircle = L.circle(bounds.getCenter(),meters, {
+	color: 'rgb(245, 231, 158)',
+	fill: false,
+	opacity: 0.75,
+      }).addTo($scope.model.map);
+    }
   }
 
   function filterNonGeocoded(featureData, layer) {
