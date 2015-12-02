@@ -12,6 +12,14 @@ PSQL_DB = 'dbname=grin user=agr'
 DATE_FMT = '%Y%m%d'
 PNT_FMT = "ST_GeographyFromText('SRID=4326;POINT(%(longdec)s %(latdec)s)')"
 
+
+if not hasattr(math, 'isclose'):
+    # monkey patch for python2
+    def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
+        return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+    math.isclose = isclose
+
+
 def main():
     print('making lat/long consensus...')
     conn = psycopg2.connect(PSQL_DB)
