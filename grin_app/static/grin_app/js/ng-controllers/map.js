@@ -8,7 +8,6 @@ function($scope, $state, $timeout, geoJsonService) {
 		 
   var DEFAULT_POS = { 'lat' : 21.15, 'lng' : 80.42 };
   var DEFAULT_ZOOM = 6;
-  var MIN_ZOOM = 3;
   var DEFAULT_BASEMAP = 'ESRI - NatGeo (default, reference map)';
   
   $scope.model = {
@@ -26,13 +25,11 @@ function($scope, $state, $timeout, geoJsonService) {
       'ESRI - NatGeo (default, reference map)' : function() {
 	return L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}', {
 	  attribution: 'Tiles &copy; Esri &mdash; National Geographic, Esri, DeLorme, NAVTEQ, UNEP-WCMC, USGS, NASA, ESA, METI, NRCAN, GEBCO, NOAA, iPC',
-	  maxZoom: 16,
 	  noWrap: true,
 	});
       },
       'OpenTopoMap (terrain map)' : function() {
 	return L.tileLayer('http://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-    	  maxZoom: 16,
     	  attribution: 'Map data: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)',
 	  noWrap: true,
 	});
@@ -54,9 +51,7 @@ function($scope, $state, $timeout, geoJsonService) {
     $scope.model.map = L.map('map', {
       'center' : [$scope.model.center.lat, $scope.model.center.lng],
       'zoom' : DEFAULT_ZOOM,
-      'minZoom' : MIN_ZOOM,
     });
-    
     
     // add the default basemap
     $scope.model.baseMapLayer = $scope.model.baseMaps[DEFAULT_BASEMAP]();
