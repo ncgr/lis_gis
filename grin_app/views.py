@@ -43,7 +43,11 @@ def _include_geo_bounds(p):
 
 WHERE_FRAGS = {
     'q' : {
-        'include' : lambda p: p.get('q', None),
+        'include' : lambda p: '|' in p.get('q', '') or '&' in p.get('q', ''),
+        'sql' :  "taxon_fts @@ to_tsquery('english', %(q)s)",
+    },
+    'q2' : {
+        'include' : lambda p: p.get('q', None) and not WHERE_FRAGS['q']['include'](p),
         'sql' :  "taxon_fts @@ plainto_tsquery('english', %(q)s)",
     },
     'country' : {
