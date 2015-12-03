@@ -99,7 +99,7 @@ def countries(req):
     # flatten into array, and filter out bogus records like '' or
     # 3 number codes.
     countries = [row[0] for row in cursor.fetchall()
-                 if COUNTRY_REGEX.match(row[0])]
+                 if row[0] and COUNTRY_REGEX.match(row[0])]
     result = json.dumps(countries)
     response = HttpResponse(result, content_type='application/json')
     return response
