@@ -84,18 +84,16 @@ app.run( function($http, $cookies, $state) {
   $state.transitionTo('search');
 });
 
-var tourId = 'lis-germplasm-mapper';
+var tourId = 'lis-germplasm-mapper-tour';
     
 app.run(function(geoJsonService, $timeout, $rootScope) {
   /* after the ui and search results have finished loading, start the
    * hopscotch tour. the tour needs to bind to dom elements by id, so
    * it cannot be started before angular compiles the html */
-  var tourState = hopscotch.getState(tourId);
-  if(tourState !== null && tourState !== undefined) {
-    // user has already seen tour, so don't automatically reveal it.
-    return;
+  if(Cookies.get(tourId)) {
+    return; // already seen tour
   }
-  // no saved state, so user has not seen the your yet.
+  
   var handler = geoJsonService.subscribe($rootScope, 'updated', function() {
     $timeout(app.tour, 500); // want it to appear after the map renders
     handler(); // unsubscribe
@@ -201,5 +199,6 @@ app.tour = function () {
     ],
   };
   hopscotch.startTour(tour, 0);
+  Cookies.set(tourId, true);
 };
 
