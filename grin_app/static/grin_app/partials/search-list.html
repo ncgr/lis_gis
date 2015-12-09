@@ -7,22 +7,22 @@
      style="margin-top: 0.5rem"
      ng-if="! model.geoJson.updating && ! model.geoJson.data.length">
 
-  <span ng-if="model.geoJson.taxonQuery && model.geoJson.limitToMapExtent">
-    <strong>{{model.geoJson.taxonQuery}}</strong> :
+  <span ng-if="model.$location.search().taxonQuery && model.$location.search().limitToMapExtent">
+    <strong>{{model.$location.search().taxonQuery}}</strong> :
     No results found for this query, within the current map extent.
   </span>
-  <span ng-if="model.geoJson.taxonQuery && ! model.geoJson.limitToMapExtent">
-    <strong>{{model.geoJson.taxonQuery}}</strong> : 
+  <span ng-if="model.$location.search().taxonQuery && ! model.$location.search().limitToMapExtent">
+    <strong>{{model.$location.search().taxonQuery}}</strong> : 
     No results found for this query.
   </span>
-  <span ng-if="! model.geoJson.taxonQuery">
-    No results found within the current map extent. Try zooming
-    out, or view a different region.
+  <span ng-if="! model.$location.search().taxonQuery">
+    No results found within the current map extent. Try zooming out, or view
+    a different region.
   </span>
 </div>
 
 <div class="alert alert-warning" style="margin-top: 0.5rem"
-     ng-if="! model.geoJson.updating && model.geoJson.data.length === model.geoJson.maxRecs">
+     ng-if="! model.geoJson.updating && model.geoJson.data.length == model.$location.search().maxRecs">
   <strong>Results: {{model.geoJson.data.length}}</strong>
   Your max # of results are listed below, but may appear to be
   clustered at the center of the map. Try zooming the map in
@@ -30,7 +30,7 @@
 </div>
 
 <div style="margin-top: 0.5rem"
-     ng-if="! model.geoJson.updating && model.geoJson.data.length !== model.geoJson.maxRecs">
+     ng-if="! model.geoJson.updating && model.geoJson.data.length !== model.$location.search().maxRecs">
   <strong>Results:
     {{model.geoJson.data.length}}
   </strong>

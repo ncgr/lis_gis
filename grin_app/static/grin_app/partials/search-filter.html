@@ -9,33 +9,33 @@
 
   <span id="current-search-filters">
   <!-- make a removable badge for each current search filter  -->
-  <span ng-if="model.geoJson.taxonQuery" class="badge">
-    {{ model.geoJson.taxonQuery }}
+  <span ng-if="model.$location.search().taxonQuery" class="badge">
+    {{ model.$location.search().taxonQuery }}
     <button class="btn btn-xs btn-default"
-	    ng-click="model.taxonFilter = ''; onTaxonFilter(model.taxonFilter)">
+	    ng-click="model.taxonQuery = ''; onTaxonQuery(model.taxonQuery)">
       <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
     </button>
   </span>
   
-  <span ng-if="model.geoJson.limitToMapExtent"
+  <span ng-if="model.$location.search().limitToMapExtent === true"
 	class="badge">
     limit search to current map extent
     <button class="btn btn-xs btn-default"
-	    ng-click="model.limitToMapExtent = false; onLimitToMapExtent(model.limitToMapExtent)">
+	    ng-click="model.limitToMapExtent = false ; onLimitToMapExtent(model.limitToMapExtent)">
       <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
     </button>
   </span>
   
-  <span ng-if="model.geoJson.maxRecs" class="badge">
-    max results: {{ model.geoJson.maxRecs | number }}
+  <span ng-if="model.$location.search().maxRecs" class="badge">
+    max results: {{ model.$location.search().maxRecs | number }}
     <button class="btn btn-xs btn-default"
 	    ng-click="onRemoveMaxResults()">
       <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
     </button>
   </span>
   
-  <span ng-if="model.geoJson.country" class="badge">
-    country: {{ model.geoJson.country }}
+  <span ng-if="model.$location.search().country" class="badge">
+    country: {{ model.$location.search().country }}
     <button class="btn btn-xs btn-default"
 	    ng-click="model.country = null; onSetCountry(model.country);">
       <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
@@ -64,20 +64,20 @@
 	  </div>
 	  <div class="panel-body">
 	    <form class="form-inline"
-		  ng-submit="onTaxonFilter(model.taxonFilter)">
+		  ng-submit="onTaxonQuery(model.taxonQuery)">
 	      <input id="taxon-filter"
 		     type="text"
 		     ng-attr-auto-focus="! model.autofocusField || model.autofocusField === 'taxonFilter'"
 		     size="20"
 		     maxlength="256"
-		     ng-model="model.taxonFilter">
+		     ng-model="model.taxonQuery">
 	      </input>
 	      <button type="submit" class="btn btn-sm btn-default">
 		<span class="glyphicon glyphicon-search"
 		      aria-hidden="true"></span>
 		Go
 	      </button>
-	      <button ng-click="model.taxonFilter = ''; onTaxonFilter(model.taxonFilter)"
+	      <button ng-click="model.taxonQuery = ''; onTaxonQuery(model.taxonQuery)"
 		      class="btn btn-sm btn-default">
 		<span class="glyphicon glyphicon-remove"
 		      aria-hidden="true"></span>

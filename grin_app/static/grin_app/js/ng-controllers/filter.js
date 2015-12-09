@@ -4,20 +4,23 @@
 "use strict";
 
 app.controller('filterController',
-function($scope, $state, $http, geoJsonService) {
-		 
+function($scope, $state, $http, $location, geoJsonService) {
+
+  var searchParams = $location.search();
+
   $scope.model = {
     geoJson: geoJsonService,
-    country: null,
     countries: [],
-    maxRecs : geoJsonService.maxRecs,
-    limitToMapExtent : geoJsonService.limitToMapExtent,
-    taxonFilter : null,
     searchOptions: false,
     autofocusField : null,
     alert : null,
+    $location : $location,
+    limitToMapExtent : searchParams.limitToMapExtent,
+    maxRecs : searchParams.maxRecs,
+    country : searchParams.country,
+    taxonQuery : searchParams.taxonQuery,
   };
-
+  
   $scope.init = function() {
     $http.get('countries').then(function(resp) {
       // success callback
@@ -31,7 +34,7 @@ function($scope, $state, $http, geoJsonService) {
   $scope.onSetMaxRecs = function(max) {
     geoJsonService.setMaxRecs(Number(max), true);
     $scope.model.alert = null;
-    $scope.model.searchOptions = false;    
+    $scope.model.searchOptions = false;
   };
 
   $scope.onLimitToMapExtent = function(bool) {
@@ -39,7 +42,7 @@ function($scope, $state, $http, geoJsonService) {
     $scope.model.searchOptions = false;
   };
 
-  $scope.onTaxonFilter = function(q) {
+  $scope.onTaxonQuery = function(q) {
     $scope.model.autofocusField = null;
     $scope.model.alert = null;
     $scope.model.searchOptions = false;    

@@ -4,18 +4,23 @@
 "use strict";
 
 app.controller('mapController',
-function($scope, $state, $timeout, geoJsonService) {
-		 
-  var DEFAULT_POS = { 'lat' : 21.15, 'lng' : 80.42 };
-  var DEFAULT_ZOOM = 6;
+function($scope, $state, $timeout, $location, geoJsonService) {
+  
   var DEFAULT_BASEMAP = 'ESRI - NatGeo (default, reference map)';
+
+  $scope.$on('$routeUpdate', function() {
+    console.log('$routeUpdate');
+  });
   
   $scope.model = {
     geoJson : geoJsonService,
     map : null,  // the leaflet map
     geoJsonLayer : null,
     geoJsonService : geoJsonService,  // array of geoJson objects
-    center : DEFAULT_POS,
+    center : {
+      lat : $location.search().lat,
+      lng : $location.search().lng,
+    },
     geoCoordsSelect : false, // show geocoords selector ui
     baseMapSelect : false,   // show basemap selector ui
     baseMapLayer : null,
@@ -50,9 +55,10 @@ function($scope, $state, $timeout, geoJsonService) {
     
     $scope.model.map = L.map('map', {
       'center' : [$scope.model.center.lat, $scope.model.center.lng],
-      'zoom' : DEFAULT_ZOOM,
+      'zoom' : $location.search().zoom,
     });
-    
+    geoJsonService.map = $scope.model.map;
+
     // add the default basemap
     $scope.model.baseMapLayer = $scope.model.baseMaps[DEFAULT_BASEMAP]();
     $scope.model.baseMapLayer.addTo($scope.model.map);
@@ -92,6 +98,11 @@ function($scope, $state, $timeout, geoJsonService) {
 	lat: mapCenter.lat.toFixed(2),
 	lng: mapCenter.lng.toFixed(2),
       };
+      
+      $location.search('lat', $scope.model.center.lat);
+      $location.search('lng', $scope.model.center.lng);
+      $location.search('zoom', $scope.model.map.getZoom());
+      
       // remove previous map markers, and then update with the new geojson
       $scope.model.geoJsonLayer.clearLayers();
       $scope.model.geoJsonLayer.addData($scope.model.geoJsonService.data);
@@ -121,7 +132,6 @@ function($scope, $state, $timeout, geoJsonService) {
       },0);
     });
     
-    geoJsonService.map = $scope.model.map;
     geoJsonService.setBounds($scope.model.map.getBounds(), false);
     geoJsonService.search();
   };

@@ -9,10 +9,10 @@ var app = angular.module('grin',
 			  'ui.router']);
 
 app.config( function($httpProvider, $stateProvider, $sceProvider) {
-  
   $stateProvider
     .state('search', {
-      views: {
+      reloadOnSearch : false,
+      views : {
 	'filter' : {
 	  templateUrl: 'static/grin_app/partials/search-filter.html',
 	  controller: 'filterController',

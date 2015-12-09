@@ -11,18 +11,23 @@ function($scope,
 	 $uibModal,
 	 $window,
 	 $timeout,
+	 $location,
 	 geoJsonService) {
   
   $scope.model = {
     geoJson: geoJsonService,
+    $location : $location,
     searchHilite: null,
     hiliteAccNumb : null,
     staticURL : STATIC_URL,
   };
   
   $scope.init = function() {
+    
     geoJsonService.subscribe($scope, 'updated', function() {
-      $scope.model.searchHilite = geoJsonService.taxonQuery;
+      var query =  $location.search().taxonQuery;
+      // TODO: fix up edge cases with "\s+\|\s+" and "\s+\&\s+" queries
+      $scope.model.searchHilite = query;
     });
     
     geoJsonService.map.on('popupopen', function(e) {

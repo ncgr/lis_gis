@@ -1,24 +1,64 @@
-app.service('geoJsonService', function($http, $rootScope) {
-
-  var COLORS_URL = STATIC_URL + '/grin_app/js/colors.json';
+app.service('geoJsonService',
+function($http, $rootScope, $location, $timeout) {
   
+  var DEFAULT_CENTER = { 'lat' : 21.15, 'lng' : 80.42 };
   var MAX_RECS = 200;
-  var s = {}; // service/singleton we will return 
+  var COLORS_URL = STATIC_URL + '/grin_app/js/colors.json';
+  var DEFAULT_ZOOM = 6;
+  
+  var s = {}; // service/singleton we will return
+
   s.updating = false;
   s.data = []; // an array of geoJson features
   s.map = null; // the leaflet map, Note: this belongs to
-		// mapController! don't update it in this service.
+		// mapController! don't update within in this service.
   s.bounds = L.latLngBounds(L.latLng(0,0), L.latLng(0,0));
   s.colors = {};
   
-  /* default values for search filters */
-  s.limitToMapExtent = true;
-  s.maxRecs = MAX_RECS;
-  s.country = null;
-  s.taxonQuery = null;
-    
   // array of event names we are publishing
   s.events = ['updated', 'willUpdate'];
+  
+  s.init = function() {
+    // set default search values
+    var searchParams = $location.search();
+    if(! _.has(searchParams, 'limitToMapExtent')) {
+      console.log('setting limitToMapExtent to true');
+      $location.search('limitToMapExtent', true);
+    }
+    if(! _.has(searchParams, 'zoom')) {
+      $location.search('zoom', DEFAULT_ZOOM);
+    }
+    if(! _.has(searchParams, 'maxRecs')) {
+      $location.search('maxRecs', MAX_RECS);
+    }
+    if(! _.has(searchParams, 'taxonQuery')) {
+      $location.search('taxonQuery', '');
+    }
+    if(! _.has(searchParams, 'country')) {
+      $location.search('country', '');
+    }
+    if(! _.has(searchParams, 'lat')) {
+      $location.search('lat', DEFAULT_CENTER.lat);
+    }
+    if(! _.has(searchParams, 'lng')) {
+      $location.search('lng', DEFAULT_CENTER.lng);
+    }
+    
+    $http.get(COLORS_URL).then(function(resp) {
+      // success function
+      s.colors = resp.data;
+      s.colorCache = {};
+      _.each(s.colors, function(v,k) {
+	if(v.color) {
+	  var key = v.genus + ' '+ v.species;
+	  s.colorCache[key] = v.color;
+	}
+      });
+      s.notify('updated');
+    }, function(resp) {
+      // error function
+    });
+  };
   
   s.setBounds = function(bounds, search) {
     if(s.bounds.equals(bounds) && s.data.length > 0) {
@@ -26,29 +66,34 @@ app.service('geoJsonService', function($http, $rootScope) {
       return;
     }
     s.bounds = bounds;
+    $location.search('ne_lat', s.bounds._northEast.lat);
+    $location.search('ne_lng', s.bounds._northEast.lng);
+    $location.search('sw_lat', s.bounds._southWest.lat);
+    $location.search('sw_lng', s.bounds._southWest.lng);
+    
     if(search) {
-      s.search();
+      s.search();      
     }
   };
   
   s.setCountry = function(cty) {
-    s.country = cty;
+    $location.search('country', cty);
     s.search();
   };
   
   s.setMaxRecs = function(max) {
-    s.maxRecs = max;
-    s.search();
+    $location.search('maxRecs', max);
+    s.search();    
   };
   
   s.setLimitToMapExtent = function(bool) {
-    s.limitToMapExtent = bool;   
+    $location.search('limitToMapExtent', bool);
     s.search();
   };
 
   s.setTaxonQuery = function(q) {
-    s.taxonQuery = q;
-    s.search();
+    $location.search('taxonQuery', q);
+    s.search();    
   };
 
   s.getBoundsOfGeoJSONPoints = function() {
@@ -67,19 +112,20 @@ app.service('geoJsonService', function($http, $rootScope) {
   };
   
   s.search = function() {
+    var params = $location.search();
     s.updating = true;
     $http({
       url : 'search',
       method : 'GET',
       params : {
-	q : s.taxonQuery,
+	q : params.taxonQuery,
   	ne_lat : s.bounds._northEast.lat,
   	ne_lng : s.bounds._northEast.lng,
   	sw_lat : s.bounds._southWest.lat,
   	sw_lng : s.bounds._southWest.lng,
-	limit_geo_bounds : s.limitToMapExtent,
-	country : s.country,
-	limit: s.maxRecs,
+	limit_geo_bounds : params.limitToMapExtent,
+	country : params.country,
+	limit: params.maxRecs,
       }
     }).then(
       function(resp) {
@@ -94,6 +140,7 @@ app.service('geoJsonService', function($http, $rootScope) {
   	console.log(resp);
       });
   };
+
   
   s.colorCache = null;
   
@@ -109,23 +156,6 @@ app.service('geoJsonService', function($http, $rootScope) {
       return result[0];
     }
     return 'grey';
-  };
- 
-  s.init = function() {
-    $http.get(COLORS_URL).then(function(resp) {
-      // success function
-      s.colors = resp.data;
-      s.colorCache = {};
-      _.each(s.colors, function(v,k) {
-	if(v.color) {
-	  var key = v.genus + ' '+ v.species;
-	  s.colorCache[key] = v.color;
-	}
-      });
-      s.notify('updated');
-    }, function(resp) {
-      // error function
-    });
   };
   
   /* pub/sub event model adapted from here :
@@ -145,5 +175,6 @@ app.service('geoJsonService', function($http, $rootScope) {
   };
 
   s.init();
+    
   return s;
 });
