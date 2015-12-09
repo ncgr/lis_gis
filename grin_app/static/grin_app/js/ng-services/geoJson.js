@@ -1,6 +1,6 @@
 app.service('geoJsonService', function($http, $rootScope) {
 
-  var COLORS_URL = '/static/grin_app/js/colors.json';
+  var COLORS_URL = STATIC_URL + '/grin_app/js/colors.json';
   
   var MAX_RECS = 200;
   var s = {}; // service/singleton we will return 

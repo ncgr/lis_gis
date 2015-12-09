@@ -17,6 +17,7 @@ function($scope,
     geoJson: geoJsonService,
     searchHilite: null,
     hiliteAccNumb : null,
+    staticURL : STATIC_URL,
   };
   
   $scope.init = function() {

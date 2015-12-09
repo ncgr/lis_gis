@@ -19,7 +19,7 @@ function($scope, $state, $http, geoJsonService) {
   };
 
   $scope.init = function() {
-    $http.get('/countries').then(function(resp) {
+    $http.get('countries').then(function(resp) {
       // success callback
       $scope.model.countries = resp.data;
     }, function(resp){

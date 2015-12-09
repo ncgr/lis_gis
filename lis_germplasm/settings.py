@@ -79,11 +79,11 @@ WSGI_APPLICATION = 'lis_germplasm.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'grin',
-        'USER': 'agr',
+        'NAME': 'drupal',
+        'USER': 'www',
         'PASSWORD': '',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
+        'HOST': '',
+        'PORT': os.environ['PGPORT'],
     }
 }
 
@@ -105,7 +105,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = '/lis_gis/static/'
+STATIC_ROOT = '/usr/local/www/lis_gis/static_collected'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
