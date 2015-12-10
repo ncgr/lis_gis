@@ -82,7 +82,7 @@ app.filter('highlight', function($sce) {
   }
 });
 
-app.run( function($http, $cookies, $state) {
+app.run( function($http, $cookies, $state, $rootScope) {
   var csrfTokenKey = 'csrftoken';
   var csrfHeader = 'X-CSRFToken';
   $http.defaults.headers.post[csrfHeader] = $cookies.get(csrfTokenKey)
@@ -91,6 +91,8 @@ app.run( function($http, $cookies, $state) {
   // this DELETE requests fail CSRF test. Add the following two lines
   $http.defaults.xsrfCookieName = csrfTokenKey;
   $http.defaults.xsrfHeaderName = csrfHeader;
+
+  $rootScope.STATIC_URL = STATIC_URL;
 
   $state.transitionTo('search');
 });

@@ -19,7 +19,6 @@ function($scope,
     $location : $location,
     searchHilite: null,
     hiliteAccNumb : null,
-    staticURL : STATIC_URL,
   };
   
   $scope.init = function() {
@@ -59,46 +58,35 @@ function($scope,
     });
   };
 
-  $scope.onAccessionDetail = function(acc) {
-    var accDetail = null;
-    
-    $http({
-      url : 'accession_detail',
-      method : 'GET',
-      params : { accenumb : acc },
-    }).then(function(resp) {
-      // success callback
-      accDetail = resp.data[0];
-      var modalInstance = $uibModal.open({
-    	animation: true,
-    	templateUrl: 'accession-modal-content.html',
-    	controller: 'ModalInstanceCtrl',
-    	size: 'lg',
-    	resolve: {
-          accession: function() { return accDetail; },
-    	}
-      });
-      modalInstance.result.then(function (action) {
-	// modal closed callback
-	switch(action) {
-	case 'ok':
-	  break;
-	case 'go-internal-map':
-	  $scope.onGoInternalMap(accDetail);
-	  break;
-	case 'go-external-lis-taxon':
-	  onGoExternalLISTaxon(accDetail);
-	  break;
-	case 'go-external-lis-grin':
-	  onGoExternalLISGRIN(accDetail);
-	  break;
-	}
-      }, function () {
-	// modal dismissed callback
-      });
-    }, function(resp) {
-      // error callback
+  $scope.onAccessionDetail = function(accId) {
+    var modalInstance = $uibModal.open({
+      animation: true,
+      templateUrl: 'accession-modal-content.html',
+      controller: 'ModalInstanceCtrl',
+      size: 'lg',
+      resolve: {
+        accId: function() { return accId; },
+      }
     });
+    modalInstance.result.then(function (action) {
+      // modal closed callback
+      switch(action) {
+      case 'ok':
+	break;
+      case 'go-internal-map':
+	$scope.onGoInternalMap(accDetail);
+	break;
+      case 'go-external-lis-taxon':
+	onGoExternalLISTaxon(accDetail);
+	break;
+      case 'go-external-lis-grin':
+	onGoExternalLISGRIN(accDetail);
+	break;
+      }
+    }, function () {
+      // modal dismissed callback
+    });
+  
   };
 
   function hiliteAccNumbInTable(accNum) {
@@ -187,17 +175,32 @@ function($scope,
 });
 
 app.controller('ModalInstanceCtrl',
-function ($scope, $uibModalInstance, accession) {
-  $scope.acc = accession;
+function ($scope, $uibModalInstance, $http, accId) {
+  $scope.accId = accId;
+
+  $scope.model = {
+    accId : accId,
+  };
+  
   $scope.init = function() {
      /* we should verify with $http.get whether there is a taxon page at lis
       * matching, e.g.  http://legumeinfo.org/organism/Cajanus/cajan but
-      * this fails with: */
-    
-    /* Response to preflight request doesn't pass access control
-     * check: No 'Access-Control-Allow-Origin' header is present on
-     * the requested resource. Origin 'http://localhost:8001' is
-     * therefore not allowed access. */
+      * this fails with:
+      * Response to preflight request doesn't pass access control
+      * check: No 'Access-Control-Allow-Origin' header is present on
+      * the requested resource. Origin 'http://localhost:8001' is
+      * therefore not allowed access.
+      */
+    $http({
+      url : 'accession_detail',
+      method : 'GET',
+      params : { accenumb : $scope.accId },
+    }).then(function(resp) {
+      // success callback
+      $scope.model.acc = resp.data[0];
+    }, function(resp) {
+      // error callback
+    });
   };
   
   $scope.onOK = function () {
