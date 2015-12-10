@@ -8,11 +8,15 @@ var app = angular.module('grin',
 			  'ui.bootstrap',
 			  'ui.router']);
 
-app.config( function($httpProvider, $stateProvider, $sceProvider) {
+app.config(function($httpProvider, $stateProvider, $sceProvider) {
   $stateProvider
     .state('search', {
-      reloadOnSearch : false,
+      reloadOnSearch : true,
       views : {
+	'errors' : {
+	  templateUrl : 'static/grin_app/partials/errors.html',
+	  controller : 'errorsController',
+	},
 	'filter' : {
 	  templateUrl: 'static/grin_app/partials/search-filter.html',
 	  controller: 'filterController',
@@ -28,7 +32,7 @@ app.config( function($httpProvider, $stateProvider, $sceProvider) {
       }
     });
   
-  function httpErrorInterceptor($q) {
+  function httpErrorInterceptor($q, $rootScope) {
     function requestError(rejection) {
       console.log('requestError:');
       console.log(rejection);
@@ -37,9 +41,13 @@ app.config( function($httpProvider, $stateProvider, $sceProvider) {
     function responseError(response) {
       console.log('responseError:')
       console.log(response);
+      if(! $rootScope.errors) {
+	$rootScope.errors = [];
+      }
       if(response.status === 0 || response.status === -1) {
-	var msg = 'Lost connection to web app. ' +
-            'Check your network connection, or check web server process.';
+	var msg = 'Lost connection to web app. Please check your network \
+           connection, or try again later.';
+	$rootScope.errors.push(msg);
 	console.log(msg);
       }
       else if(response.status === 404 || response.status === 500) {
@@ -47,7 +55,10 @@ app.config( function($httpProvider, $stateProvider, $sceProvider) {
 		   response.statusText + ' '+
 		   response.config.url + ' ',
 		   response.data];
+	$rootScope.errors.push(msg);
+	console.log(msg);
       }
+      console.log($rootScope.errors);
       return($q.reject(response)); // pass-through the response
     }
     return({
@@ -70,7 +81,7 @@ app.filter('highlight', function($sce) {
     return $sce.trustAsHtml(text);
   }
 });
-  
+
 app.run( function($http, $cookies, $state) {
   var csrfTokenKey = 'csrftoken';
   var csrfHeader = 'X-CSRFToken';
