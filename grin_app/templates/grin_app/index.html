@@ -22,9 +22,14 @@
 
 </head>
 <body>
-  
   <div ui-view class="container-fluid">
-    <h3>Legume Information System | Germplasm</h3>
+    <h3>
+      <a href="http://{{ request.get_host }}"><img
+	src="http://legumeinfo.org/sites/all/themes/legumeinfo_theme/images/legumeinfo_logo.png" height="30" alt="LIS" /></a>
+      <a href="http://{{ request.get_host }}" style="color: #87a96b;">
+	Legume Information System</a>
+	| Germplasm Map
+    </h3>
     <div ui-view="map"></div>
     <div ui-view="filter"></div>
     <div ui-view="list"></div>
