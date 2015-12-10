@@ -1,26 +1,36 @@
-<div id="tour-start" style="margin-top: 0.5rem;">
-  <button id="search-btn"
-	  class="btn btn-sm btn-default"
-	  ng-click="model.searchOptions = ! model.searchOptions ; model.autofocusField = 'taxonFilter';">
-    <span class="glyphicon glyphicon-search" aria-hidden="true"></span>  
-    Search
-  </button>
+<div id="tour-start" style="margin-top: 0.5rem;"></div>
 
-  <span id="current-search-filters">
+<button id="search-btn"
+	class="btn btn-sm btn-default"
+	ng-click="model.searchOptions = ! model.searchOptions ; model.autofocusField = 'taxonFilter';">
+  <span class="glyphicon glyphicon-search" aria-hidden="true"></span>  
+  Search
+</button>
+
+<span id="current-search-filters">
   <!-- make a removable badge for each current search filter  -->
-  <span ng-if="model.$location.search().taxonQuery" class="badge">
-    {{ model.$location.search().taxonQuery }}
+
+   <span ng-if="model.$location.search().accessionIds" class="badge">
+    {{ model.$location.search().accessionIds }}
     <button class="btn btn-xs btn-default"
-	    ng-click="model.taxonQuery = ''; onTaxonQuery(model.taxonQuery)">
+	    ng-click="model.accessionIds = ''; onOK();">
       <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
     </button>
   </span>
   
+  <span ng-if="model.$location.search().taxonQuery" class="badge">
+    {{ model.$location.search().taxonQuery }}
+    <button class="btn btn-xs btn-default"
+	    ng-click="model.taxonQuery = ''; onOK();">
+      <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+    </button>
+  </span>
+
   <span ng-if="model.$location.search().limitToMapExtent === true"
 	class="badge">
     limit search to current map extent
     <button class="btn btn-xs btn-default"
-	    ng-click="model.limitToMapExtent = false ; onLimitToMapExtent(model.limitToMapExtent)">
+	    ng-click="model.limitToMapExtent = false ; onOK(); ">
       <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
     </button>
   </span>
@@ -36,11 +46,11 @@
   <span ng-if="model.$location.search().country" class="badge">
     country: {{ model.$location.search().country }}
     <button class="btn btn-xs btn-default"
-	    ng-click="model.country = null; onSetCountry(model.country);">
+	    ng-click="model.country = null; onOK();">
       <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
     </button>
   </span>
-  </span>
+</span>
 </div>
 
 <div class="panel panel-info"
@@ -49,127 +59,150 @@
   <div class="panel-heading">
     <span class="glyphicon glyphicon-search"></span>
     Search parameters:
-   
   </div>
   <div class="panel-body">
+    
     <div class="alert alert-success" ng-if="model.alert">
       {{model.alert}}
     </div>
-    <div class="row">
-      <div class="col-md-4">
-	<div class="panel panel-default">
-	  <div class="panel-heading">
-	    Taxon Search
-	  </div>
-	  <div class="panel-body">
-	    <form class="form-inline"
-		  ng-submit="onTaxonQuery(model.taxonQuery)">
-	      <input id="taxon-filter"
-		     type="text"
-		     ng-attr-auto-focus="! model.autofocusField || model.autofocusField === 'taxonFilter'"
-		     size="20"
-		     maxlength="256"
-		     ng-model="model.taxonQuery">
-	      </input>
-	      <button type="submit" class="btn btn-sm btn-default">
-		<span class="glyphicon glyphicon-search"
-		      aria-hidden="true"></span>
-		Go
-	      </button>
-	      <button ng-click="model.taxonQuery = ''; onTaxonQuery(model.taxonQuery)"
-		      class="btn btn-sm btn-default">
-		<span class="glyphicon glyphicon-remove"
-		      aria-hidden="true"></span>
-		Clear
-	      </button>
-	     
-	    </form>
-	  </div>
-	</div>
-      </div>
-      <div class="col-md-2">
-	<div class="panel panel-default">
-	  <div class="panel-heading">
-	    Search Extent
-	  </div>
-	  <div class="panel-body">	
-	    <div class="checkbox">
-	      <label>
-		<input type="checkbox"
-		       ng-model="model.limitToMapExtent"
-		       ng-change="onLimitToMapExtent(model.limitToMapExtent)">
-		</input>
-		Limit to current map extent
-	      </label>
-	    </div>
-	  </div>
-	</div>
-      </div>
-      <div class="col-md-3">
-	<div class="panel panel-default">
-	  <div class="panel-heading">
-	    Country Search
-	  </div>
-	  <div class="panel-body">
-	    <form class="form-inline"
-		  ng-submit="onSetCountry(model.country)">
-	      <label>
-		Limit to accessions in:
-	      </label>
-	      <select class="form-control"
-		      ng-model="model.country">
-		<option value="">Country</option>
-		  
-		<option ng-repeat="country in model.countries"
-			value="{{country}}">
-		  {{country}}
-		</option>
-	      </select>
-	      <button type="submit" class="btn btn-sm btn-default">
-		<span class="glyphicon glyphicon-search"
-		      aria-hidden="true"></span>
-		Go
-	      </button>
-	    </form>
-	  </div>
-	</div>
-      </div>
-       
-      <div class="col-md-3">
-	<div class="panel panel-default">
-	  <div class="panel-heading">
-	    Limit Search Results #:
-	  </div>
-	  <div class="panel-body">
-	    <form class="form-inline"
-		  ng-submit="onSetMaxRecs(model.maxRecs)">
-	      <label>
-		Limit # to:
-	      </label>
-	      <input type="text"
-		     ng-model="model.maxRecs"
-		     ng-attr-auto-focus="! model.autofocusField || model.autofocusField === 'maxRecs'"
-		     size="5">
-	      </input>
-	      <button type="submit" class="btn btn-sm btn-default">
-		<span class="glyphicon glyphicon-search"
-		      aria-hidden="true"></span>
-		Go
-	      </button>
-	    </form>
-	    <p>Hint: increase for wider search area;
-	      decrease for speed.</p>
-	  </div>
-	</div>
-      </div>
-     
-    </div>
 
-    <button class="btn btn-success"
-	    ng-click="model.searchOptions = false; model.alert = ''">
-      OK
-    </button>  
+    <table class="table" style="margin-top: 0.5rem;">
+      <tr>
+	<td>Search Taxon:
+	  <button ng-click="model.taxonQuery = 'Arachis hypogaea'; model.limitToMapExtent = false;"
+		  class="btn btn-xs btn-default">
+	    <span class="glyphicon glyphicon-question-sign"
+		  aria-hidden="true"></span>
+	    Example
+	  </button>
+	</td>
+	<td>
+	  <form class="form-inline" ng-submit="onOK()">
+	    <input id="taxon-filter"
+		   type="text"
+		   ng-attr-auto-focus="! model.autofocusField || model.autofocusField === 'taxonFilter'"
+		   size="40"
+		   maxlength="256"
+		   ng-model="model.taxonQuery">
+	    </input>
+	    <button type="submit" class="btn btn-sm btn-default">
+	      <span class="glyphicon glyphicon-search"
+		    aria-hidden="true"></span>
+	      Go
+	    </button>
+	    <button ng-click="model.taxonQuery = ''; onOK();"
+		    class="btn btn-sm btn-default">
+	      <span class="glyphicon glyphicon-remove"
+		    aria-hidden="true"></span>
+	      Clear
+	    </button>
+	  </form>
+
+	</td>
+      </tr>
+      <tr>
+	<td>Search Accession IDs:
+	  <button ng-click="model.accessionIds = 'PI 494798,PI 490297'; model.limitToMapExtent = false;"
+		  class="btn btn-xs btn-default">
+	    <span class="glyphicon glyphicon-question-sign"
+		  aria-hidden="true"></span>
+	    Example
+	  </button>
+	</td>
+	<td>
+	  <form class="form-inline"
+		ng-submit="onOK()">
+	    <input id="accession-ids-filter"
+		   type="text"
+		   ng-attr-auto-focus="! model.autofocusField || model.autofocusField === 'accessionIdsFilter'"
+		   size="40"
+		   maxlength="256"
+		   ng-model="model.accessionIds">
+	    </input>
+	    <button type="submit" class="btn btn-sm btn-default">
+	      <span class="glyphicon glyphicon-search"
+		    aria-hidden="true"></span>
+	      Go
+	    </button>
+	    <button ng-click="model.accessionIds = ''; onOK()"
+		    class="btn btn-sm btn-default">
+	      <span class="glyphicon glyphicon-remove"
+		    aria-hidden="true"></span>
+	      Clear
+	    </button>
+	  </form>
+	</td>
+      </tr>
+            
+      <tr>
+	<td>Search Country:</td>
+	<td>
+	  <form class="form-inline"
+		ng-submit="onOK()">
+	    <label>
+	      Limit to accessions in:
+	    </label>
+	    <select class="form-control"
+		    ng-model="model.country">
+	      <option value="">Country</option>
+	      
+	      <option ng-repeat="country in model.countries"
+		      value="{{country}}">
+		{{country}}
+	      </option>
+	    </select>
+	    <button type="submit" class="btn btn-sm btn-default">
+	      <span class="glyphicon glyphicon-search"
+		    aria-hidden="true"></span>
+	      Go
+	    </button>
+	  </form>
+	</td>
+      </tr>
+      <tr>
+	<td>Limit Search Results #: </td>
+	<td>
+	  <form class="form-inline"
+		ng-submit="onOK()">
+	    <label>
+	      Limit # to:
+	    </label>
+	    <input type="text"
+		   ng-model="model.maxRecs"
+		   ng-attr-auto-focus="! model.autofocusField || model.autofocusField === 'maxRecs'"
+		   size="5">
+	    </input>
+	    <button type="submit" class="btn btn-sm btn-default">
+	      <span class="glyphicon glyphicon-search"
+		    aria-hidden="true"></span>
+	      Go
+	    </button>
+	    Hint: increase for wider search area; decrease for speed.
+	  </form>
+	</td>
+      </tr>
+      <tr>
+	<td>Search Extent:</td>
+	<td>
+	  <div class="checkbox">
+	    <label>
+	      <input type="checkbox"
+		     ng-model="model.limitToMapExtent"
+		     ng-change="onOK()">
+	      </input>
+	      Limit to current map extent
+	    </label>
+	  </div>
+	</td>
+      </tr>
+      <tr>
+	<td colspan="2">
+	  <button class="btn btn-success" ng-click="onOK()">
+	    OK
+	  </button>	  
+	</td>
+      </tr>
+    </table>
   </div>
-  
 </div>
 

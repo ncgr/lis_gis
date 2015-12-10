@@ -7,10 +7,6 @@ app.controller('mapController',
 function($scope, $state, $timeout, $location, geoJsonService) {
   
   var DEFAULT_BASEMAP = 'ESRI - NatGeo (default, reference map)';
-
-  $scope.$on('$routeUpdate', function() {
-    console.log('$routeUpdate');
-  });
   
   $scope.model = {
     geoJson : geoJsonService,
@@ -88,17 +84,26 @@ function($scope, $state, $timeout, $location, geoJsonService) {
     $scope.model.geoJsonLayer.addTo($scope.model.map);
     
     geoJsonService.subscribe($scope, 'updated', function() {
+      
       // update map and scope.model with any changes in bounds in the
       // bounds, or the center of the geoJsonService
       if(! $scope.model.map.getBounds().equals(geoJsonService.bounds)) {
 	$scope.model.map.fitBounds(geoJsonService.bounds);
+	if($scope.model.map.getZoom() > 10) {
+	  // in case of single geocoded accession, fudge the zoom to something
+	  // reasonable
+	  $scope.model.map.setZoom(10);
+	}
       }
+      
+      // update model so we can display lat/long of map center.
       var mapCenter = $scope.model.map.getCenter();
       $scope.model.center = {
 	lat: mapCenter.lat.toFixed(2),
 	lng: mapCenter.lng.toFixed(2),
       };
-      
+
+      // update url with lat/lng and zoom parameters.
       $location.search('lat', $scope.model.center.lat);
       $location.search('lng', $scope.model.center.lng);
       $location.search('zoom', $scope.model.map.getZoom());
@@ -106,6 +111,7 @@ function($scope, $state, $timeout, $location, geoJsonService) {
       // remove previous map markers, and then update with the new geojson
       $scope.model.geoJsonLayer.clearLayers();
       $scope.model.geoJsonLayer.addData($scope.model.geoJsonService.data);
+      
       $timeout(addMaxResultsSymbology, 0);
       $timeout(fixMarkerZOrder, 0);
     });
@@ -132,8 +138,7 @@ function($scope, $state, $timeout, $location, geoJsonService) {
       },0);
     });
     
-    geoJsonService.setBounds($scope.model.map.getBounds(), false);
-    geoJsonService.search();
+    geoJsonService.setBounds($scope.model.map.getBounds(), true);
   };
   
   $scope.onSelectBaseMap = function(name) {

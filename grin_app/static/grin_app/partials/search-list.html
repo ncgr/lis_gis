@@ -55,8 +55,8 @@
 	ng-class="{'hilite-row' : model.hiliteAccNumb == rec.properties.accenumb}">
       <td class="nowrap">
 	<button class="btn btn-xs btn-default accdetail-button"
-		ng-click="onAccessionDetail(rec.properties.accenumb)">
-	  {{rec.properties.accenumb}}
+		ng-click="onAccessionDetail(rec.properties.accenumb)"
+		ng-bind-html="rec.properties.accenumb | highlight: model.searchHilite">
 	</button>
       </td>
       <td class="nowrap">

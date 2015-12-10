@@ -24,14 +24,18 @@ function($scope,
   $scope.init = function() {
     
     geoJsonService.subscribe($scope, 'updated', function() {
-      var query = $location.search().taxonQuery;
+      $scope.model.searchHilite = null;
+      var query = $location.search().taxonQuery ||
+	          $location.search().accessionIds;
       if(! query) {
 	return;
       }
       // logical operators may (usually) work as ng string
       // highlighting, but the whitespace needs to be cleaned up a bit
+      query = query.replace(/,/g,'|');
       query = query.replace(/\s+\|\s+/,'|');
       query = query.replace(/\s+\&\s+/,'&');
+      console.log(query);
       $scope.model.searchHilite = query.trim();
     });
     
@@ -70,17 +74,17 @@ function($scope,
     });
     modalInstance.result.then(function (action) {
       // modal closed callback
-      switch(action) {
+      switch(action.choice) {
       case 'ok':
 	break;
       case 'go-internal-map':
-	$scope.onGoInternalMap(accDetail);
+	$scope.onGoInternalMap(action.accDetail);
 	break;
       case 'go-external-lis-taxon':
-	onGoExternalLISTaxon(accDetail);
+	onGoExternalLISTaxon(action.accDetail);
 	break;
       case 'go-external-lis-grin':
-	onGoExternalLISGRIN(accDetail);
+	onGoExternalLISGRIN(action.accDetail);
 	break;
       }
     }, function () {
@@ -205,24 +209,32 @@ function ($scope, $uibModalInstance, $http, accId) {
   
   $scope.onOK = function () {
     // user hit ok button
-    $uibModalInstance.close('ok');
+    $uibModalInstance.close({ choice: 'ok'});
   };
   
   $scope.onGoMap = function () {
     // user hit view on map button
-    $uibModalInstance.close('go-internal-map');
+    $uibModalInstance.close({
+      choice :'go-internal-map',
+      accDetail : $scope.model.acc,
+    });
   };
   
   $scope.onGoLISTaxon = function () {
     // user View taxon at LIS button
-    $uibModalInstance.close('go-external-lis-taxon');  
+    $uibModalInstance.close({
+      choice : 'go-external-lis-taxon',
+      accDetail : $scope.model.acc,
+    });
   };
   
   $scope.onGoLISGRIN = function () {
     // user hit search USDA GRIN button
-    $uibModalInstance.close('go-external-lis-grin');
+    $uibModalInstance.close({
+      choice : 'go-external-lis-grin',
+      accDetail : $scope.model.acc,
+    });
   };
-
   $scope.init();
   
 });

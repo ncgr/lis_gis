@@ -19,6 +19,7 @@ function($scope, $state, $http, $location, geoJsonService) {
     maxRecs : searchParams.maxRecs,
     country : searchParams.country,
     taxonQuery : searchParams.taxonQuery,
+    accessionIds : searchParams.accessionIds,
   };
   
   $scope.init = function() {
@@ -29,6 +30,30 @@ function($scope, $state, $http, $location, geoJsonService) {
       // error callback
       console.log(resp);
     });
+  };
+
+  $scope.onOK = function() {
+    // user hit OK in the search parameters panel
+    // force all of our model into geoJson and trigger search.  this
+    // may be redundant but catches some edge cases where user input
+    // events are not caught and they close out with OK button.
+    $scope.model.autofocusField = null;
+    $scope.model.alert = null;
+    $scope.model.searchOptions = false;
+    geoJsonService.setMaxRecs($scope.model.maxRecs, false);
+    geoJsonService.setLimitToMapExtent($scope.model.limitToMapExtent, false);
+    geoJsonService.setTaxonQuery($scope.model.taxonQuery, false);
+    geoJsonService.setCountry($scope.model.country, false);
+    geoJsonService.setAccessionIds($scope.model.accessionIds, false);
+    geoJsonService.search();
+  };
+
+  $scope.onAccessionIds = function(s) {
+    $scope.model.limitToMapExtent = false;
+    geoJsonService.setLimitToMapExtent(false, false);
+    geoJsonService.setAccessionIds(s, true);
+    $scope.model.alert = null;
+    $scope.model.searchOptions = false;
   };
   
   $scope.onSetMaxRecs = function(max) {

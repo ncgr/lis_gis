@@ -12,6 +12,7 @@ from django.core.context_processors import csrf
 from django.core.serializers.json import DjangoJSONEncoder
 
 SRID = 4326  # this needs to match the SRID on the location field in psql.
+DEFAULT_LIMIT = 200
 TWO_PLACES = Decimal('0.01')
 ACCESSION_TAB = 'lis_germplasm.grin_accession'
 SELECT_COLS = ('gid', 'taxon', 'latdec', 'longdec', 'accenumb', 'elevation',
@@ -42,17 +43,21 @@ def _include_geo_bounds(p):
     return True
 
 WHERE_FRAGS = {
-    'q' : {
+    'fts' : {
         'include' : lambda p: '|' in p.get('q', '') or '&' in p.get('q', ''),
-        'sql' :  "taxon_fts @@ to_tsquery('english', %(q)s)",
+        'sql' : "taxon_fts @@ to_tsquery('english', %(q)s)",
     },
-    'q2' : {
-        'include' : lambda p: p.get('q', None) and not WHERE_FRAGS['q']['include'](p),
-        'sql' :  "taxon_fts @@ plainto_tsquery('english', %(q)s)",
+    'fts_simple' : {
+        'include' : lambda p: p.get('q', None) and not WHERE_FRAGS['fts']['include'](p),
+        'sql' : "taxon_fts @@ plainto_tsquery('english', %(q)s)",
     },
     'country' : {
         'include' : lambda p: p.get('country', None),
-        'sql' :  'origcty = %(country)s',
+        'sql' : 'origcty = %(country)s',
+    },
+    'accession_ids' : {
+        'include' : lambda p: p.get('accession_ids', None),
+        'sql' : 'accenumb = ANY( %(accession_ids)s )',
     },
     'limit_geo_bounds' : {
         'include' :  lambda p: p.get('limit_geo_bounds', None) == 'true',
@@ -113,7 +118,8 @@ def search(req):
     '''Search by map bounds and return GeoJSON results.'''
     assert req.method == 'GET', 'GET request method required'
     params = req.GET.dict()
-    assert 'limit' in params, 'missing limit param'
+    if 'limit' not in params:
+        params['limit'] = DEFAULT_LIMIT
     where_clauses = []
     for key, val in WHERE_FRAGS.items():
         if val['include'](params):
@@ -139,13 +145,18 @@ def search(req):
     sql_params = {
         'q' : params.get('q', None),
         'country' : params.get('country', None),
-        'minx' : float(params['sw_lng']),
-        'miny' : float(params['sw_lat']),
-        'maxx' : float(params['ne_lng']),
-        'maxy' : float(params['ne_lat']),
+        'minx' : float(params.get('sw_lng', 0)),
+        'miny' : float(params.get('sw_lat', 0)),
+        'maxx' : float(params.get('ne_lng', 0)),
+        'maxy' : float(params.get('ne_lat', 0)),
         'limit': int(params['limit']),
         'srid' : SRID,
     }
+    if(params.get('accession_ids', None)):
+        if ',' in params['accession_ids']:
+            sql_params['accession_ids'] = params['accession_ids'].split(',')
+        else:
+            sql_params['accession_ids'] = [params['accession_ids']];
     logger.info(cursor.mogrify(sql, sql_params))
     cursor.execute(sql, sql_params)
     rows = _dictfetchall(cursor)

@@ -2,6 +2,7 @@ app.service('geoJsonService',
 function($http, $rootScope, $location, $timeout) {
   
   var DEFAULT_CENTER = { 'lat' : 21.15, 'lng' : 80.42 };
+  var ALT_CENTER = { 'lat' : 0, 'lng' : -179 };
   var MAX_RECS = 200;
   var COLORS_URL = STATIC_URL + '/grin_app/js/colors.json';
   var DEFAULT_ZOOM = 6;
@@ -12,7 +13,7 @@ function($http, $rootScope, $location, $timeout) {
   s.updating = false;
   s.data = []; // an array of geoJson features
   s.map = null; // the leaflet map, Note: this belongs to
-		// mapController! don't update within in this service.
+                // mapController! don't update within in this service.
   s.bounds = L.latLngBounds(L.latLng(0,0), L.latLng(0,0));
   s.colors = {};
   
@@ -26,18 +27,68 @@ function($http, $rootScope, $location, $timeout) {
       s.colors = resp.data;
       s.colorCache = {};
       _.each(s.colors, function(v,k) {
-	if(v.color) {
-	  var key = v.genus + ' '+ v.species;
-	  s.colorCache[key] = v.color;
-	}
+        if(v.color) {
+          var key = v.genus + ' '+ v.species;
+          s.colorCache[key] = v.color;
+        }
       });
       s.notify('updated');
     }, function(resp) {
       // error function
     });
   };
- 
-  s.setBounds = function(bounds, search) {
+  
+  s.getBoundsOfGeoJSONPoints = function() {
+    /* Calculate a center and radius which all the geojson points fall
+     * within */
+    var boundsArr = [];
+    _.each(s.data, function(d) {
+      if(d.geometry.coordinates)  {
+        // convert from geojson simple coords to leafletjs simple coords
+        boundsArr.push([d.geometry.coordinates[1],
+                        d.geometry.coordinates[0]]);
+      }
+    });
+    var bounds = new L.LatLngBounds(boundsArr);
+    return bounds;
+  };
+  
+  s.search = function() {
+    s.updating = true;
+    var params = $location.search();
+    
+    $http({
+      url : 'search',
+      method : 'GET',
+      params : {
+        q : params.taxonQuery,
+        ne_lat : s.bounds._northEast.lat,
+        ne_lng : s.bounds._northEast.lng,
+        sw_lat : s.bounds._southWest.lat,
+        sw_lng : s.bounds._southWest.lng,
+        limit_geo_bounds : params.limitToMapExtent,
+        country : params.country,
+        accession_ids : params.accessionIds,
+        limit: params.maxRecs,
+      }
+    }).then(
+      function(resp) {
+        // success handler;
+        s.data = resp.data;
+        if(params.accessionIds) {
+          s.updateBounds();
+        }
+        s.updating = false;
+        s.notify('updated');
+      },
+      function(resp) {
+        // error handler
+        console.log('Error:');
+        console.log(resp);
+      });
+  };
+   
+  s.setBounds = function(bounds, doSearch) {
     if(s.bounds.equals(bounds) && s.data.length > 0) {
       // early out if the bounds is already set to same, and we have results
       return;
@@ -47,75 +98,66 @@ function($http, $rootScope, $location, $timeout) {
     $location.search('ne_lng', s.bounds._northEast.lng);
     $location.search('sw_lat', s.bounds._southWest.lat);
     $location.search('sw_lng', s.bounds._southWest.lng);
-    
-    if(search) {
-      s.search();      
-    }
+    if(doSearch) { s.search(); }
   };
   
-  s.setCountry = function(cty) {
+  s.setCountry = function(cty, search) {
     $location.search('country', cty);
-    s.search();
+    if(search) { s.search(); }
   };
   
-  s.setMaxRecs = function(max) {
+  s.setMaxRecs = function(max, search) {
     $location.search('maxRecs', max);
-    s.search();    
+    if(search) { s.search(); }
   };
   
-  s.setLimitToMapExtent = function(bool) {
+  s.setLimitToMapExtent = function(bool, search) {
     $location.search('limitToMapExtent', bool);
-    s.search();
+    if(search) { s.search(); }
   };
 
-  s.setTaxonQuery = function(q) {
+  s.setTaxonQuery = function(q, search) {
     $location.search('taxonQuery', q);
-    s.search();    
+    if(search) { s.search(); }
   };
 
-  s.getBoundsOfGeoJSONPoints = function() {
-    /* Calculate a center and radius which all the geojson points fall
-     * within */
-    var boundsArr = [];
-    _.each(s.data, function(d) {
-      if(d.geometry.coordinates)  {
-	// convert from geojson simple coords to leafletjs simple coords
-	boundsArr.push([d.geometry.coordinates[1],
-			d.geometry.coordinates[0]]);
+  s.setAccessionIds = function(accessionIds, search) {
+    $location.search('accessionIds', accessionIds);
+    s.initialBoundsUpdated = false;
+    if(search) { s.search(); }
+  };
+  
+  s.initialBoundsUpdated = false;
+  
+  s.updateBounds = function() {
+    /* in case we are searching by accessionIds, need to derive new
+     * bounds before sending updated event to listeners
+     * (e.g. mapController) Use Leafletjs to perform all the bounds
+     * calculations and extent fitting.
+     */
+    if(s.initialBoundsUpdated || s.data.length == 0) {
+      return;
+    }
+    var anyGeolocatedAccession = _.find(s.data, function(geoJson) {
+      if(_.has(geoJson, 'geometry.coordinates.length')) {
+        return true;
       }
     });
-    var bounds = new L.LatLngBounds(boundsArr);
-    return bounds;
-  };
-  
-  s.search = function() {
-    var params = $location.search();
-    s.updating = true;
-    $http({
-      url : 'search',
-      method : 'GET',
-      params : {
-	q : params.taxonQuery,
-  	ne_lat : s.bounds._northEast.lat,
-  	ne_lng : s.bounds._northEast.lng,
-  	sw_lat : s.bounds._southWest.lat,
-  	sw_lng : s.bounds._southWest.lng,
-	limit_geo_bounds : params.limitToMapExtent,
-	country : params.country,
-	limit: params.maxRecs,
+    if( ! anyGeolocatedAccession) {
+      return;
+    }
+    var point = L.latLng(anyGeolocatedAccession.geometry.coordinates[1],
+                         anyGeolocatedAccession.geometry.coordinates[0]);
+    var bounds = L.latLngBounds(point, point);
+    _.each(s.data, function(geoJson) {
+      if(_.has(geoJson, 'geometry.coordinates.length')) {
+        var point = L.latLng(geoJson.geometry.coordinates[1],
+                             geoJson.geometry.coordinates[0]);  
+        bounds.extend(point);
       }
-    }).then(
-      function(resp) {
-  	// success handler;
-  	s.data = resp.data;
-	s.updating = false;
-	s.notify('updated');
-      },
-      function(resp) {
-  	// error handler
-  	console.log('Error:');
-  	console.log(resp);
-      });
+    });
+    s.bounds = bounds;
+    s.initialBoundsUpdated = true;
   };
   
   s.colorFeature = function(feature) {
@@ -151,7 +193,8 @@ function($http, $rootScope, $location, $timeout) {
   function setDefaults() {
     // set default search values on $location service
     var searchParams = $location.search();
-    if(! _.has(searchParams, 'limitToMapExtent')) {
+    if(! _.has(searchParams, 'limitToMapExtent') &&
+       ! _.has(searchParams, 'accessionIds')) {
       $location.search('limitToMapExtent', true);
     }
     if(! _.has(searchParams, 'zoom')) {
@@ -167,10 +210,23 @@ function($http, $rootScope, $location, $timeout) {
       $location.search('country', '');
     }
     if(! _.has(searchParams, 'lat')) {
-      $location.search('lat', DEFAULT_CENTER.lat);
+      if(_.has(searchParams, 'accessionIds')) {
+        $location.search('lat', ALT_CENTER.lat);        
+      }
+      else {
+        $location.search('lat', DEFAULT_CENTER.lat);
+      }
     }
     if(! _.has(searchParams, 'lng')) {
-      $location.search('lng', DEFAULT_CENTER.lng);
+      if(_.has(searchParams, 'accessionIds')) {
+        $location.search('lng', ALT_CENTER.lng);        
+      }
+      else {
+        $location.search('lng', DEFAULT_CENTER.lng);
+      }
+    }
+    if(! _.has(searchParams, 'accessionIds')) {
+      $location.search('accessionIds', '');
     }
   }
   
