@@ -6,8 +6,9 @@ function($http, $rootScope, $location, $timeout) {
   var COLORS_URL = STATIC_URL + '/grin_app/js/colors.json';
   var DEFAULT_ZOOM = 6;
   
-  var s = {}; // service/singleton we will return
-
+  var s = {}; // service/singleton we will construct & return
+  
+  s.colorCache = null;
   s.updating = false;
   s.data = []; // an array of geoJson features
   s.map = null; // the leaflet map, Note: this belongs to
@@ -19,31 +20,7 @@ function($http, $rootScope, $location, $timeout) {
   s.events = ['updated', 'willUpdate'];
   
   s.init = function() {
-    // set default search values
-    var searchParams = $location.search();
-    if(! _.has(searchParams, 'limitToMapExtent')) {
-      console.log('setting limitToMapExtent to true');
-      $location.search('limitToMapExtent', true);
-    }
-    if(! _.has(searchParams, 'zoom')) {
-      $location.search('zoom', DEFAULT_ZOOM);
-    }
-    if(! _.has(searchParams, 'maxRecs')) {
-      $location.search('maxRecs', MAX_RECS);
-    }
-    if(! _.has(searchParams, 'taxonQuery')) {
-      $location.search('taxonQuery', '');
-    }
-    if(! _.has(searchParams, 'country')) {
-      $location.search('country', '');
-    }
-    if(! _.has(searchParams, 'lat')) {
-      $location.search('lat', DEFAULT_CENTER.lat);
-    }
-    if(! _.has(searchParams, 'lng')) {
-      $location.search('lng', DEFAULT_CENTER.lng);
-    }
-    
+    setDefaults();
     $http.get(COLORS_URL).then(function(resp) {
       // success function
       s.colors = resp.data;
@@ -59,7 +36,7 @@ function($http, $rootScope, $location, $timeout) {
       // error function
     });
   };
-  
+ 
   s.setBounds = function(bounds, search) {
     if(s.bounds.equals(bounds) && s.data.length > 0) {
       // early out if the bounds is already set to same, and we have results
@@ -140,9 +117,6 @@ function($http, $rootScope, $location, $timeout) {
   	console.log(resp);
       });
   };
-
-  
-  s.colorCache = null;
   
   s.colorFeature = function(feature) {
     /* try to match the genus and species against the LIS colors json */
@@ -174,6 +148,32 @@ function($http, $rootScope, $location, $timeout) {
     $rootScope.$emit('geoJsonService_'+eventName);
   };
 
+  function setDefaults() {
+    // set default search values on $location service
+    var searchParams = $location.search();
+    if(! _.has(searchParams, 'limitToMapExtent')) {
+      $location.search('limitToMapExtent', true);
+    }
+    if(! _.has(searchParams, 'zoom')) {
+      $location.search('zoom', DEFAULT_ZOOM);
+    }
+    if(! _.has(searchParams, 'maxRecs')) {
+      $location.search('maxRecs', MAX_RECS);
+    }
+    if(! _.has(searchParams, 'taxonQuery')) {
+      $location.search('taxonQuery', '');
+    }
+    if(! _.has(searchParams, 'country')) {
+      $location.search('country', '');
+    }
+    if(! _.has(searchParams, 'lat')) {
+      $location.search('lat', DEFAULT_CENTER.lat);
+    }
+    if(! _.has(searchParams, 'lng')) {
+      $location.search('lng', DEFAULT_CENTER.lng);
+    }
+  }
+  
   s.init();
     
   return s;

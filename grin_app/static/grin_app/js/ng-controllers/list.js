@@ -25,9 +25,15 @@ function($scope,
   $scope.init = function() {
     
     geoJsonService.subscribe($scope, 'updated', function() {
-      var query =  $location.search().taxonQuery;
-      // TODO: fix up edge cases with "\s+\|\s+" and "\s+\&\s+" queries
-      $scope.model.searchHilite = query;
+      var query = $location.search().taxonQuery;
+      if(! query) {
+	return;
+      }
+      // logical operators may (usually) work as ng string
+      // highlighting, but the whitespace needs to be cleaned up a bit
+      query = query.replace(/\s+\|\s+/,'|');
+      query = query.replace(/\s+\&\s+/,'&');
+      $scope.model.searchHilite = query.trim();
     });
     
     geoJsonService.map.on('popupopen', function(e) {

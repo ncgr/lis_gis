@@ -116,8 +116,10 @@ app.tour = function () {
       {
         title: 'Map Frame',
         content: 'You can drag the map to pan the extent, and use your \
-         mouse-wheel to zoom in and out, or use the [+/-] buttons. (The same \
-         as google maps and many other web maps). Try it!',
+         mouse-wheel to zoom in and out, or use the \
+         <span class="glyphicon glyphicon-plus"></span> / \
+         <span class="glyphicon glyphicon-minus"></span> zoom buttons \
+         (The same as google maps and many other web maps). Try it!',
         target: 'map',
         placement: 'bottom',
       },
@@ -144,19 +146,30 @@ app.tour = function () {
       },
       {
         title: 'Locator Buttons',
-        content: 'Click on the  <span class="glyphicon \
-         glyphicon-map-marker"="true"></span> location icon to select, center \
-         and reveal this accession on the map.  Try it!',
+        content: 'Click on the \
+         <span class="glyphicon glyphicon-map-marker"></span> \
+         location icon to select, center and reveal this accession on the map.\
+          Try it!',
         target: 'tour-coords-btn',
         placement: 'top',
       },
       {
         title: 'Set Search Parameters',
-        content: 'Click on the Search button to reveal search settings. Then \
-         click OK to close the search parameters panel. Try it!',
+        content: 'Click on the Search button to reveal search settings. \
+         The Taxon Search may be plain text or use logical \
+         AND (&amp;) and OR (|) operators. For example <br/> \
+         <code>Arachis hypogaea</code> or <br/>\
+         <code>sylvestris | burchellii</code> or <br/>\
+         <code>medicago &amp; brevispina</code>.\
+         You may click OK to close the search parameters panel.',
         target: 'tour-start',
         placement: 'top',
-      }, 
+	onShow: function() {
+	  setTimeout( function() {
+	    angular.element('#search-btn').trigger('click');
+	  }, 0);
+	},
+      },
       {
         title: 'Your Search Filters',
         content: 'Your current search filters are always listed here. You can \
@@ -198,7 +211,8 @@ app.tour = function () {
       },
     ],
   };
+  
   hopscotch.startTour(tour, 0);
-  Cookies.set(tourId, true);
+  Cookies.set(tourId, true, { expires: 365 });
 };
 
