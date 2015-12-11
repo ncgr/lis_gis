@@ -191,7 +191,7 @@ function($scope, $state, $timeout, $location, geoJsonService) {
     if($scope.maxResultsCircle) {
       $scope.model.map.removeLayer($scope.maxResultsCircle);
     }
-    if(geoJsonService.data.length !== geoJsonService.maxRecs) {
+    if(geoJsonService.data.length !== parseInt($location.search().maxRecs)) {
       return;
     }
     var bounds = geoJsonService.getBoundsOfGeoJSONPoints();

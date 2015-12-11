@@ -39,8 +39,6 @@ function($http, $rootScope, $location, $timeout) {
   };
   
   s.getBoundsOfGeoJSONPoints = function() {
-    /* Calculate a center and radius which all the geojson points fall
-     * within */
     var boundsArr = [];
     _.each(s.data, function(d) {
       if(d.geometry.coordinates)  {
