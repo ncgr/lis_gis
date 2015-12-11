@@ -35,7 +35,6 @@ function($scope,
       query = query.replace(/,/g,'|');
       query = query.replace(/\s+\|\s+/,'|');
       query = query.replace(/\s+\&\s+/,'&');
-      console.log(query);
       $scope.model.searchHilite = query.trim();
     });
     
