@@ -262,10 +262,7 @@
       <tr ng-repeat="rec in model.evaluation">
 	<td>
 	  <span class="badge">
-	    {{rec.method_name}}
-	    <span ng-if="rec.descriptor_name">
-	      descriptor: {{rec.descriptor_name}}
-	    </span>
+	    {{rec.descriptor_name}}
 	    <span ng-if="rec.observation_value">
 	      obs. value: {{rec.observation_value}} ;
 	    </span>
@@ -290,6 +287,9 @@
 	    <span ng-if="rec.sdev">
 	      sdev: {{rec.sdev}} ;
 	    </span>
+	  </span>
+	  <span ng-if="rec.method_name">
+	    method: {{rec.method_name}} ;
 	  </span>
 	  <span ng-if="rec.plant_name">
 	    plant name: {{rec.plant_name}} ;

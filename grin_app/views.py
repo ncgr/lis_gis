@@ -87,7 +87,7 @@ def evaluation_detail(req):
     SELECT accession_prefix,
            accession_number,
            observation_value,
-           descriptor_name
+           descriptor_name,
            method_name,
            accession_surfix,
            plant_name,

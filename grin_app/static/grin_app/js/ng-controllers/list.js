@@ -213,7 +213,7 @@ function ($scope, $uibModalInstance, $http, accId) {
     }).then(function(resp) {
       // success callback
       $scope.model.evaluation = _.sortBy(resp.data, function(rec) {
-	return rec.method_name;
+	return rec.descriptor_name;
       });
     }, function(resp) {
       // error callback
