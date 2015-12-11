@@ -119,11 +119,14 @@
     </button>
      
     <button ng-if="model.acc.properties.genus && model.acc.properties.species"
-	    ng-click="onGoLISTaxon()"	    
-	    class="btn btn-default" type="button">
+	    ng-disabled="model.hideLISSpeciesLink"
+	    ng-click="onGoLISTaxon()"
+	    class="btn btn-default"
+	    type="button">
       <span class="glyphicon glyphicon-leaf"
 	    aria-hidden="true"></span>
-      View {{model.acc.properties.genus}} {{model.acc.properties.species}} at LIS
+      View {{model.acc.properties.genus}}
+           {{model.acc.properties.species}} at LIS
     </button>
     
     <table class="table table-striped" style="margin-top: 0.5rem;">

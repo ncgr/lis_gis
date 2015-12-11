@@ -50,7 +50,7 @@ app.config(function($httpProvider, $stateProvider, $sceProvider) {
 	$rootScope.errors.push(msg);
 	console.log(msg);
       }
-      else if(response.status === 404 || response.status === 500) {
+      else if(response.status === 500) {
 	var msg = [response.status + ' '+
 		   response.statusText + ' '+
 		   response.config.url + ' ',

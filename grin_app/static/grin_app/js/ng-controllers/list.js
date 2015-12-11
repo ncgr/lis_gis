@@ -183,17 +183,12 @@ function ($scope, $uibModalInstance, $http, accId) {
 
   $scope.model = {
     accId : accId,
+    acc : null,
+    hideLISSpeciesLink : true,
   };
-  
-  $scope.init = function() {
-     /* we should verify with $http.get whether there is a taxon page at lis
-      * matching, e.g.  http://legumeinfo.org/organism/Cajanus/cajan but
-      * this fails with:
-      * Response to preflight request doesn't pass access control
-      * check: No 'Access-Control-Allow-Origin' header is present on
-      * the requested resource. Origin 'http://localhost:8001' is
-      * therefore not allowed access.
-      */
+
+  function getAccessionDetail() {
+    // lookup all detail for this accession id
     $http({
       url : 'accession_detail',
       method : 'GET',
@@ -201,9 +196,30 @@ function ($scope, $uibModalInstance, $http, accId) {
     }).then(function(resp) {
       // success callback
       $scope.model.acc = resp.data[0];
+      checkLISSpeciesPage();
     }, function(resp) {
       // error callback
     });
+  }
+
+  function checkLISSpeciesPage() {
+    /* attempt check whether there is actually a taxon page at
+     * lis matching, e.g. http://legumeinfo.org/organism/Cajanus/cajan
+     * note: this may fail from other hosts outside of production,
+     * because of 'Access-Control-Allow-Origin' header. */
+    var acc = $scope.model.acc.properties;
+    var lisURL = '/organism/' + acc.genus + '/' + acc.species;
+    $http({ url : lisURL, method : 'HEAD' }).then(function(resp) {
+      // success callback
+      $scope.model.hideLISSpeciesLink = false;
+    }, function(resp) {
+      // error callback
+      $scope.model.hideLISSpeciesLink = true;
+    });
+  }
+  
+  $scope.init = function() {
+    getAccessionDetail()
   };
   
   $scope.onOK = function () {
