@@ -20,12 +20,20 @@ function($scope, $state, $http, $location, geoJsonService) {
     country : searchParams.country,
     taxonQuery : searchParams.taxonQuery,
     accessionIds : searchParams.accessionIds,
+    traitOverlay : null,
   };
   
   $scope.init = function() {
     $http.get('countries').then(function(resp) {
       // success callback
       $scope.model.countries = resp.data;
+    }, function(resp){
+      // error callback
+      console.log(resp);
+    });
+    $http.get('evaluation_descr_names').then(function(resp) {
+      // success callback
+      $scope.model.traitDescriptors = resp.data;
     }, function(resp){
       // error callback
       console.log(resp);
@@ -45,6 +53,7 @@ function($scope, $state, $http, $location, geoJsonService) {
     geoJsonService.setTaxonQuery($scope.model.taxonQuery, false);
     geoJsonService.setCountry($scope.model.country, false);
     geoJsonService.setAccessionIds($scope.model.accessionIds, false);
+    geoJsonService.setTraitOverlay($scope.model.traitOverlay, false);
     geoJsonService.search();
   };
 
@@ -74,6 +83,13 @@ function($scope, $state, $http, $location, geoJsonService) {
     geoJsonService.setTaxonQuery(q, true);
   };
 
+   $scope.onTraitOverlay = function(q) {
+     $scope.model.autofocusField = null;
+     $scope.model.alert = null;
+     $scope.model.searchOptions = false;
+     geoJsonService.setTraitOverlay(q, true);
+  };
+  
   $scope.onSetCountry = function(cty) {
     $scope.model.alert = null;
     $scope.model.searchOptions = false;    

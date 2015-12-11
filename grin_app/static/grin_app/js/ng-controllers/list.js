@@ -212,9 +212,7 @@ function ($scope, $uibModalInstance, $http, accId) {
       params : { accenumb : $scope.accId },
     }).then(function(resp) {
       // success callback
-      $scope.model.evaluation = _.sortBy(resp.data, function(rec) {
-	return rec.descriptor_name;
-      });
+      $scope.model.evaluation = resp.data;
     }, function(resp) {
       // error callback
     });

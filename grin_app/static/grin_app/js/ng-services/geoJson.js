@@ -67,6 +67,7 @@ function($http, $rootScope, $location, $timeout) {
         limit_geo_bounds : params.limitToMapExtent,
         country : params.country,
         accession_ids : params.accessionIds,
+	trait_overlay : params.traitOverlay,
         limit: params.maxRecs,
       }
     }).then(
@@ -122,6 +123,11 @@ function($http, $rootScope, $location, $timeout) {
   s.setAccessionIds = function(accessionIds, search) {
     $location.search('accessionIds', accessionIds);
     s.initialBoundsUpdated = false;
+    if(search) { s.search(); }
+  };
+
+  s.setTraitOverlay = function(trait, search) {
+    $location.search('traitOverlay', trait);
     if(search) { s.search(); }
   };
   

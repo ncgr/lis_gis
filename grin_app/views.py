@@ -63,9 +63,11 @@ WHERE_FRAGS = {
     },
     'limit_geo_bounds' : {
         'include' :  lambda p: p.get('limit_geo_bounds', None) == 'true',
-        'sql' : '''ST_Contains(
-           ST_MakeEnvelope(%(minx)s, %(miny)s, %(maxx)s, %(maxy)s, %(srid)s),
-           geographic_coord::geometry
+        'sql' : '''
+           latdec <> 0 AND longdec <> 0 AND
+           ST_Contains(
+            ST_MakeEnvelope(%(minx)s, %(miny)s, %(maxx)s, %(maxy)s, %(srid)s),
+            geographic_coord::geometry
            )''',
     },
 }
@@ -74,6 +76,22 @@ def index(req):
     '''Render the index template, which will boot up angular-js.
     '''
     return render(req, 'grin_app/index.html')
+
+
+def evaluation_descr_names(req):
+    '''Return JSON for all distinct trait descriptor names'''
+    assert req.method == 'GET', 'GET request method required'
+    sql = '''
+    SELECT DISTINCT descriptor_name
+    FROM lis_germplasm.legumes_grin_evaluation_data
+    ORDER BY descriptor_name
+    '''
+    cursor = connection.cursor()
+    cursor.execute(sql)
+    names = [row[0] for row in cursor.fetchall()]
+    result = json.dumps(names)
+    response = HttpResponse(result, content_type='application/json')
+    return response
 
 
 def evaluation_detail(req):
@@ -107,6 +125,7 @@ def evaluation_detail(req):
     FROM lis_germplasm.legumes_grin_evaluation_data
     WHERE accession_prefix = %(prefix)s AND
           accession_number = %(acc_num)s
+    ORDER BY descriptor_name
     '''
     cursor = connection.cursor()
     sql_params = {'prefix' : prefix, 'acc_num' : acc_num}

@@ -25,6 +25,14 @@
       <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
     </button>
   </span>
+  
+  <span ng-if="model.$location.search().traitOverlay" class="badge">
+    {{ model.$location.search().traitOverlay }}
+    <button class="btn btn-xs btn-default"
+	    ng-click="model.traitOverlay = ''; onOK();">
+      <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+    </button>
+  </span>
 
   <span ng-if="model.$location.search().limitToMapExtent === true"
 	class="badge">
@@ -68,7 +76,11 @@
 
     <table class="table" style="margin-top: 0.5rem;">
       <tr>
-	<td>Search Taxon:
+	<td>
+	  <span ng-if="model.taxonQuery"
+		class="glyphicon glyphicon-asterisk" aria-hidden="true"></span>
+	  
+	  Search Taxon:
 	  <button ng-click="model.taxonQuery = 'Arachis hypogaea'; model.limitToMapExtent = false;"
 		  class="btn btn-xs btn-default">
 	    <span class="glyphicon glyphicon-question-sign"
@@ -97,11 +109,47 @@
 	      Clear
 	    </button>
 	  </form>
-
 	</td>
       </tr>
+      
       <tr>
-	<td>Search Accession IDs:
+	<td>
+	<span ng-if="model.traitOverlay"
+	      class="glyphicon glyphicon-asterisk" aria-hidden="true"></span>
+	Overlay Characterization and Evaluation Data:
+	
+	  <button ng-click="onTraitOverlayExample()"
+		  class="btn btn-xs btn-default">
+	    <span class="glyphicon glyphicon-question-sign"
+		  aria-hidden="true"></span>
+	    Example
+	  </button>
+	</td>
+	<td>
+	  <form class="form-inline" ng-submit="onOK()">
+	    <select class="form-control"
+		    ng-model="model.traitOverlay">
+	      <option value="">Descriptor Name</option>
+	      <option ng-repeat="name in model.traitDescriptors"
+		      value="{{name}}">
+		{{name}}
+	      </option>
+	    </select>
+	    <button type="submit" class="btn btn-sm btn-default">
+	      <span class="glyphicon glyphicon-search"
+		    aria-hidden="true"></span>
+	      Go
+	    </button>
+	  </form>
+	</td>
+      </tr>
+      
+      <tr>
+	<td>
+	  <span ng-if="model.accessionIds"
+	      class="glyphicon glyphicon-asterisk" aria-hidden="true"></span>
+
+	  Search Accession IDs:
 	  <button ng-click="model.accessionIds = 'PI 494798,PI 490297'; model.limitToMapExtent = false;"
 		  class="btn btn-xs btn-default">
 	    <span class="glyphicon glyphicon-question-sign"
@@ -135,7 +183,10 @@
       </tr>
             
       <tr>
-	<td>Search Country:</td>
+	<td>
+	  <span ng-if="model.country"
+		class="glyphicon glyphicon-asterisk" aria-hidden="true"></span>
+	  Search Country:</td>
 	<td>
 	  <form class="form-inline"
 		ng-submit="onOK()">
@@ -160,7 +211,11 @@
 	</td>
       </tr>
       <tr>
-	<td>Limit Search Results #: </td>
+	<td>
+	  <span ng-if="model.maxRecs"
+		class="glyphicon glyphicon-asterisk" aria-hidden="true"></span>
+	  Limit Search Results #:
+	</td>
 	<td>
 	  <form class="form-inline"
 		ng-submit="onOK()">
@@ -182,7 +237,10 @@
 	</td>
       </tr>
       <tr>
-	<td>Search Extent:</td>
+	<td>
+	  <span ng-if="model.limitToMapExtent"
+		class="glyphicon glyphicon-asterisk" aria-hidden="true"></span>
+	  Search Extent:</td>
 	<td>
 	  <div class="checkbox">
 	    <label>

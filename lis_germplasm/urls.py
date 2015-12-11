@@ -17,10 +17,12 @@ from django.conf.urls import include, url
 from django.contrib import admin
 
 urlpatterns = [
+
     url(r'^$', 'grin_app.views.index'),
     url(r'^search$', 'grin_app.views.search'),
     url(r'^countries$', 'grin_app.views.countries'),
     url(r'^accession_detail$', 'grin_app.views.accession_detail'),
+    url(r'^evaluation_descr_names$', 'grin_app.views.evaluation_descr_names'),
     url(r'^evaluation_detail$', 'grin_app.views.evaluation_detail'),
 
     # disabling admin site until it's actually required/used --agr
