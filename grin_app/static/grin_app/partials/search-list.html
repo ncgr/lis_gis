@@ -263,6 +263,9 @@
 	<td>
 	  <span class="badge">
 	    {{rec.method_name}}
+	    <span ng-if="rec.descriptor_name">
+	      descriptor: {{rec.descriptor_name}}
+	    </span>
 	    <span ng-if="rec.observation_value">
 	      obs. value: {{rec.observation_value}} ;
 	    </span>
