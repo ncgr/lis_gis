@@ -128,8 +128,9 @@
       View {{model.acc.properties.genus}}
            {{model.acc.properties.species}} at LIS
     </button>
-    
-    <table class="table table-striped" style="margin-top: 0.5rem;">
+
+       <table class="table table-striped" style="margin-top: 0.5rem;">
+	 <caption>Accession Details</caption>
       <tr ng-if="model.acc.properties.taxon">
 	<td>taxon</td>
 	<td ng-bind-html="model.acc.properties.taxon"></td>
@@ -242,5 +243,72 @@
 	<td>{{model.acc.properties.accename}}</td>
       </tr>
     </table>
+
+    <a name="evaluation-detail"></a>
+    
+    <table class="table table-striped"
+	   ng-if="model.evaluation"
+	   style="margin-top: 0.5rem;">
+      <caption>Trait/Evaluation Data for
+	<span>
+	    {{model.evaluation[0].accession_prefix}}
+	    {{model.evaluation[0].accession_number}}
+	    {{model.evaluation[0].accession_surfix}}
+	  </span> ;
+	  <span>
+	    {{model.evaluation[0].taxon}}
+	  </span>
+      </caption>
+      <tr ng-repeat="rec in model.evaluation">
+	<td>
+	  <span class="badge">
+	    {{rec.method_name}}
+	    <span ng-if="rec.observation_value">
+	      obs. value: {{rec.observation_value}} ;
+	    </span>
+	    <span ng-if="rec.original_value">
+	      original_value: {{rec.original_value}} ;
+	    </span>
+            <span ng-if="rec.low">
+	      low: {{rec.low}} ;
+	    </span>
+	    <span ng-if="rec.frequency">
+	      freq: {{rec.frequency}} ;
+	    </span>
+	    <span ng-if="rec.hign">
+	      hign: {{rec.hign}} ;
+	    </span>
+	    <span ng-if="rec.mean">
+	      mean: {{rec.mean}} ;
+	    </span>
+	    <span ng-if="rec.ssize">
+	      ssize: {{rec.ssize}} ;
+	    </span>
+	    <span ng-if="rec.sdev">
+	      sdev: {{rec.sdev}} ;
+	    </span>
+	  </span>
+	  <span ng-if="rec.plant_name">
+	    plant name: {{rec.plant_name}} ;
+	  </span>
+	  <span ng-if="rec.origin">
+	    origin: {{rec.origin}} ;
+	  </span>
+	  <span ng-if="rec.inventory_number">
+	    inventory:
+	    {{rec.inventory_prefix}}
+	    {{rec.inventory_number}}
+	    {{rec.inventory_suffix}}
+	  </span>
+	  <span ng-if="rec.accession_comment">
+	    comment: {{rec.accession_comment}}
+	  </span>
+	</td>
+      </tr>
+    </table>
+     <button class="btn btn-primary" type="button" ng-click="onOK()">
+      <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+      OK
+    </button>
   </div>
 </script>

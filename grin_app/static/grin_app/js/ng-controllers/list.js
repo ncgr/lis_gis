@@ -184,11 +184,12 @@ function ($scope, $uibModalInstance, $http, accId) {
   $scope.model = {
     accId : accId,
     acc : null,
+    evaluation : null,
     hideLISSpeciesLink : true,
   };
 
   function getAccessionDetail() {
-    // lookup all detail for this accession id
+    // fetch all detail for this accession id
     $http({
       url : 'accession_detail',
       method : 'GET',
@@ -196,12 +197,29 @@ function ($scope, $uibModalInstance, $http, accId) {
     }).then(function(resp) {
       // success callback
       $scope.model.acc = resp.data[0];
+      getEvaluationDetail();
       checkLISSpeciesPage();
     }, function(resp) {
       // error callback
     });
   }
 
+  function getEvaluationDetail() {
+     // fetch all trait/evaluation details for this accession id
+    $http({
+      url : 'evaluation_detail',
+      method : 'GET',
+      params : { accenumb : $scope.accId },
+    }).then(function(resp) {
+      // success callback
+      $scope.model.evaluation = _.sortBy(resp.data, function(rec) {
+	return rec.method_name;
+      });
+    }, function(resp) {
+      // error callback
+    });
+  }
+  
   function checkLISSpeciesPage() {
     /* attempt check whether there is actually a taxon page at
      * lis matching, e.g. http://legumeinfo.org/organism/Cajanus/cajan

@@ -15,8 +15,9 @@ SRID = 4326  # this needs to match the SRID on the location field in psql.
 DEFAULT_LIMIT = 200
 TWO_PLACES = Decimal('0.01')
 ACCESSION_TAB = 'lis_germplasm.grin_accession'
-SELECT_COLS = ('gid', 'taxon', 'latdec', 'longdec', 'accenumb', 'elevation',
+ACC_SELECT_COLS = ('gid', 'taxon', 'latdec', 'longdec', 'accenumb', 'elevation',
                'cropname', 'collsite', 'acqdate', 'origcty')
+
 
 ORDER_BY_FRAG = '''
  ORDER BY ST_Distance(
@@ -28,6 +29,7 @@ ORDER_BY_FRAG = '''
 '''
 LIMIT_FRAG = 'LIMIT %(limit)s'
 COUNTRY_REGEX = re.compile(r'[a-z]{3,3}', re.I)
+ACC_NUMB_REGEX = re.compile(r'\s+')
 
 logger = logging.getLogger(__name__)
 
@@ -74,35 +76,69 @@ def index(req):
     return render(req, 'grin_app/index.html')
 
 
-def accession_detail(req):
-    '''Return all columns for this accesion record.'''
+def evaluation_detail(req):
+    '''Return JSON for all evalation/trait records matching this accession id
+    '''
     assert req.method == 'GET', 'GET request method required'
     params = req.GET.dict()
     assert 'accenumb' in params, 'missing accenumb param'
-    # fix me: name the columns dont select *
+    (prefix, acc_num) = re.split(ACC_NUMB_REGEX, params['accenumb'])
+    sql = '''
+    SELECT accession_prefix,
+           accession_number,
+           observation_value,
+           descriptor_name
+           method_name,
+           accession_surfix,
+           plant_name,
+           taxon,
+           origin,
+           original_value,
+           frequency,
+           low,
+           hign,
+           mean,
+           sdev,
+           ssize,
+           inventory_prefix,
+           inventory_number,
+           inventory_suffix,
+           accession_comment
+    FROM lis_germplasm.legumes_grin_evaluation_data
+    WHERE accession_prefix = %(prefix)s AND
+          accession_number = %(acc_num)s
+    '''
+    cursor = connection.cursor()
+    sql_params = {'prefix' : prefix, 'acc_num' : acc_num}
+    logger.info(cursor.mogrify(sql, sql_params))
+    cursor.execute(sql, sql_params)
+    rows = _dictfetchall(cursor)
+    result = json.dumps(rows, use_decimal=True)
+    response = HttpResponse(result, content_type='application/json')
+    return response
+    
+
+def accession_detail(req):
+    '''Return JSON for all columns for a accession id.'''
+    assert req.method == 'GET', 'GET request method required'
+    params = req.GET.dict()
+    assert 'accenumb' in params, 'missing accenumb param'
+    # fix me: name the columns dont select *!
     sql= '''
-    SELECT * FROM %s  WHERE accenumb = %s
-     ''' % (ACCESSION_TAB, '%(accenumb)s')
+    SELECT * FROM lis_germplasm.grin_accession WHERE accenumb = %(accenumb)s
+    '''
     cursor = connection.cursor()
     logger.info(cursor.mogrify(sql, params))
     cursor.execute(sql, params)
     rows = _dictfetchall(cursor)
-    return _search_response(rows)
-    # columns = [col[0] for col in cursor.description]
-    # rows = cursor.fetchall()
-    # result = dict(zip(columns, rows))
-    # result_json = json.dumps(result[0])
-    # response = HttpResponse(result_json, content_type='application/json')
-    # return response
+    return _acc_search_response(rows)
 
 
 def countries(req):
     '''Return a json array of countries for search filtering ui.'''
     cursor = connection.cursor()
     sql = '''
-    SELECT DISTINCT origcty
-    FROM lis_germplasm.grin_accession 
-    ORDER by origcty
+    SELECT DISTINCT origcty FROM lis_germplasm.grin_accession ORDER by origcty
     '''
     cursor.execute(sql)
     # flatten into array, and filter out bogus records like '' or
@@ -128,7 +164,7 @@ def search(req):
         where_sql = ''
     else:
         where_sql = 'WHERE %s' % ' AND '.join(where_clauses)
-    cols_sql = ' , '.join(SELECT_COLS)
+    cols_sql = ' , '.join(ACC_SELECT_COLS)
     
     params['limit'] = int(params['limit'])
     if int(params['limit']) == 0:
@@ -160,10 +196,10 @@ def search(req):
     logger.info(cursor.mogrify(sql, sql_params))
     cursor.execute(sql, sql_params)
     rows = _dictfetchall(cursor)
-    return _search_response(rows)
+    return _acc_search_response(rows)
    
 
-def _search_response(rows):
+def _acc_search_response(rows):
     geo_json = []
     # logger.info('results: %d' % len(rows))
     for rec in rows:
@@ -179,14 +215,14 @@ def _search_response(rows):
         # geojson can have null coords, so output this for
         # non-geocoded search results (e.g. full text search w/ limit
         # to current map extent turned off
-        if rec['longdec'] == 0 and rec['latdec'] == 0:
+        if rec.get('longdec', 0) == 0 and rec.get('latdec', 0) == 0:
             coords = None
         else:
             lat = Decimal(rec['latdec']).quantize(TWO_PLACES)
             lng = Decimal(rec['longdec']).quantize(TWO_PLACES)
             coords = [lng, lat]
-        del rec['latdec']  # have been translated into geojson coords, 
-        del rec['longdec'] # so these keys are extraneous now.
+            del rec['latdec']  # have been translated into geojson coords, 
+            del rec['longdec'] # so these keys are extraneous now.
         geo_json_frag = {
             'type' : 'Feature',
             'geometry' : {
