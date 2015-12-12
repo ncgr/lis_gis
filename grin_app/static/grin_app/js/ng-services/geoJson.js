@@ -4,38 +4,21 @@ function($http, $rootScope, $location, $timeout) {
   var DEFAULT_CENTER = { 'lat' : 21.15, 'lng' : 80.42 };
   var ALT_CENTER = { 'lat' : 0, 'lng' : -179 };
   var MAX_RECS = 200;
-  var COLORS_URL = STATIC_URL + 'grin_app/js/colors.json';
   var DEFAULT_ZOOM = 6;
   
   var s = {}; // service/singleton we will construct & return
   
-  s.colorCache = null;
   s.updating = false;
   s.data = []; // an array of geoJson features
   s.map = null; // the leaflet map, Note: this belongs to
                 // mapController! don't update within in this service.
   s.bounds = L.latLngBounds(L.latLng(0,0), L.latLng(0,0));
-  s.colors = {};
   
   // array of event names we are publishing
   s.events = ['updated', 'willUpdate'];
   
   s.init = function() {
     setDefaults();
-    $http.get(COLORS_URL).then(function(resp) {
-      // success function
-      s.colors = resp.data;
-      s.colorCache = {};
-      _.each(s.colors, function(v,k) {
-        if(v.color) {
-          var key = v.genus + ' '+ v.species;
-          s.colorCache[key] = v.color;
-        }
-      });
-      s.notify('updated');
-    }, function(resp) {
-      // error function
-    });
   };
   
   s.getBoundsOfGeoJSONPoints = function() {
@@ -77,6 +60,7 @@ function($http, $rootScope, $location, $timeout) {
         if(params.accessionIds) {
           s.updateBounds();
         }
+	s.updateColors();
         s.updating = false;
         s.notify('updated');
       },
@@ -86,7 +70,46 @@ function($http, $rootScope, $location, $timeout) {
         console.log(resp);
       });
   };
-   
+
+  var colorScale = chroma.scale('Spectral');
+  var colorCache = {};
+  
+  s.colorize = function(accession) {
+    /* use chroma.js to colorize taxon feature in a consistent and
+       cross-site portable manner */
+    
+    var props = accession.properties;
+    var color = _.get(colorCache, props.taxon);
+    if(color) { return color; }
+    
+    // 1. map accession properties into scale [0,1] deterministically
+    var parts = props.taxon.toLowerCase().split(' ');
+    var genus = parts[0];
+    var species = parts[1];
+    var sig1 = (genus.charCodeAt(0) - 96) / 26; // see man ascii
+    var sig2 = (species.charCodeAt(0) - 96) / 26;
+    //    console.log(sig2);
+    // 2. use color scale function then convert to get hex code
+    var col = colorScale(sig1).saturate(sig2 * 4).darken(sig2 * 2).hex();
+    colorCache[props.taxon] = col;
+    return col;
+  };
+
+  String.prototype.hashCode = function() {
+    /* Javascript implementation of Java’s String.hashCode() method
+    http://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
+    */
+    var hash = 0;
+    if (this.length == 0) return hash;
+    for (i = 0; i < this.length; i++) {
+      char = this.charCodeAt(i);
+      hash = ((hash<<5)-hash)+char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return hash;
+  };
+
+ 
   s.setBounds = function(bounds, doSearch) {
     if(s.bounds.equals(bounds) && s.data.length > 0) {
       // early out if the bounds is already set to same, and we have results
@@ -132,6 +155,12 @@ function($http, $rootScope, $location, $timeout) {
   };
   
   s.initialBoundsUpdated = false;
+
+  s.updateColors = function() {
+    _.each(s.data, function(accession) {
+      accession.properties.color = s.colorize(accession);
+    });
+  };
   
   s.updateBounds = function() {
     /* in case we are searching by accessionIds, need to derive new
@@ -162,20 +191,6 @@ function($http, $rootScope, $location, $timeout) {
     });
     s.bounds = bounds;
     s.initialBoundsUpdated = true;
-  };
-  
-  s.colorFeature = function(feature) {
-    /* try to match the genus and species against the LIS colors json */
-    var key = feature.properties.taxon;
-    var val = _.get(s.colorCache, key, false);
-    if(val) { return val; }
-    var result = _.filter(s.colorCache, function(v,k) {
-      return key.indexOf(k) !== -1;
-    });
-    if(result.length) {
-      return result[0];
-    }
-    return 'grey';
   };
   
   /* pub/sub event model adapted from here :
