@@ -14,19 +14,19 @@ app.config(function($httpProvider, $stateProvider, $sceProvider) {
       reloadOnSearch : true,
       views : {
 	'errors' : {
-	  templateUrl : 'static/grin_app/partials/errors.html',
+	  templateUrl : STATIC_URL + 'grin_app/partials/errors.html',
 	  controller : 'errorsController',
 	},
 	'filter' : {
-	  templateUrl: 'static/grin_app/partials/search-filter.html',
+	  templateUrl: STATIC_URL + 'grin_app/partials/search-filter.html',
 	  controller: 'filterController',
 	},
 	'list' : {
-	  templateUrl: 'static/grin_app/partials/search-list.html',
+	  templateUrl: STATIC_URL + 'grin_app/partials/search-list.html',
 	  controller: 'listController',
 	},
 	'map' : {
-	  templateUrl: 'static/grin_app/partials/search-map.html',
+	  templateUrl: STATIC_URL + 'grin_app/partials/search-map.html',
 	  controller: 'mapController',
 	},
       }
