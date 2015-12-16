@@ -24,14 +24,14 @@ function($scope, $state, $http, $location, geoJsonService) {
   };
   
   $scope.init = function() {
-    $http.get('countries').then(function(resp) {
+    $http.get(API_ROOT + '/countries').then(function(resp) {
       // success callback
       $scope.model.countries = resp.data;
     }, function(resp){
       // error callback
       console.log(resp);
     });
-    $http.get('evaluation_descr_names').then(function(resp) {
+    $http.get(API_ROOT + '/evaluation_descr_names').then(function(resp) {
       // success callback
       $scope.model.traitDescriptors = resp.data;
     }, function(resp){

@@ -39,7 +39,7 @@ function($http, $rootScope, $location, $timeout) {
     var params = $location.search();
     
     $http({
-      url : 'search',
+      url : API_ROOT + '/search',
       method : 'GET',
       params : {
         q : params.taxonQuery,

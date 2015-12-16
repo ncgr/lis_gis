@@ -92,8 +92,6 @@ app.run( function($http, $cookies, $state, $rootScope) {
   $http.defaults.xsrfCookieName = csrfTokenKey;
   $http.defaults.xsrfHeaderName = csrfHeader;
 
-  $rootScope.STATIC_URL = STATIC_URL;
-
   $state.transitionTo('search');
 });
 
