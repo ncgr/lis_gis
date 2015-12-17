@@ -29,7 +29,6 @@ ORDER_BY_FRAG = '''
 '''
 LIMIT_FRAG = 'LIMIT %(limit)s'
 COUNTRY_REGEX = re.compile(r'[a-z]{3,3}', re.I)
-ACC_NUMB_REGEX = re.compile(r'\s+')
 
 logger = logging.getLogger(__name__)
 
@@ -44,13 +43,13 @@ def _include_geo_bounds(p):
         return False
     return True
 
-WHERE_FRAGS = {
+GRIN_ACC_WHERE_FRAGS = {
     'fts' : {
         'include' : lambda p: '|' in p.get('q', '') or '&' in p.get('q', ''),
         'sql' : "taxon_fts @@ to_tsquery('english', %(q)s)",
     },
     'fts_simple' : {
-        'include' : lambda p: p.get('q', None) and not WHERE_FRAGS['fts']['include'](p),
+        'include' : lambda p: p.get('q', None) and not GRIN_ACC_WHERE_FRAGS['fts']['include'](p),
         'sql' : "taxon_fts @@ plainto_tsquery('english', %(q)s)",
     },
     'country' : {
@@ -62,7 +61,7 @@ WHERE_FRAGS = {
         'sql' : 'accenumb = ANY( %(accession_ids)s )',
     },
     'limit_geo_bounds' : {
-        'include' :  lambda p: p.get('limit_geo_bounds', None) == 'true',
+        'include' : lambda p: p.get('limit_geo_bounds', None) == 'true',
         'sql' : '''
            latdec <> 0 AND longdec <> 0 AND
            ST_Contains(
@@ -71,6 +70,22 @@ WHERE_FRAGS = {
            )''',
     },
 }
+
+GRIN_EVAL_WHERE_FRAGS = {
+    'accession prefix' : {
+        'include' : lambda p: p.get('prefix', None),
+        'sql' : 'accession_prefix = %(prefix)s',
+    },
+    'accession number' : {
+        'include' : lambda p: p.get('acc_num', None),
+        'sql' : 'accession_number = %(acc_num)s',
+    },
+    'accession surfix' : {
+        'include' : lambda p: p.get('suffix', None),
+        'sql' : 'accession_surfix = %(suffix)s',
+    },
+}
+
 
 def index(req):
     '''Render the index template, which will boot up angular-js.
@@ -100,14 +115,27 @@ def evaluation_detail(req):
     assert req.method == 'GET', 'GET request method required'
     params = req.GET.dict()
     assert 'accenumb' in params, 'missing accenumb param'
-    (prefix, acc_num) = re.split(ACC_NUMB_REGEX, params['accenumb'])
+    parts = params['accenumb'].split()
+    prefix, acc_num, rest = parts[0], parts[1], parts[2:]  # suffix optional
+    suffix = ' '.join(rest)
+    cursor = connection.cursor()
+    sql_params = {
+        'prefix' : prefix,
+        'acc_num' : acc_num,
+        'suffix' : suffix,
+    }
+    where_clauses = []
+    for key, val in GRIN_EVAL_WHERE_FRAGS.items():
+        if val['include'](sql_params):
+            where_clauses.append(val['sql'])
+    where_sql = ' AND '.join(where_clauses)
     sql = '''
     SELECT accession_prefix,
            accession_number,
+           accession_surfix,
            observation_value,
            descriptor_name,
            method_name,
-           accession_surfix,
            plant_name,
            taxon,
            origin,
@@ -123,13 +151,10 @@ def evaluation_detail(req):
            inventory_suffix,
            accession_comment
     FROM lis_germplasm.legumes_grin_evaluation_data
-    WHERE accession_prefix = %(prefix)s AND
-          accession_number = %(acc_num)s
+    WHERE %s
     ORDER BY descriptor_name
-    '''
-    cursor = connection.cursor()
-    sql_params = {'prefix' : prefix, 'acc_num' : acc_num}
-    logger.info(cursor.mogrify(sql, sql_params))
+    ''' % where_sql
+    # logger.info(cursor.mogrify(sql, sql_params))
     cursor.execute(sql, sql_params)
     rows = _dictfetchall(cursor)
     result = json.dumps(rows, use_decimal=True)
@@ -147,7 +172,7 @@ def accession_detail(req):
     SELECT * FROM lis_germplasm.grin_accession WHERE accenumb = %(accenumb)s
     '''
     cursor = connection.cursor()
-    logger.info(cursor.mogrify(sql, params))
+    # logger.info(cursor.mogrify(sql, params))
     cursor.execute(sql, params)
     rows = _dictfetchall(cursor)
     return _acc_search_response(rows)
@@ -176,7 +201,7 @@ def search(req):
     if 'limit' not in params:
         params['limit'] = DEFAULT_LIMIT
     where_clauses = []
-    for key, val in WHERE_FRAGS.items():
+    for key, val in GRIN_ACC_WHERE_FRAGS.items():
         if val['include'](params):
             where_clauses.append(val['sql'])
     if len(where_clauses) == 0:
@@ -212,7 +237,7 @@ def search(req):
             sql_params['accession_ids'] = params['accession_ids'].split(',')
         else:
             sql_params['accession_ids'] = [params['accession_ids']];
-    logger.info(cursor.mogrify(sql, sql_params))
+    # logger.info(cursor.mogrify(sql, sql_params))
     cursor.execute(sql, sql_params)
     rows = _dictfetchall(cursor)
     return _acc_search_response(rows)

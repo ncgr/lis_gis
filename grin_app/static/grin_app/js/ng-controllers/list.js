@@ -19,6 +19,7 @@ function($scope,
     $location : $location,
     searchHilite: null,
     hiliteAccNumb : null,
+    STATIC_PATH : STATIC_PATH,
   };
   
   $scope.init = function() {
@@ -186,12 +187,13 @@ function ($scope, $uibModalInstance, $http, accId) {
     acc : null,
     evaluation : null,
     hideLISSpeciesLink : true,
+    STATIC_PATH : STATIC_PATH,
   };
 
   function getAccessionDetail() {
     // fetch all detail for this accession id
     $http({
-      url : API_ROOT + '/accession_detail',
+      url : API_PATH + '/accession_detail',
       method : 'GET',
       params : { accenumb : $scope.accId },
     }).then(function(resp) {
@@ -207,7 +209,7 @@ function ($scope, $uibModalInstance, $http, accId) {
   function getEvaluationDetail() {
      // fetch all trait/evaluation details for this accession id
     $http({
-      url : API_ROOT + '/evaluation_detail',
+      url : API_PATH + '/evaluation_detail',
       method : 'GET',
       params : { accenumb : $scope.accId },
     }).then(function(resp) {
