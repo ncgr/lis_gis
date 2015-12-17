@@ -72,47 +72,7 @@ function($http, $rootScope, $location, $timeout) {
       });
   };
 
-  var colorScale = chroma.scale('Spectral');
-  var colorCache = {};
 
-  function fnv32a( str, hashSize ) {
-    /* a consistent hashing algorithm
-       https://gist.github.com/vaiorabbit/5657561
-       http://isthe.com/chongo/tech/comp/fnv/#xor-fold
-    */
-    var FNV1_32A_INIT = 0x811c9dc5;
-    var hval = FNV1_32A_INIT;
-    for ( var i = 0; i < str.length; ++i ) {
-      hval ^= str.charCodeAt(i);
-      hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
-    }
-    return (hval >>> 0) % hashSize;
-  }
-  
-  s.colorize = function(taxon) {
-    /* use chroma.js to colorize taxon feature in a consistent and
-       cross-site portable manner */
-    var color = _.get(colorCache, taxon);
-    if(color) { return color; }
-    
-    // 1. map accession properties into scale [0,1] deterministically
-    var parts = taxon.toLowerCase().split(' ');
-    var genus = parts[0];
-    
-    // map the genus to a color hue in [0,1]
-    var hue = fnv32a(genus, 1000) / 1000;
-    // map the species to darkness and saturation in [0,1]
-    var saturation = 1;
-    for(var i=1; i<parts.length; i++) {
-      var part = parts[i];
-      saturation *= fnv32a(part, 1000) / 1000;
-    }
-    // call color scale function then convert to get hex code
-    var col = colorScale(hue).saturate(saturation * 2).darken(saturation * 2).hex();
-    // cache it
-    colorCache[taxon] = col;
-    return col;
-  };
  
   s.setBounds = function(bounds, doSearch) {
     if(s.bounds.equals(bounds) && s.data.length > 0) {
@@ -162,7 +122,7 @@ function($http, $rootScope, $location, $timeout) {
 
   s.updateColors = function() {
     _.each(s.data, function(accession) {
-      accession.properties.color = s.colorize(accession.properties.taxon);
+      accession.properties.color = taxonChroma.get(accession.properties.taxon);
     });
   };
   
