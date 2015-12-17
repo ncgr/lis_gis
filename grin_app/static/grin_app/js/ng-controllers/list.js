@@ -187,6 +187,7 @@ function ($scope, $uibModalInstance, $http, accId) {
     acc : null,
     evaluation : null,
     hideLISSpeciesLink : true,
+    STATIC_PATH : STATIC_PATH,
   };
 
   function getAccessionDetail() {
