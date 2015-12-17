@@ -93,6 +93,10 @@
 <script type="text/ng-template"
 	id="accession-modal-content.html">
   <div class="modal-header">
+    <button type="button" class="close"
+	    ng-click="onOK()">
+      <span aria-hidden="true">&times;</span>
+    </button>
     <h3 class="modal-title">
       Accession: {{model.acc.properties.accenumb}}
       <img ng-if="! model.acc"

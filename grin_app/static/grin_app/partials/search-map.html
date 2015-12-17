@@ -31,23 +31,42 @@
 
 <div class="panel panel-info"
      ng-if="model.baseMapSelect"  style="margin-top: 0.5rem;">
+
   <div class="panel-heading">
+    
+    <button type="button" class="close" ng-click="model.baseMapSelect = false">
+      <span aria-hidden="true">&times;</span>
+    </button>
+    
     <span class="glyphicon glyphicon-picture"></span>
     Select a basemap:
   </div>
   <div class="panel-body">
-    <div ng-repeat="(key,value) in model.baseMaps">
+    <div ng-repeat="(key,value) in model.baseMaps" style="margin-top: 0.2rem;">
       <button class="btn btn-sm btn-success" ng-click="onSelectBaseMap(key)">
 	Go
       </button>
       {{key}}
+    </div>
+    <div style="margin-top: 0.2rem;">
+      <button class="btn btn-sm btn-default"
+	      ng-click="model.baseMapSelect = false">
+	<span class="glyphicon glyphicon-remove"
+	      aria-hidden="true"></span>
+	Cancel
+      </button>
     </div>
   </div>
 </div>
 
 <div class="panel panel-info"
      ng-if="model.geoCoordsSelect" style="margin-top: 0.5rem;">
+
+  
   <div class="panel-heading">
+    <button type="button" class="close" ng-click="model.geoCoordsSelect = false">
+      <span aria-hidden="true">&times;</span>
+    </button>
     <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>
     Center map at Geographic Coordinates:
   </div>
@@ -69,6 +88,12 @@
 	  Go
 	</button>
       </div>
+      <button class="btn btn-sm btn-default"
+	      ng-click="model.baseMapSelect = false">
+	<span class="glyphicon glyphicon-remove"
+	      aria-hidden="true"></span>
+	Cancel
+      </button>
     </form>
   </div>
 </div>

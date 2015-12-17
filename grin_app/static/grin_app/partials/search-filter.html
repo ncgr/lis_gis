@@ -65,6 +65,11 @@
      style="margin-top: 0.5rem;"
      ng-if="model.searchOptions">
   <div class="panel-heading">
+
+    <button type="button" class="close" ng-click="model.searchOptions = false">
+      <span aria-hidden="true">&times;</span>
+    </button>
+    
     <span class="glyphicon glyphicon-search"></span>
     Search parameters:
   </div>
@@ -256,8 +261,17 @@
       <tr>
 	<td colspan="2">
 	  <button class="btn btn-success" ng-click="onOK()">
+	    <span class="glyphicon glyphicon-ok"
+		  aria-hidden="true"></span>
+	    
 	    OK
-	  </button>	  
+	  </button>
+	  <button class="btn btn-default"
+		  ng-click="model.searchOptions = false">
+	    <span class="glyphicon glyphicon-remove"
+		  aria-hidden="true"></span>
+	    Cancel
+	  </button>
 	</td>
       </tr>
     </table>
