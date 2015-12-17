@@ -61,7 +61,7 @@
       </td>
       <td class="nowrap">
 	<span class="badge"
-	      ng-style="{'background-color':model.geoJson.colorFeature(rec)}">
+	      ng-style="{'background-color': rec.properties.color}">
 	  &nbsp;
 	</span>
 	<span ng-bind-html="rec.properties.taxon | highlight: model.searchHilite">

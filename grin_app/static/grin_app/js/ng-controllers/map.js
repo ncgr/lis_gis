@@ -46,7 +46,7 @@ function($scope, $state, $timeout, $location, geoJsonService) {
       }
     },
   };
- 
+
   $scope.init = function() {
     
     $scope.model.map = L.map('map', {
@@ -64,7 +64,7 @@ function($scope, $state, $timeout, $location, geoJsonService) {
         return L.circleMarker(latlng, {
 	  id : feature.accenumb,
 	  radius: 8,
-	  fillColor: geoJsonService.colorFeature(feature),
+	  fillColor: feature.properties.color,
 	  color: "#000",
 	  weight: 1,
 	  opacity: 1,

@@ -4,38 +4,22 @@ function($http, $rootScope, $location, $timeout) {
   var DEFAULT_CENTER = { 'lat' : 21.15, 'lng' : 80.42 };
   var ALT_CENTER = { 'lat' : 0, 'lng' : -179 };
   var MAX_RECS = 200;
-  var COLORS_URL = STATIC_PATH + 'grin_app/js/colors.json';
   var DEFAULT_ZOOM = 6;
+  var MAX_INT = Math.pow(2, 53) - 1;
   
   var s = {}; // service/singleton we will construct & return
   
-  s.colorCache = null;
   s.updating = false;
   s.data = []; // an array of geoJson features
   s.map = null; // the leaflet map, Note: this belongs to
                 // mapController! don't update within in this service.
   s.bounds = L.latLngBounds(L.latLng(0,0), L.latLng(0,0));
-  s.colors = {};
   
   // array of event names we are publishing
   s.events = ['updated', 'willUpdate'];
   
   s.init = function() {
     setDefaults();
-    $http.get(COLORS_URL).then(function(resp) {
-      // success function
-      s.colors = resp.data;
-      s.colorCache = {};
-      _.each(s.colors, function(v,k) {
-        if(v.color) {
-          var key = v.genus + ' '+ v.species;
-          s.colorCache[key] = v.color;
-        }
-      });
-      s.notify('updated');
-    }, function(resp) {
-      // error function
-    });
   };
   
   s.getBoundsOfGeoJSONPoints = function() {
@@ -77,6 +61,7 @@ function($http, $rootScope, $location, $timeout) {
         if(params.accessionIds) {
           s.updateBounds();
         }
+	s.updateColors();
         s.updating = false;
         s.notify('updated');
       },
@@ -86,7 +71,9 @@ function($http, $rootScope, $location, $timeout) {
         console.log(resp);
       });
   };
-   
+
+
+ 
   s.setBounds = function(bounds, doSearch) {
     if(s.bounds.equals(bounds) && s.data.length > 0) {
       // early out if the bounds is already set to same, and we have results
@@ -132,6 +119,12 @@ function($http, $rootScope, $location, $timeout) {
   };
   
   s.initialBoundsUpdated = false;
+
+  s.updateColors = function() {
+    _.each(s.data, function(accession) {
+      accession.properties.color = taxonChroma.get(accession.properties.taxon);
+    });
+  };
   
   s.updateBounds = function() {
     /* in case we are searching by accessionIds, need to derive new
@@ -162,20 +155,6 @@ function($http, $rootScope, $location, $timeout) {
     });
     s.bounds = bounds;
     s.initialBoundsUpdated = true;
-  };
-  
-  s.colorFeature = function(feature) {
-    /* try to match the genus and species against the LIS colors json */
-    var key = feature.properties.taxon;
-    var val = _.get(s.colorCache, key, false);
-    if(val) { return val; }
-    var result = _.filter(s.colorCache, function(v,k) {
-      return key.indexOf(k) !== -1;
-    });
-    if(result.length) {
-      return result[0];
-    }
-    return 'grey';
   };
   
   /* pub/sub event model adapted from here :
