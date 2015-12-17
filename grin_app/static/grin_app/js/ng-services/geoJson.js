@@ -5,6 +5,7 @@ function($http, $rootScope, $location, $timeout) {
   var ALT_CENTER = { 'lat' : 0, 'lng' : -179 };
   var MAX_RECS = 200;
   var DEFAULT_ZOOM = 6;
+  var MAX_INT = Math.pow(2, 53) - 1;
   
   var s = {}; // service/singleton we will construct & return
   
@@ -73,42 +74,45 @@ function($http, $rootScope, $location, $timeout) {
 
   var colorScale = chroma.scale('Spectral');
   var colorCache = {};
+
+  function fnv32a( str, hashSize ) {
+    /* a consistent hashing algorithm
+       https://gist.github.com/vaiorabbit/5657561
+       http://isthe.com/chongo/tech/comp/fnv/#xor-fold
+    */
+    var FNV1_32A_INIT = 0x811c9dc5;
+    var hval = FNV1_32A_INIT;
+    for ( var i = 0; i < str.length; ++i ) {
+      hval ^= str.charCodeAt(i);
+      hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
+    }
+    return (hval >>> 0) % hashSize;
+  }
   
-  s.colorize = function(accession) {
+  s.colorize = function(taxon) {
     /* use chroma.js to colorize taxon feature in a consistent and
        cross-site portable manner */
-    
-    var props = accession.properties;
-    var color = _.get(colorCache, props.taxon);
+    var color = _.get(colorCache, taxon);
     if(color) { return color; }
     
     // 1. map accession properties into scale [0,1] deterministically
-    var parts = props.taxon.toLowerCase().split(' ');
+    var parts = taxon.toLowerCase().split(' ');
     var genus = parts[0];
-    var species = parts[1];
-    var sig1 = (genus.charCodeAt(0) - 96) / 26; // see man ascii
-    var sig2 = (species.charCodeAt(0) - 96) / 26;
-    //    console.log(sig2);
-    // 2. use color scale function then convert to get hex code
-    var col = colorScale(sig1).saturate(sig2 * 4).darken(sig2 * 2).hex();
-    colorCache[props.taxon] = col;
+    
+    // map the genus to a color hue in [0,1]
+    var hue = fnv32a(genus, 1000) / 1000;
+    // map the species to darkness and saturation in [0,1]
+    var saturation = 1;
+    for(var i=1; i<parts.length; i++) {
+      var part = parts[i];
+      saturation *= fnv32a(part, 1000) / 1000;
+    }
+    // call color scale function then convert to get hex code
+    var col = colorScale(hue).saturate(saturation * 2).darken(saturation * 2).hex();
+    // cache it
+    colorCache[taxon] = col;
     return col;
   };
-
-  String.prototype.hashCode = function() {
-    /* Javascript implementation of Java’s String.hashCode() method
-    http://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
-    */
-    var hash = 0;
-    if (this.length == 0) return hash;
-    for (i = 0; i < this.length; i++) {
-      char = this.charCodeAt(i);
-      hash = ((hash<<5)-hash)+char;
-      hash = hash & hash; // Convert to 32bit integer
-    }
-    return hash;
-  };
-
  
   s.setBounds = function(bounds, doSearch) {
     if(s.bounds.equals(bounds) && s.data.length > 0) {
@@ -158,7 +162,7 @@ function($http, $rootScope, $location, $timeout) {
 
   s.updateColors = function() {
     _.each(s.data, function(accession) {
-      accession.properties.color = s.colorize(accession);
+      accession.properties.color = s.colorize(accession.properties.taxon);
     });
   };
   
