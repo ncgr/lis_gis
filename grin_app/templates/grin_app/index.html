@@ -59,9 +59,13 @@
   <script src="{% static 'bower_components/angular-auto-focus/angular-auto-focus.js'%}" ></script>
 
   <script language="javascript">
-    var STATIC_URL = "{% static ''%}";
-    var API_ROOT = "/lis_gis";
+   // where static resources (js, img, html) are served on this http server 
+   var STATIC_PATH = "{% static ''%}";
+   // where is the django web application (set to '' for devel with
+   // django runserver, set to '/lis_gis' for LIS deploy)
+   var API_PATH = '/lis_gis';
   </script>
+  
   <script src="{% static 'grin_app/js/app.js'%}"></script>
   <script src="{% static 'grin_app/js/ng-services/geoJson.js'%}"></script>
   <script src="{% static 'grin_app/js/ng-controllers/errors.js'%}"></script>

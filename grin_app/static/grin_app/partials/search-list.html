@@ -1,5 +1,5 @@
 <span ng-if="model.geoJson.updating">
-  <img ng-src="{{STATIC_URL}}grin_app/images/ajax-loader.gif"></img>
+  <img ng-src="{{model.STATIC_PATH}}grin_app/images/ajax-loader.gif"></img>
   Loading...
 </span>
 
@@ -96,7 +96,7 @@
     <h3 class="modal-title">
       Accession: {{model.acc.properties.accenumb}}
       <img ng-if="! model.acc"
-	   ng-src="{{STATIC_URL}}grin_app/images/ajax-loader.gif"/>
+	   ng-src="{{model.STATIC_PATH}}grin_app/images/ajax-loader.gif"/>
     </h3>
   </div>
   <div class="modal-body">

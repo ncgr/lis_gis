@@ -4,7 +4,7 @@ function($http, $rootScope, $location, $timeout) {
   var DEFAULT_CENTER = { 'lat' : 21.15, 'lng' : 80.42 };
   var ALT_CENTER = { 'lat' : 0, 'lng' : -179 };
   var MAX_RECS = 200;
-  var COLORS_URL = STATIC_URL + 'grin_app/js/colors.json';
+  var COLORS_URL = STATIC_PATH + 'grin_app/js/colors.json';
   var DEFAULT_ZOOM = 6;
   
   var s = {}; // service/singleton we will construct & return
@@ -56,7 +56,7 @@ function($http, $rootScope, $location, $timeout) {
     var params = $location.search();
     
     $http({
-      url : API_ROOT + '/search',
+      url : API_PATH + '/search',
       method : 'GET',
       params : {
         q : params.taxonQuery,
