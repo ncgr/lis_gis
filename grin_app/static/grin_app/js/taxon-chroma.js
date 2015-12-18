@@ -4,8 +4,8 @@
  * usage example: (always returns same hue for Arachis, but scaled in
  * saturation and darkness)
  *
- * colorizeTaxon.get('Arachis hypogaea');
- * colorizeTaxon.get('Arachis burkartii');
+ * taxonChroma.get('Arachis hypogaea');
+ * taxonChroma.get('Arachis burkartii');
  */
 
 var taxonChroma = {};
