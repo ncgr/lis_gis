@@ -16,6 +16,26 @@ var taxonChroma = {};
   var colorCache = {};
   var COLOR_SATURATION_FACTOR = 4;
 
+  // hardcode a list of legume genera, in case users of this library want
+  // to use it as a lookup table (e.g. phylotree module)
+  this.legumeGenera = {
+    Apios : true,
+    Arachis : true,
+    Cajanus : true,
+    Chamaecrista : true,
+    Cicer : true,
+    Glycine : true,
+    Lens : true,
+    Lotus : true,
+    Lupinus : true,
+    Medicago : true,
+    Phaseolus : true,
+    Pisum : true,
+    Trifolium : true,
+    Vicia : true,
+    Vigna : true,
+  };
+
   this.get = function(taxon) {
     var color = _.get(colorCache, taxon);
     if(color) { return color; }
