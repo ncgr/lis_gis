@@ -14,7 +14,8 @@ var taxonChroma = {};
 (function() {
 
   var colorCache = {};
-  var LIGHTNESS = 0.5; // default lightness [0,1] range
+  var LIGHTNESS_FACTOR = 1; // default lightness factor (1= don't post-adjust)
+  var MIN_LIGHTNESS = 0.3;
   var SET1 = chroma.brewer.Set3; // brewer color set w/ 12 elements
   var SET2 = chroma.brewer.Pastel1 // brewer color set w/ 9 elements
 
@@ -38,20 +39,24 @@ var taxonChroma = {};
     vigna :        SET2[3],
   };
 
-  this.get = function(taxon) {
+  this.get = function(taxon, lightnessFactor) {
 
     // cache lookup
     var color = _.get(colorCache, taxon);
     if(color) { return color; }
-    
+
+    if(! lightnessFactor) {
+      lightnessFactor = LIGHTNESS_FACTOR;
+    }
     var parts = taxon.toLowerCase().split(' ');
     var genus = parts[0];
     var species = parts[1];
     var genusColor = _.get(this.legumeGenera, genus, null);
     if(genusColor) {
       var hue = chroma(genusColor).hsl()[0];
-      var lightness = 0.15 + fnv32a(species, 750) / 1000;
-      color = chroma(hue, 1, lightness, 'hsl').hex();
+      var lightness = MIN_LIGHTNESS +
+	             (fnv32a(species, 1000) / 1000) * (1 - 2 *MIN_LIGHTNESS);
+      color = chroma(hue, 1, lightness * lightnessFactor, 'hsl').hex();
     }
     else {
       color = this.defaultColor;
