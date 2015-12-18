@@ -1,8 +1,9 @@
 /* use the chroma.js library to colorize taxons consistently and
  * predictably. Requires chroma.js https://github.com/gka/chroma.js/
  *
- * usage example: (always returns same hue for Arachis, but scaled in
- * saturation and darkness)
+ * usage example: (always returns same hue for Arachis, but scaled
+ * lightness depending on the Species -- completely abitrarily, but
+ * consistently)
  *
  * taxonChroma.get('Arachis hypogaea');
  * taxonChroma.get('Arachis burkartii');
@@ -17,13 +18,9 @@ var taxonChroma = {};
   var SET1 = chroma.brewer.Set3; // brewer color set w/ 12 elements
   var SET2 = chroma.brewer.Pastel1 // brewer color set w/ 9 elements
 
-  // hardcode a list of legume genera, in case users of this library want
-  // to use it as a lookup table (e.g. phylotree module)
-
   this.defaultColor = 'grey'; // used for non-legume genera
   
   this.legumeGenera = {
-    // 1st set
     apios :        SET1[0],
     arachis :      SET1[1],
     cajanus :      SET1[2],
@@ -32,7 +29,7 @@ var taxonChroma = {};
     glycine :      SET1[5],
     lens :         SET1[6],
     lotus :        SET1[7],
-    lupinus :      SET1[9],
+    lupinus :      SET1[9], // 8 is grey-ish
     medicago :     SET1[10],
     phaseolus :    SET1[11],
     pisum :        SET2[0],
