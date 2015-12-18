@@ -121,8 +121,8 @@ function($http, $rootScope, $location, $timeout) {
   s.initialBoundsUpdated = false;
 
   s.updateColors = function() {
-    _.each(s.data, function(accession) {
-      accession.properties.color = taxonChroma.get(accession.properties.taxon);
+    _.each(s.data, function(acc) {
+      acc.properties.color = taxonChroma.get(acc.properties.taxon);
     });
   };
   

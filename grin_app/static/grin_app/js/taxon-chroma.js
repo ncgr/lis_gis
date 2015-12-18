@@ -11,52 +11,56 @@
 var taxonChroma = {};
 
 (function() {
-  
-  var colorScale = chroma.scale('Spectral');
+
   var colorCache = {};
-  var COLOR_SATURATION_FACTOR = 4;
+  var LIGHTNESS = 0.5; // default lightness [0,1] range
+  var SET1 = chroma.brewer.Set3; // brewer color set w/ 12 elements
+  var SET2 = chroma.brewer.Pastel1 // brewer color set w/ 9 elements
 
   // hardcode a list of legume genera, in case users of this library want
   // to use it as a lookup table (e.g. phylotree module)
+
+  this.defaultColor = 'grey'; // used for non-legume genera
+  
   this.legumeGenera = {
-    Apios : true,
-    Arachis : true,
-    Cajanus : true,
-    Chamaecrista : true,
-    Cicer : true,
-    Glycine : true,
-    Lens : true,
-    Lotus : true,
-    Lupinus : true,
-    Medicago : true,
-    Phaseolus : true,
-    Pisum : true,
-    Trifolium : true,
-    Vicia : true,
-    Vigna : true,
+    // 1st set
+    apios :        SET1[0],
+    arachis :      SET1[1],
+    cajanus :      SET1[2],
+    chamaecrista : SET1[3],
+    cicer :        SET1[4],
+    glycine :      SET1[5],
+    lens :         SET1[6],
+    lotus :        SET1[7],
+    lupinus :      SET1[9],
+    medicago :     SET1[10],
+    phaseolus :    SET1[11],
+    pisum :        SET2[0],
+    trifolium :    SET2[1],
+    vicia :        SET2[2],
+    vigna :        SET2[3],
   };
 
   this.get = function(taxon) {
+
+    // cache lookup
     var color = _.get(colorCache, taxon);
     if(color) { return color; }
+    
     var parts = taxon.toLowerCase().split(' ');
     var genus = parts[0];
-    // map the genus to a color hue in [0,1]
-    var hue = fnv32a(genus, 1000) / 1000;
-    // map the species to darkness and saturation in [0,1]
-    var saturation = 1;
-    for(var i=1; i<parts.length; i++) {
-      var part = parts[i];
-      saturation *= fnv32a(part, 1000) / 1000;
+    var species = parts[1];
+    var genusColor = _.get(this.legumeGenera, genus, null);
+    if(genusColor) {
+      var hue = chroma(genusColor).hsl()[0];
+      var lightness = 0.15 + fnv32a(species, 750) / 1000;
+      color = chroma(hue, 1, lightness, 'hsl').hex();
     }
-    // call color scale function then convert to get hex code
-    saturation = saturation * COLOR_SATURATION_FACTOR;
-    var col = colorScale(hue)
-	.saturate(saturation)
-	.darken(saturation).hex();
-    // cache it
-    colorCache[taxon] = col;
-    return col;
+    else {
+      color = this.defaultColor;
+    }
+    colorCache[taxon] = color;
+    return color;
   };
   
   function fnv32a(str, hashSize) {
