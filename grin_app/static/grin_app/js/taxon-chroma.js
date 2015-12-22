@@ -68,12 +68,9 @@ var taxonChroma = {};
       options.overrides = {};
     }
     if(options.overrides[taxon] !== undefined) {
-      console.log('override hit');
       return options.overrides[taxon];
     }
     if(colorCache[taxon] !== undefined) {
-      // cache hit
-      console.log('cache hit');
       return colorCache[taxon];
     }
     var color = null;
