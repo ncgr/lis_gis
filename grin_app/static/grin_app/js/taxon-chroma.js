@@ -5,8 +5,21 @@
  * lightness depending on the Species -- completely abitrarily, but
  * consistently)
  *
+ * taxonChroma.get(taxon, options);
+ *
+ * // examples: 
  * taxonChroma.get('Arachis hypogaea');
  * taxonChroma.get('Arachis burkartii');
+ *
+ * // make 20% lighter overall
+ * taxonChroma.get(someTaxon, { lightnessFactor: 1.2 } );
+ * // override some taxon
+ * taxonChroma.get(acc.properties.taxon, {
+ * 'lightnessFactor' : 1.2,
+ *   'overrides' : {
+ *   'Phaseolus lunatus' : 'green',
+ *  }
+ * });
  */
 
 var taxonChroma = {};
@@ -16,7 +29,6 @@ var taxonChroma = {};
   var colorCache = {};
   var LIGHTNESS_FACTOR = 1; // default lightness factor (1= don't post-adjust)
   var MIN_LIGHTNESS = 0.3;
-  
   var moreBrewerColors = chroma.brewer.Set2; 
   
   this.defaultColor = 'lightgrey'; // used for non-legume genera
@@ -26,31 +38,43 @@ var taxonChroma = {};
   // colors.
   this.legumeGenera = {
     apios :        moreBrewerColors[0],
-    arachis :     "#bcbd22",
+    arachis :      '#bcbd22',
     cajanus :      '#ffbb78',
     chamaecrista : moreBrewerColors[5],
     cicer :        '#2ca02c',
     glycine :      '#1f77b4',
     lens :         '#98df8a',
     lotus :        '#17becf',
-    lupinus :      '#ff9896', // 8 is grey-ish
-    medicago :    "#8c564b",
-    phaseolus :    "#e377c2",
+    lupinus :      '#ff9896',
+    medicago :     '#8c564b',
+    phaseolus :    '#e377c2',
     pisum :        '#f7b6d2',
     trifolium :    moreBrewerColors[2],
     vicia :        moreBrewerColors[4],
     vigna :        '#d62728',
   };
 
-  this.get = function(taxon, lightnessFactor) {
-
-    // cache lookup
-    var color = _.get(colorCache, taxon);
-    if(color) { return color; }
-
-    if(! lightnessFactor) {
-      lightnessFactor = LIGHTNESS_FACTOR;
+  this.get = function(taxon, options) {
+    // options is an object w/ keys lightnessFactor, overrides
+    if (! options) {
+      options = {};
     }
+    if (options.lightnessFactor === undefined) {
+      options.lightnessFactor = LIGHTNESS_FACTOR;
+    }
+    if (options.overrides === undefined) {
+      options.overrides = {};
+    }
+    if(options.overrides[taxon] !== undefined) {
+      console.log('override hit');
+      return options.overrides[taxon];
+    }
+    if(colorCache[taxon] !== undefined) {
+      // cache hit
+      console.log('cache hit');
+      return colorCache[taxon];
+    }
+    var color = null;
     var parts = taxon.toLowerCase().split(' ');
     var genus = parts[0];
     var species = parts[1];
@@ -59,7 +83,7 @@ var taxonChroma = {};
       var hue = chroma(genusColor).hsl()[0];
       var lightness = MIN_LIGHTNESS +
 	             (fnv32a(species, 1000) / 1000) * (1 - 2 *MIN_LIGHTNESS);
-      color = chroma(hue, 1, lightness * lightnessFactor, 'hsl').hex();
+      color = chroma(hue, 1, lightness * options.lightnessFactor, 'hsl').hex();
     }
     else {
       color = this.defaultColor;

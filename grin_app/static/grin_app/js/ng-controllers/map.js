@@ -9,6 +9,7 @@ function($scope, $state, $timeout, $location, geoJsonService) {
   var DEFAULT_BASEMAP = 'ESRI - NatGeo (default, reference map)';
   
   $scope.model = {
+    //legumeGenera : taxonChroma.legumeGenera, // for development only
     geoJson : geoJsonService,
     map : null,  // the leaflet map
     geoJsonLayer : null,
