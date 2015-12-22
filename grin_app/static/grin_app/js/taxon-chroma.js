@@ -16,27 +16,30 @@ var taxonChroma = {};
   var colorCache = {};
   var LIGHTNESS_FACTOR = 1; // default lightness factor (1= don't post-adjust)
   var MIN_LIGHTNESS = 0.3;
-  var SET1 = chroma.brewer.Set3; // brewer color set w/ 12 elements
-  var SET2 = chroma.brewer.Pastel1 // brewer color set w/ 9 elements
-
-  this.defaultColor = 'grey'; // used for non-legume genera
   
+  var moreBrewerColors = chroma.brewer.Set2; 
+  
+  this.defaultColor = 'lightgrey'; // used for non-legume genera
+
+  // some of these colors are carried over from the colors.json file
+  // from the pholylotree module. they are all cbrewer classification
+  // colors.
   this.legumeGenera = {
-    apios :        SET1[0],
-    arachis :      SET1[1],
-    cajanus :      SET1[2],
-    chamaecrista : SET1[3],
-    cicer :        SET1[4],
-    glycine :      SET1[5],
-    lens :         SET1[6],
-    lotus :        SET1[7],
-    lupinus :      SET1[9], // 8 is grey-ish
-    medicago :     SET1[10],
-    phaseolus :    SET1[11],
-    pisum :        SET2[0],
-    trifolium :    SET2[1],
-    vicia :        SET2[2],
-    vigna :        SET2[3],
+    apios :        moreBrewerColors[0],
+    arachis :     "#bcbd22",
+    cajanus :      '#ffbb78',
+    chamaecrista : moreBrewerColors[5],
+    cicer :        '#2ca02c',
+    glycine :      '#1f77b4',
+    lens :         '#98df8a',
+    lotus :        '#17becf',
+    lupinus :      '#ff9896', // 8 is grey-ish
+    medicago :    "#8c564b",
+    phaseolus :    "#e377c2",
+    pisum :        '#f7b6d2',
+    trifolium :    moreBrewerColors[2],
+    vicia :        moreBrewerColors[4],
+    vigna :        '#d62728',
   };
 
   this.get = function(taxon, lightnessFactor) {

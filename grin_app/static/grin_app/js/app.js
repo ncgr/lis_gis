@@ -137,7 +137,9 @@ app.tour = function () {
       {
         title: 'Map Markers',
         content: 'Click on a circular map marker to select this accession and \
-         get more details.  Try it!',
+         get more details. Try it! (take care to click, not drag). Map markers \
+         are colored by genus, and within each genus the hue is darker or \
+         lighter for the various species.',
 	target: 'map',
         placement: 'bottom',
       },          
