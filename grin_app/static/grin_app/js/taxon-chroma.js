@@ -17,7 +17,7 @@
  * taxonChroma.get(acc.properties.taxon, {
  * 'lightnessFactor' : 1.2,
  *   'overrides' : {
- *   'Phaseolus lunatus' : 'green',
+ *   'phaseolus lunatus' : 'green',
  *  }
  * });
  */
@@ -55,6 +55,8 @@ var taxonChroma = {};
   };
 
   this.get = function(taxon, options) {
+    taxon = taxon.toLowerCase();
+    
     // options is an object w/ keys lightnessFactor, overrides
     if (! options) {
       options = {};
@@ -75,7 +77,7 @@ var taxonChroma = {};
       return colorCache[taxon];
     }
     var color = null;
-    var parts = taxon.toLowerCase().split(' ');
+    var parts = taxon.split(' ');
     var genus = parts[0];
     var species = parts[1];
     var genusColor = _.get(this.legumeGenera, genus, null);
