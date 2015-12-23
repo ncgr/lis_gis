@@ -74,6 +74,8 @@ function($http, $rootScope, $location, $timeout) {
   };
   
   s.search = function() {
+    $rootScope.errors = [];
+    $rootScope.warnings = [];
     s.updating = true;
     var params = $location.search();
     
