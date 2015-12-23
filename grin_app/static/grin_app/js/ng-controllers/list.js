@@ -20,23 +20,17 @@ function($scope,
     searchHilite: null,
     hiliteAccNumb : null,
     STATIC_PATH : STATIC_PATH,
+    showAssistiveButton : false,
+    showAssistiveText : null,
   };
-  
+
   $scope.init = function() {
     
     geoJsonService.subscribe($scope, 'updated', function() {
-      $scope.model.searchHilite = null;
-      var query = $location.search().taxonQuery ||
-	          $location.search().accessionIds;
-      if(! query) {
-	return;
-      }
-      // logical operators may (usually) work as ng string
-      // highlighting, but the whitespace needs to be cleaned up a bit
-      query = query.replace(/,/g,'|');
-      query = query.replace(/\s+\|\s+/,'|');
-      query = query.replace(/\s+\&\s+/,'&');
-      $scope.model.searchHilite = query.trim();
+      // callback for geoJsonService updated search results
+      updateQueryHiliting();
+      updateSingleAccessionHilite();
+      updateAssistiveButton();
     });
     
     geoJsonService.map.on('popupopen', function(e) {
@@ -90,38 +84,7 @@ function($scope,
     }, function () {
       // modal dismissed callback
     });
-  
   };
-
-  function hiliteAccNumbInTable(accNum) {
-    // splice the record to beginning of geoJson dataset
-    var accession = _.find(geoJsonService.data, function(d) {
-      return (d.properties.accenumb === accNum);
-    });
-    if( ! accession) {
-      return;
-    }
-    var idx = _.indexOf(geoJsonService.data, accession);
-    if(idx === -1) {
-      return;
-    }
-    geoJsonService.data.splice(idx, 1);
-    geoJsonService.data.splice(0, 0, accession);
-    $scope.model.hiliteAccNumb = accNum;    
-  };
-  
-  function onGoExternalLISTaxon(accDetail)  {
-    var url = 'http://legumeinfo.org/organism/' +
-	encodeURIComponent(accDetail.properties.genus) + '/' +
-	encodeURIComponent(accDetail.properties.species);
-    $window.open(url, 'LIS');
-  }
-
-  function onGoExternalLISGRIN(accDetail) {
-    var url = 'http://legumeinfo.org/grinconnect/query?grin_acc_no='+
-	encodeURIComponent(accDetail.properties.accenumb);
-    $window.open(url, 'LIS');
-  }
   
   $scope.onGoInternalMap = function(accDetail) {
     /* user hit a map marker buton in the results table */
@@ -157,7 +120,7 @@ function($scope,
 	unsub(); // dispose of the callback
       }, 0);
     });
-    
+
     // force the search to update (even if already centered at this
     // position, we definitely want the above callback to run)
     var c = L.latLng(lat, lng);
@@ -173,6 +136,73 @@ function($scope,
       geoJsonService.map.panTo(c);
     }
   };
+
+  $scope.onAssistiveButtonAllNearby = function() {
+    geoJsonService.showAllNearby();
+  };
+  
+  $scope.onAssistiveButtonTaxonNearby = function() {
+    geoJsonService.showAllNearbySameTaxon();
+  };
+  
+  function updateAssistiveButton() {
+    var params = $location.search();
+    if(! ('accessionIds' in params)) { return; }
+    if(geoJsonService.data.length !== 1) { return; }
+    if(! geoJsonService.getAnyGeocodedAccession()) { return; };
+    var acc = geoJsonService.data[0];
+    $scope.model.showAssistiveButton = true;
+    $scope.model.showAssistiveText = acc.properties.taxon;
+  }
+  
+  function hiliteAccNumbInTable(accNum) {
+    // splice the record to beginning of geoJson dataset
+    var accession = _.find(geoJsonService.data, function(d) {
+      return (d.properties.accenumb === accNum);
+    });
+    if( ! accession) {
+      return;
+    }
+    var idx = _.indexOf(geoJsonService.data, accession);
+    if(idx === -1) {
+      return;
+    }
+    geoJsonService.data.splice(idx, 1);
+    geoJsonService.data.splice(0, 0, accession);
+    $scope.model.hiliteAccNumb = accNum;    
+  };
+
+  function onGoExternalLISTaxon(accDetail)  {
+    var url = 'http://legumeinfo.org/organism/' +
+	encodeURIComponent(accDetail.properties.genus) + '/' +
+	encodeURIComponent(accDetail.properties.species);
+    $window.open(url, 'LIS');
+  }
+
+  function onGoExternalLISGRIN(accDetail) {
+    var url = 'http://legumeinfo.org/grinconnect/query?grin_acc_no='+
+	encodeURIComponent(accDetail.properties.accenumb);
+    $window.open(url, 'LIS');
+  }
+
+  function updateQueryHiliting() {
+    var params = $location.search();
+    $scope.model.searchHilite = null;
+    var query = params.taxonQuery || params.accessionIds;
+    if(! query) { return; }
+    // logical operators may (usually) work as ng string
+    // highlighting, but the whitespace needs to be cleaned up a bit
+    query = query.replace(/,/g,'|');
+    query = query.replace(/\s+\|\s+/,'|');
+    query = query.replace(/\s+\&\s+/,'&');
+    $scope.model.searchHilite = query.trim();
+  }
+
+  function updateSingleAccessionHilite() {
+    if(geoJsonService.data.length !== 1) { return; }
+    var accId = geoJsonService.data[0].properties.accenumb;
+    hiliteAccNumbInTable(accId);
+  }
   
   $scope.init();
   
@@ -206,36 +236,6 @@ function ($scope, $uibModalInstance, $http, accId) {
     });
   }
 
-  function getEvaluationDetail() {
-     // fetch all trait/evaluation details for this accession id
-    $http({
-      url : API_PATH + '/evaluation_detail',
-      method : 'GET',
-      params : { accenumb : $scope.accId },
-    }).then(function(resp) {
-      // success callback
-      $scope.model.evaluation = resp.data;
-    }, function(resp) {
-      // error callback
-    });
-  }
-  
-  function checkLISSpeciesPage() {
-    /* attempt check whether there is actually a taxon page at
-     * lis matching, e.g. http://legumeinfo.org/organism/Cajanus/cajan
-     * note: this may fail from other hosts outside of production,
-     * because of 'Access-Control-Allow-Origin' header. */
-    var acc = $scope.model.acc.properties;
-    var lisURL = '/organism/' + acc.genus + '/' + acc.species;
-    $http({ url : lisURL, method : 'HEAD' }).then(function(resp) {
-      // success callback
-      $scope.model.hideLISSpeciesLink = false;
-    }, function(resp) {
-      // error callback
-      $scope.model.hideLISSpeciesLink = true;
-    });
-  }
-  
   $scope.init = function() {
     getAccessionDetail()
   };
@@ -268,6 +268,37 @@ function ($scope, $uibModalInstance, $http, accId) {
       accDetail : $scope.model.acc,
     });
   };
+ 
+  function getEvaluationDetail() {
+     // fetch all trait/evaluation details for this accession id
+    $http({
+      url : API_PATH + '/evaluation_detail',
+      method : 'GET',
+      params : { accenumb : $scope.accId },
+    }).then(function(resp) {
+      // success callback
+      $scope.model.evaluation = resp.data;
+    }, function(resp) {
+      // error callback
+    });
+  }
+ 
+  function checkLISSpeciesPage() {
+    /* attempt check whether there is actually a taxon page at
+     * lis matching, e.g. http://legumeinfo.org/organism/Cajanus/cajan
+     * note: this may fail from other hosts outside of production,
+     * because of 'Access-Control-Allow-Origin' header. */
+    var acc = $scope.model.acc.properties;
+    var lisURL = '/organism/' + acc.genus + '/' + acc.species;
+    $http({ url : lisURL, method : 'HEAD' }).then(function(resp) {
+      // success callback
+      $scope.model.hideLISSpeciesLink = false;
+    }, function(resp) {
+      // error callback
+      $scope.model.hideLISSpeciesLink = true;
+    });
+  }
+ 
   $scope.init();
   
 });

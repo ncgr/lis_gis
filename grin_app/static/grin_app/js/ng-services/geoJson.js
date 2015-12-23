@@ -2,7 +2,6 @@ app.service('geoJsonService',
 function($http, $rootScope, $location, $timeout) {
   
   var DEFAULT_CENTER = { 'lat' : 35.87, 'lng' : -109.47 };
-  var ALT_CENTER = { 'lat' : 0, 'lng' : 0 };
   var MAX_RECS = 200;
   var DEFAULT_ZOOM = 6;
   
@@ -36,18 +35,26 @@ function($http, $rootScope, $location, $timeout) {
     if(! ('country' in params)) {
       $location.search('country', '');
     }
-    if('accessionIds' in params) {
-      if (! ('lng' in params)) {
-	$location.search('lat', ALT_CENTER.lat);
-	$location.search('lng', ALT_CENTER.lng);
-      }
+    if (! ('lng' in params)) {
+      $location.search('lat', DEFAULT_CENTER.lat);
+      $location.search('lng', DEFAULT_CENTER.lng);
     }
-    else {
-      if (! ('lng' in params)) {
-	$location.search('lat', DEFAULT_CENTER.lat);
-	$location.search('lng', DEFAULT_CENTER.lng);
-      }
-    }
+  };
+
+  s.showAllNearbySameTaxon = function() {
+    var acc = s.data[0];
+    var taxon = acc.properties.taxon;
+    s.setAccessionIds(null, false);
+    s.setLimitToMapExtent(true, false);
+    s.setTaxonQuery(taxon, false);
+    s.map.setZoom(DEFAULT_ZOOM);
+  };
+  
+  s.showAllNearby = function() {
+    s.setAccessionIds(null, false);
+    s.setLimitToMapExtent(true, false);
+    s.setTaxonQuery(null, false);
+    s.map.setZoom(DEFAULT_ZOOM);
   };
   
   s.getBoundsOfGeoJSONPoints = function() {
@@ -86,6 +93,7 @@ function($http, $rootScope, $location, $timeout) {
       function(resp) {
         // success handler;
         s.data = resp.data;
+	s.checkForGeocodedAccessionIds();
         s.updateBounds();
 	s.updateColors();
         s.updating = false;
@@ -98,6 +106,17 @@ function($http, $rootScope, $location, $timeout) {
       });
   };
 
+  s.checkForGeocodedAccessionIds = function() {
+    var params = $location.search();
+    if(! ('accessionIds' in params)) { return; }
+    var geocodedAcc = s.getAnyGeocodedAccession();
+    if(! geocodedAcc) {
+      $rootScope.warnings = ['None of the requested accession ids (' +
+	     params.accessionIds + ') have geographic \
+             coordinates, so they will not appear on the map browser'];
+    }
+  };
+  
   s.setBounds = function(bounds, doSearch) {
     if(s.bounds.equals(bounds) && s.data.length > 0) {
       // early out if the bounds is already set to same, and we have results
@@ -141,37 +160,33 @@ function($http, $rootScope, $location, $timeout) {
     $location.search('traitOverlay', trait);
     if(search) { s.search(); }
   };
-  
-  s.initialBoundsUpdated = false;
 
   s.updateColors = function() {
     _.each(s.data, function(acc) {
       acc.properties.color = taxonChroma.get(acc.properties.taxon);
     });
   };
-  
+
+  s.getAnyGeocodedAccession = function() {
+    return _.find(s.data, function(geoJson) {
+      if(_.has(geoJson, 'geometry.coordinates.length')) { return true; }
+    });
+  };
+
+  s.initialBoundsUpdated = false;
   s.updateBounds = function() {
     /* in case we are searching by accessionIds, we need to derive new
      * bounds before sending updated event to listeners
      * (e.g. mapController) Use Leafletjs to perform all the bounds
      * calculations and extent fitting. */
-
     var params = $location.search();
-    if(! params.accessionIds) { return; }
-
-    if(s.initialBoundsUpdated || s.data.length == 0) {
-      return;
-    }
-    var anyGeolocatedAccession = _.find(s.data, function(geoJson) {
-      if(_.has(geoJson, 'geometry.coordinates.length')) {
-        return true;
-      }
-    });
-    if( ! anyGeolocatedAccession) {
-      return;
-    }
-    var point = L.latLng(anyGeolocatedAccession.geometry.coordinates[1],
-                         anyGeolocatedAccession.geometry.coordinates[0]);
+    var accessionIds = _.get(params, 'accessionIds');
+    if( ! accessionIds) { return; }
+    if(s.initialBoundsUpdated || s.data.length == 0) { return; }
+    var geocodedAcc = s.getAnyGeocodedAccession();
+    if( ! geocodedAcc) { return; }
+    var point = L.latLng(geocodedAcc.geometry.coordinates[1],
+                         geocodedAcc.geometry.coordinates[0]);
     var bounds = L.latLngBounds(point, point);
     _.each(s.data, function(geoJson) {
       if(_.has(geoJson, 'geometry.coordinates.length')) {

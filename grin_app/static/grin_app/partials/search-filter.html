@@ -119,9 +119,10 @@
       
       <tr>
 	<td>
-	<span ng-if="model.traitOverlay"
-	      class="glyphicon glyphicon-asterisk" aria-hidden="true"></span>
-	Overlay Characterization and Evaluation Data:
+	  <span ng-if="model.traitOverlay"
+		class="glyphicon glyphicon-asterisk" aria-hidden="true"></span>
+	  
+	  Overlay Characterization and Evaluation Data
 	
 	  <button ng-click="onTraitOverlayExample()"
 		  class="btn btn-xs btn-default">
@@ -133,14 +134,24 @@
 	<td>
 	  <form class="form-inline" ng-submit="onOK()">
 	    <select class="form-control"
+		    ng-disabled="! model.taxonQuery"
 		    ng-model="model.traitOverlay">
-	      <option value="">Descriptor Name</option>
+	      
+	      <option value=""
+		      ng-if="! model.taxonQuery">(no taxon selected)</option>
+	      
+	      <option value=""
+		      ng-if="model.taxonQuery">
+		Select trait for {{model.taxonQuery}}
+	      </option>
+	      
 	      <option ng-repeat="name in model.traitDescriptors"
 		      value="{{name}}">
 		{{name}}
 	      </option>
 	    </select>
-	    <button type="submit" class="btn btn-sm btn-default">
+	    <button type="submit" class="btn btn-sm btn-default"
+		    ng-disabled="! model.taxonQuery">
 	      <span class="glyphicon glyphicon-search"
 		    aria-hidden="true"></span>
 	      Go

@@ -1,3 +1,12 @@
+<!-- this div for development/testing only  -->
+<div ng-repeat="(k,v) in model.legumeGenera">
+  <span style="display: inline-block"
+	ng-style="{'background-color': v}">
+    {{v}}
+  </span>
+  {{k}}
+</div>
+
 <button id="change-base-map-btn"
 	class="btn btn-sm btn-default"
 	ng-click="model.baseMapSelect = true; model.geoCoordsSelect = false;">

@@ -7,6 +7,10 @@
      style="margin-top: 0.5rem"
      ng-if="! model.geoJson.updating && ! model.geoJson.data.length">
 
+   <button type="button" class="close" data-dismiss="alert">
+    <span aria-hidden="true">&times;</span>
+   </button>
+   
   <span ng-if="model.$location.search().taxonQuery && model.$location.search().limitToMapExtent">
     <strong>{{model.$location.search().taxonQuery}}</strong> :
     No results found for this query, within the current map extent.
@@ -19,14 +23,21 @@
     No results found within the current map extent. Try zooming out, or view
     a different region.
   </span>
+ 
 </div>
 
 <div class="alert alert-warning" style="margin-top: 0.5rem"
      ng-if="! model.geoJson.updating && model.geoJson.data.length == model.$location.search().maxRecs">
+  
+  <button type="button" class="close" data-dismiss="alert">
+    <span aria-hidden="true">&times;</span>
+  </button>
+  
   <strong>Results: {{model.geoJson.data.length}}</strong>
   Your max # of results are listed below, but may appear to be
   clustered at the center of the map. Try zooming the map in,
   change search parameters, or increase the max # of results.
+
 </div>
 
 <div style="margin-top: 0.5rem"
@@ -88,6 +99,22 @@
       </td>
     </tr>
   </table>
+
+  <span ng-if="model.showAssistiveButton">
+    Suggested searches:
+    
+  <button ng-click="onAssistiveButtonTaxonNearby()"
+	  class="btn btn-primary">
+    Nearby {{model.showAssistiveText}} accessions
+  </button>
+  
+  <button ng-click="onAssistiveButtonAllNearby()"
+	  class="btn btn-primary">
+    Nearby accessions, all taxa
+  </button>
+  
+  </span>
+
 </div>
 
 <script type="text/ng-template"
