@@ -19,11 +19,14 @@
     <strong>{{model.$location.search().taxonQuery}}</strong> : 
     No results found for this query.
   </span>
-  <span ng-if="! model.$location.search().taxonQuery">
-    No results found within the current map extent. Try zooming out, or view
-    a different region.
+  <span ng-if="! model.$location.search().taxonQuery && ! model.$location.search().country">
+    No results found in current map extent.
+    Try zooming out, or view a different region.
   </span>
- 
+  <span ng-if="! model.$location.search().taxonQuery && model.$location.search().country">
+    No accessions with geographic coordinates found
+    for {{model.$location.search().country}}.
+  </span>
 </div>
 
 <div class="alert alert-warning" style="margin-top: 0.5rem"

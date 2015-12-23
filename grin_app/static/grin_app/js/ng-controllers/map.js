@@ -112,7 +112,15 @@ function($scope, $state, $timeout, $location, geoJsonService) {
       // remove previous map markers, and then update with the new geojson
       $scope.model.geoJsonLayer.clearLayers();
       $scope.model.geoJsonLayer.addData($scope.model.geoJsonService.data);
-      
+
+      // check if all accessions are outside of bounds, if so then update
+      if(getVisibleMarkerCount() === 0) {
+	var b = geoJsonService.getBoundsOfGeoJSONPoints();
+	if(b && '_southWest' in b) {
+	  geoJsonService.setBounds(b, false);
+	  $scope.model.map.fitBounds(b);
+	}
+      }
       $timeout(addMaxResultsSymbology, 0);
       $timeout(fixMarkerZOrder, 0);
     });
@@ -211,6 +219,17 @@ function($scope, $state, $timeout, $location, geoJsonService) {
     }
   }
 
+  function getVisibleMarkerCount() {
+    var bounds = $scope.model.map.getBounds();
+    var ct = 0;
+    $scope.model.geoJsonLayer.eachLayer(function(marker) {
+      if (bounds.contains(marker.getLatLng())) {
+        ct++;
+      }
+    });
+    return ct;
+  }
+  
   function filterNonGeocoded(featureData, layer) {
     /* GeoJson spec allows null coordinates (e.g. non-geocoded
      * accessions in our situation). However leafletjs errors on the

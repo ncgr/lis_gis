@@ -210,7 +210,8 @@
 	      Limit to accessions in:
 	    </label>
 	    <select class="form-control"
-		    ng-model="model.country">
+		    ng-model="model.country"
+		    ng-change="onCountry(model.country)">
 	      <option value="">Country</option>
 	      
 	      <option ng-repeat="country in model.countries"

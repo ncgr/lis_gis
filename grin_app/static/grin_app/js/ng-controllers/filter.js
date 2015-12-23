@@ -48,6 +48,7 @@ function($scope, $state, $http, $location, geoJsonService) {
     $scope.model.autofocusField = null;
     $scope.model.alert = null;
     $scope.model.searchOptions = false;
+    geoJsonService.setGeocodedAccessionsOnly($scope.model.country !==null, false);
     geoJsonService.setMaxRecs($scope.model.maxRecs, false);
     geoJsonService.setLimitToMapExtent($scope.model.limitToMapExtent, false);
     geoJsonService.setTaxonQuery($scope.model.taxonQuery, false);
@@ -56,53 +57,22 @@ function($scope, $state, $http, $location, geoJsonService) {
     geoJsonService.setTraitOverlay($scope.model.traitOverlay, false);
     geoJsonService.search();
   };
-
-  $scope.onAccessionIds = function(s) {
-    $scope.model.limitToMapExtent = false;
-    geoJsonService.setLimitToMapExtent(false, false);
-    geoJsonService.setAccessionIds(s, true);
-    $scope.model.alert = null;
-    $scope.model.searchOptions = false;
-  };
-  
-  $scope.onSetMaxRecs = function(max) {
-    geoJsonService.setMaxRecs(Number(max), true);
-    $scope.model.alert = null;
-    $scope.model.searchOptions = false;
-  };
-
-  $scope.onLimitToMapExtent = function(bool) {
-    geoJsonService.setLimitToMapExtent(bool, true);
-    $scope.model.searchOptions = false;
-  };
-
-  $scope.onTaxonQuery = function(q) {
-    $scope.model.autofocusField = null;
-    $scope.model.alert = null;
-    $scope.model.searchOptions = false;    
-    geoJsonService.setTaxonQuery(q, true);
-  };
-
-   $scope.onTraitOverlay = function(q) {
-     $scope.model.autofocusField = null;
-     $scope.model.alert = null;
-     $scope.model.searchOptions = false;
-     geoJsonService.setTraitOverlay(q, true);
-  };
-  
-  $scope.onSetCountry = function(cty) {
-    $scope.model.alert = null;
-    $scope.model.searchOptions = false;    
-    geoJsonService.setCountry(cty, true);
-  };
-  
+ 
   $scope.onRemoveMaxResults = function() {
     $scope.model.autofocusField = 'maxRecs';
     $scope.model.searchOptions = true;
     $scope.model.alert='Max results: You can set the limit of search results, '+
       ' but cannot remove the limit.';
   };
- 
+
+  $scope.onCountry = function(country) {
+    if(country) {
+      $scope.model.limitToMapExtent = false;
+      geoJsonService.setGeocodedAccessionsOnly(true, false);
+      geoJsonService.setLimitToMapExtent(false, false);
+    }
+  };
+  
   $scope.init();
   
 });

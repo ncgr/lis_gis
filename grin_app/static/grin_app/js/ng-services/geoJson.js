@@ -35,6 +35,9 @@ function($http, $rootScope, $location, $timeout) {
     if(! ('country' in params)) {
       $location.search('country', '');
     }
+    if(! ('geocodedOnly' in params)) {
+      $location.search('geocodedOnly', false);
+    }
     if (! ('lng' in params)) {
       $location.search('lat', DEFAULT_CENTER.lat);
       $location.search('lng', DEFAULT_CENTER.lng);
@@ -84,6 +87,7 @@ function($http, $rootScope, $location, $timeout) {
         sw_lat : s.bounds._southWest.lat,
         sw_lng : s.bounds._southWest.lng,
         limit_geo_bounds : params.limitToMapExtent,
+	geocoded_only : params.geocodedOnly,
         country : params.country,
         accession_ids : params.accessionIds,
 	trait_overlay : params.traitOverlay,
@@ -93,6 +97,16 @@ function($http, $rootScope, $location, $timeout) {
       function(resp) {
         // success handler;
         s.data = resp.data;
+
+	if(s.data.length === 0 && params.geocodedOnly) {
+	  // retry search with geocodedOnly off (to support edge case
+	  // e.g. when searching by some countries which only have
+	  // non-geographic accessions.)
+	  params.geocodedOnly = false;
+	  $timeout(s.search, 0);
+	  return;
+	}
+	
 	s.checkForGeocodedAccessionIds();
         s.updateBounds();
 	s.updateColors();
@@ -161,6 +175,11 @@ function($http, $rootScope, $location, $timeout) {
     if(search) { s.search(); }
   };
 
+  s.setGeocodedAccessionsOnly = function(bool, search) {
+    $location.search('geocodedOnly', bool);
+    if(search) { s.search(); }
+  };
+  
   s.updateColors = function() {
     _.each(s.data, function(acc) {
       acc.properties.color = taxonChroma.get(acc.properties.taxon);
