@@ -122,12 +122,17 @@ function($http, $rootScope, $location, $timeout) {
 
   s.checkForGeocodedAccessionIds = function() {
     var params = $location.search();
-    if(! ('accessionIds' in params)) { return; }
     var geocodedAcc = s.getAnyGeocodedAccession();
     if(! geocodedAcc) {
-      $rootScope.warnings = ['None of the requested accession ids (' +
-	     params.accessionIds + ') have geographic \
-             coordinates, so they will not appear on the map browser'];
+      if(params.accessionIds) {
+	$rootScope.warnings = ['None of the requested accession ids (' +
+	       params.accessionIds + ') have geographic \
+               coordinates, so they will not appear on the map.'];
+      }
+      else if(params.country) {
+	$rootScope.warnings = ['None of the matching accessions have \
+          geographic coordinates, so they will not appear on the map.'];
+      }
     }
   };
   
