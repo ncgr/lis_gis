@@ -56,6 +56,10 @@ GRIN_ACC_WHERE_FRAGS = {
         'include' : lambda p: p.get('country', None),
         'sql' : 'origcty = %(country)s',
     },
+    'geocoded_only' : {
+        'include' : lambda p: p.get('limit_geo_bounds', None) == 'true' or p.get('geocoded_only', None) == 'true',
+        'sql' : 'latdec <> 0 AND longdec <> 0',
+    },
     'accession_ids' : {
         'include' : lambda p: p.get('accession_ids', None),
         'sql' : 'accenumb = ANY( %(accession_ids)s )',
