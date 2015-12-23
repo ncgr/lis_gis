@@ -163,6 +163,13 @@ function($scope, $state, $timeout, $location, geoJsonService) {
   
   $scope.onSetCenter = function() {
     // user updated lat/long form values
+    
+    // cancel searching by accession id, or country, because
+    // otherwise the map will revert to the accession's bounds instead
+    // of the requested center.
+    geoJsonService.setAccessionIds(null, false);
+    geoJsonService.setCountry(null, false);
+    
     $scope.model.map.panTo($scope.model.center);
     $scope.model.geoCoordsSelect = false;
   };
@@ -170,6 +177,13 @@ function($scope, $state, $timeout, $location, geoJsonService) {
   $scope.onGeoLocate = function() {
     // user hit go to my location button
     if (navigator.geolocation) {
+
+      // cancel searching by accession id, or country, because
+      // otherwise the map will revert to the accession's bounds
+      // instead of the requested center.
+      geoJsonService.setAccessionIds(null, false);
+      geoJsonService.setCountry(null, false);
+
       navigator.geolocation.getCurrentPosition(function(position) {
 	$scope.model.center = {
 	  lat : position.coords.latitude,
