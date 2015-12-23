@@ -5,7 +5,6 @@ function($http, $rootScope, $location, $timeout) {
   var ALT_CENTER = { 'lat' : 0, 'lng' : 0 };
   var MAX_RECS = 200;
   var DEFAULT_ZOOM = 6;
-  var MAX_INT = Math.pow(2, 53) - 1;
   
   var s = {}; // service/singleton we will construct & return
   
