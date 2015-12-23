@@ -55,7 +55,7 @@ function($scope, $state, $timeout, $location, geoJsonService) {
       'zoom' : $location.search().zoom,
     });
     geoJsonService.map = $scope.model.map;
-
+    
     // add the default basemap
     $scope.model.baseMapLayer = $scope.model.baseMaps[DEFAULT_BASEMAP]();
     $scope.model.baseMapLayer.addTo($scope.model.map);
@@ -70,10 +70,10 @@ function($scope, $state, $timeout, $location, geoJsonService) {
 	  weight: 1,
 	  opacity: 1,
 	  fillOpacity: 1,
-	});
+	}).bindLabel(getMouseOverLabel(feature));
       },
       onEachFeature: function (feature, layer) {
-	// bind a popup to each 
+	// bind a popup to each feature
 	var content = feature.properties.accenumb +
 	    '<br/>' + feature.properties.taxon;
 	var popup = L.popup();
@@ -186,6 +186,15 @@ function($scope, $state, $timeout, $location, geoJsonService) {
     app.tour();
   };
 
+  function get2CharAbbrev(feature) {
+    var species = feature.properties.taxon.split(' ')[1];
+    return species.substring(0,2);
+  }
+  
+  function getMouseOverLabel(feature) {
+    return feature.properties.accenumb + ' (' + feature.properties.taxon + ')';
+  }
+    
   function fixMarkerZOrder() {
     // workaround for leaflet not having correct z ordering for
     // the layers as added
