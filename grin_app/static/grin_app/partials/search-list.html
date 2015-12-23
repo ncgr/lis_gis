@@ -92,7 +92,7 @@
 		aria-hidden="true"></span>
 	</button>
       </td>
-      <td ng-bind-html="rec.properties.collsite">
+      <td class="trim-ellipsis" ng-bind-html="rec.properties.collsite">
       </td>
       <td class="nowrap">{{rec.properties.acqdate}}</td>
       <td class="nowrap">
@@ -199,7 +199,8 @@
       </tr>
       <tr ng-if="model.acc.properties.collsite">
 	<td>collsite</td>
-	<td ng-bind-html="model.acc.properties.collsite"></td>
+	<td ng-bind-html="model.acc.properties.collsite">
+	</td>
       </tr>
       <tr ng-if="model.acc.geometry.coordinates">
 	<td>geographic coordinates</td>

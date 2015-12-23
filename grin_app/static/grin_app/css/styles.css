@@ -13,4 +13,14 @@
 .hilite-row { 
     background: #fff380 !important;
     border: 3px dashed #aaa;
-}   
+}
+
+.trim-ellipsis {
+    max-width: 20rem;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;  
+    line-height: 15px;
+    position: relative;
+}
