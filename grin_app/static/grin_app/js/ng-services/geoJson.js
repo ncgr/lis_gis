@@ -1,8 +1,8 @@
 app.service('geoJsonService',
 function($http, $rootScope, $location, $timeout) {
   
-  var DEFAULT_CENTER = { 'lat' : 21.15, 'lng' : 80.42 };
-  var ALT_CENTER = { 'lat' : 0, 'lng' : -179 };
+  var DEFAULT_CENTER = { 'lat' : 35.87, 'lng' : -109.47 };
+  var ALT_CENTER = { 'lat' : 0, 'lng' : 0 };
   var MAX_RECS = 200;
   var DEFAULT_ZOOM = 6;
   var MAX_INT = Math.pow(2, 53) - 1;
@@ -19,7 +19,36 @@ function($http, $rootScope, $location, $timeout) {
   s.events = ['updated', 'willUpdate'];
   
   s.init = function() {
-    setDefaults();
+    // set default search values on $location service
+    var params = $location.search();
+    if(! ('limitToMapExtent' in params) &&
+       ! ('accessionIds' in params)) {
+      $location.search('limitToMapExtent', true);
+    }
+    if(! ('zoom' in params)) {
+      $location.search('zoom', DEFAULT_ZOOM);
+    }
+    if(! ('maxRecs' in params)) {
+      $location.search('maxRecs', MAX_RECS);
+    }
+    if(! ('taxonQuery' in params)) {
+      $location.search('taxonQuery', '');
+    }
+    if(! ('country' in params)) {
+      $location.search('country', '');
+    }
+    if('accessionIds' in params) {
+      if (! ('lng' in params)) {
+	$location.search('lat', ALT_CENTER.lat);
+	$location.search('lng', ALT_CENTER.lng);
+      }
+    }
+    else {
+      if (! ('lng' in params)) {
+	$location.search('lat', DEFAULT_CENTER.lat);
+	$location.search('lng', DEFAULT_CENTER.lng);
+      }
+    }
   };
   
   s.getBoundsOfGeoJSONPoints = function() {
@@ -58,9 +87,7 @@ function($http, $rootScope, $location, $timeout) {
       function(resp) {
         // success handler;
         s.data = resp.data;
-        if(params.accessionIds) {
-          s.updateBounds();
-        }
+        s.updateBounds();
 	s.updateColors();
         s.updating = false;
         s.notify('updated');
@@ -72,8 +99,6 @@ function($http, $rootScope, $location, $timeout) {
       });
   };
 
-
- 
   s.setBounds = function(bounds, doSearch) {
     if(s.bounds.equals(bounds) && s.data.length > 0) {
       // early out if the bounds is already set to same, and we have results
@@ -127,11 +152,14 @@ function($http, $rootScope, $location, $timeout) {
   };
   
   s.updateBounds = function() {
-    /* in case we are searching by accessionIds, need to derive new
+    /* in case we are searching by accessionIds, we need to derive new
      * bounds before sending updated event to listeners
      * (e.g. mapController) Use Leafletjs to perform all the bounds
-     * calculations and extent fitting.
-     */
+     * calculations and extent fitting. */
+
+    var params = $location.search();
+    if(! params.accessionIds) { return; }
+
     if(s.initialBoundsUpdated || s.data.length == 0) {
       return;
     }
@@ -172,46 +200,6 @@ function($http, $rootScope, $location, $timeout) {
   s.notify = function(eventName) {
     $rootScope.$emit('geoJsonService_'+eventName);
   };
-
-  function setDefaults() {
-    // set default search values on $location service
-    var searchParams = $location.search();
-    if(! _.has(searchParams, 'limitToMapExtent') &&
-       ! _.has(searchParams, 'accessionIds')) {
-      $location.search('limitToMapExtent', true);
-    }
-    if(! _.has(searchParams, 'zoom')) {
-      $location.search('zoom', DEFAULT_ZOOM);
-    }
-    if(! _.has(searchParams, 'maxRecs')) {
-      $location.search('maxRecs', MAX_RECS);
-    }
-    if(! _.has(searchParams, 'taxonQuery')) {
-      $location.search('taxonQuery', '');
-    }
-    if(! _.has(searchParams, 'country')) {
-      $location.search('country', '');
-    }
-    if(! _.has(searchParams, 'lat')) {
-      if(_.has(searchParams, 'accessionIds')) {
-        $location.search('lat', ALT_CENTER.lat);        
-      }
-      else {
-        $location.search('lat', DEFAULT_CENTER.lat);
-      }
-    }
-    if(! _.has(searchParams, 'lng')) {
-      if(_.has(searchParams, 'accessionIds')) {
-        $location.search('lng', ALT_CENTER.lng);        
-      }
-      else {
-        $location.search('lng', DEFAULT_CENTER.lng);
-      }
-    }
-    if(! _.has(searchParams, 'accessionIds')) {
-      $location.search('accessionIds', '');
-    }
-  }
   
   s.init();
     
