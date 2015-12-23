@@ -86,7 +86,7 @@
 		class="glyphicon glyphicon-asterisk" aria-hidden="true"></span>
 	  
 	  Search Taxon:
-	  <button ng-click="model.taxonQuery = 'Arachis hypogaea'; model.limitToMapExtent = false;"
+	  <button ng-click="model.taxonQuery = 'Arachis hypogaea'; model.limitToMapExtent = false; model.country = null; model.accessionIds = null;"
 		  class="btn btn-xs btn-default">
 	    <span class="glyphicon glyphicon-question-sign"
 		  aria-hidden="true"></span>
@@ -166,7 +166,7 @@
 	      class="glyphicon glyphicon-asterisk" aria-hidden="true"></span>
 
 	  Search Accession IDs:
-	  <button ng-click="model.accessionIds = 'PI 494798,PI 490297'; model.limitToMapExtent = false;"
+	  <button ng-click="model.accessionIds = 'PI 494798,PI 490297'; model.limitToMapExtent = false; model.country = null; model.taxonQuery = null;"
 		  class="btn btn-xs btn-default">
 	    <span class="glyphicon glyphicon-question-sign"
 		  aria-hidden="true"></span>
