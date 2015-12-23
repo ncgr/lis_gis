@@ -10,23 +10,9 @@
    <button type="button" class="close" data-dismiss="alert">
     <span aria-hidden="true">&times;</span>
    </button>
+
+   No results found for this query.
    
-  <span ng-if="model.$location.search().taxonQuery && model.$location.search().limitToMapExtent">
-    <strong>{{model.$location.search().taxonQuery}}</strong> :
-    No results found for this query, within the current map extent.
-  </span>
-  <span ng-if="model.$location.search().taxonQuery && ! model.$location.search().limitToMapExtent">
-    <strong>{{model.$location.search().taxonQuery}}</strong> : 
-    No results found for this query.
-  </span>
-  <span ng-if="! model.$location.search().taxonQuery && ! model.$location.search().country">
-    No results found in current map extent.
-    Try zooming out, or view a different region.
-  </span>
-  <span ng-if="! model.$location.search().taxonQuery && model.$location.search().country">
-    No accessions with geographic coordinates found
-    for {{model.$location.search().country}}.
-  </span>
 </div>
 
 <div class="alert alert-warning" style="margin-top: 0.5rem"
