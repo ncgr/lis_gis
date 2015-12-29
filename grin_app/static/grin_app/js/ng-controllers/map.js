@@ -113,14 +113,6 @@ function($scope, $state, $timeout, $location, geoJsonService) {
       $scope.model.geoJsonLayer.clearLayers();
       $scope.model.geoJsonLayer.addData($scope.model.geoJsonService.data);
 
-      // check if all accessions are outside of bounds, if so then update
-      if(getVisibleMarkerCount() === 0) {
-	var b = geoJsonService.getBoundsOfGeoJSONPoints();
-	if(b && '_southWest' in b) {
-	  geoJsonService.setBounds(b, false);
-	  $scope.model.map.fitBounds(b);
-	}
-      }
       $timeout(addMaxResultsSymbology, 0);
       $timeout(fixMarkerZOrder, 0);
     });
@@ -148,6 +140,14 @@ function($scope, $state, $timeout, $location, geoJsonService) {
     });
     
     geoJsonService.setBounds($scope.model.map.getBounds(), true);
+  };
+
+  $scope.onZoomToAccessions = function() {
+    var b = geoJsonService.getBoundsOfGeoJSONPoints();
+    if(b && '_southWest' in b) {
+      geoJsonService.setBounds(b, false);
+      $scope.model.map.fitBounds(b);
+    }
   };
   
   $scope.onSelectBaseMap = function(name) {
@@ -242,7 +242,7 @@ function($scope, $state, $timeout, $location, geoJsonService) {
     }
   }
 
-  function getVisibleMarkerCount() {
+  $scope.getVisibleMarkerCount = function() {
     var bounds = $scope.model.map.getBounds();
     var ct = 0;
     $scope.model.geoJsonLayer.eachLayer(function(marker) {

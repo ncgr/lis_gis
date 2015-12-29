@@ -110,3 +110,24 @@
 <div id="map" style="margin-top: 0.2rem;">
 </div>
 
+
+<div class="alert alert-info"
+     style="margin-top: 0.5rem"
+     ng-if="(! getVisibleMarkerCount()) && model.geoJsonService.data.length">
+
+   <button type="button" class="close" data-dismiss="alert">
+    <span aria-hidden="true">&times;</span>
+   </button>
+
+   <strong>Please note:</strong>
+
+   {{model.geoJsonService.data.length}} results are in your query, but
+   are not visible on the map.
+   
+   <button type="button"
+	   class="btn btn-sm btn-primary"
+	   ng-click="onZoomToAccessions()">
+     Zoom map to view these accessions
+   </button>
+   
+</div>
