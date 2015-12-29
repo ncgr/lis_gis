@@ -72,7 +72,15 @@ function($scope, $state, $http, $location, geoJsonService) {
       geoJsonService.setLimitToMapExtent(false, false);
     }
   };
-  
+
+  $scope.onExampleAccessions = function() {
+    $scope.model.limitToMapExtent = false;
+    $scope.model.country = null;
+    $scope.model.taxonQuery = null;
+    $scope.model.accessionIds = 'PI 257413,W6 36352,PI 257412,PI 257416,\
+      PI 661801,PI 642123,W6 17477,W6 36350';
+  };
+
   $scope.init();
   
 });
