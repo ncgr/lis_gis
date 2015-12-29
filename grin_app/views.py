@@ -8,7 +8,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import HttpResponseNotFound
 from django.http import HttpResponseServerError
-from django.core.context_processors import csrf
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.core.serializers.json import DjangoJSONEncoder
 
 SRID = 4326  # this needs to match the SRID on the location field in psql.
@@ -91,12 +91,14 @@ GRIN_EVAL_WHERE_FRAGS = {
 }
 
 
+@ensure_csrf_cookie
 def index(req):
     '''Render the index template, which will boot up angular-js.
     '''
     return render(req, 'grin_app/index.html')
 
 
+@ensure_csrf_cookie
 def evaluation_descr_names(req):
     '''Return JSON for all distinct trait descriptor names'''
     assert req.method == 'GET', 'GET request method required'
@@ -113,6 +115,59 @@ def evaluation_descr_names(req):
     return response
 
 
+@ensure_csrf_cookie
+def evaluation_search(req):
+    '''Return JSON array of observation_value for all trait records
+    matching a set of accession ids, and matching the descriptor_name
+    field. Used for creating a map overlay of trait data.
+
+    '''
+    assert req.method == 'POST', 'POST request method required'
+    params = json.loads(req.body)
+    assert 'accession_ids' in params, 'missing accession_ids param'
+    assert 'descriptor_name' in params, 'missing descriptor_name param'
+    sql = '''
+    SELECT accenumb, descriptor_name, observation_value
+     FROM lis_germplasm.legumes_grin_evaluation_data
+     WHERE descriptor_name = %(descriptor_name)s 
+     AND accenumb IN %(accession_ids)s
+    '''
+    sql_params = {
+        'descriptor_name' : params['descriptor_name'],
+        'accession_ids' : tuple(params['accession_ids'])
+    }
+    cursor = connection.cursor()
+    logger.info(cursor.mogrify(sql, sql_params))
+    cursor.execute(sql, sql_params)
+    rows = _dictfetchall(cursor)
+    # observation_value is a string field, so cast to int or float as necessary
+    rows_clean = []
+    for row in rows:
+        row['observation_value'] = _string2num(row['observation_value'])
+        rows_clean.append(row)
+    result = json.dumps(rows_clean, use_decimal=True)
+    response = HttpResponse(result, content_type='application/json')
+    return response
+
+def _string2num(s):
+    '''
+    Convert a strint to int or float if possible
+    '''
+    intval = None
+    floatval = None
+    try:
+        intval = int(s)
+    except ValueError:
+        pass
+    if not intval:
+        try:
+            floatval = float(s)
+        except ValueError:
+            pass
+    return floatval or intval or s
+
+
+@ensure_csrf_cookie
 def evaluation_detail(req):
     '''Return JSON for all evalation/trait records matching this accession id
     '''
@@ -166,6 +221,7 @@ def evaluation_detail(req):
     return response
     
 
+@ensure_csrf_cookie
 def accession_detail(req):
     '''Return JSON for all columns for a accession id.'''
     assert req.method == 'GET', 'GET request method required'
@@ -182,6 +238,7 @@ def accession_detail(req):
     return _acc_search_response(rows)
 
 
+@ensure_csrf_cookie
 def countries(req):
     '''Return a json array of countries for search filtering ui.'''
     cursor = connection.cursor()
@@ -198,6 +255,7 @@ def countries(req):
     return response
 
 
+@ensure_csrf_cookie
 def search(req):
     '''Search by map bounds and return GeoJSON results.'''
     assert req.method == 'GET', 'GET request method required'

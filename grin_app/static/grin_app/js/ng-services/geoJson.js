@@ -9,6 +9,8 @@ function($http, $rootScope, $location, $timeout) {
   
   s.updating = false;
   s.data = []; // an array of geoJson features
+  s.traitData = []; // an array of json with observation_values
+  s.traitHash = {}; // lookup hash for accenumb to array of obs. values
   s.map = null; // the leaflet map, Note: this belongs to
                 // mapController! don't update within in this service.
   s.bounds = L.latLngBounds(L.latLng(0,0), L.latLng(0,0));
@@ -72,11 +74,23 @@ function($http, $rootScope, $location, $timeout) {
     var bounds = new L.LatLngBounds(boundsArr);
     return bounds;
   };
+
+
+  function postProcessSearch() {
+    s.checkForGeocodedAccessionIds();
+    s.updateBounds();
+    s.updateColors();
+    s.updating = false;
+    s.notify('updated');
+  }
   
   s.search = function() {
     $rootScope.errors = [];
     $rootScope.warnings = [];
     s.updating = true;
+    s.data = [];
+    s.traitData = [];
+    s.traitHash = {};
     var params = $location.search();
     
     $http({
@@ -99,7 +113,6 @@ function($http, $rootScope, $location, $timeout) {
       function(resp) {
         // success handler;
         s.data = resp.data;
-
 	if(s.data.length === 0 && params.geocodedOnly) {
 	  // retry search with geocodedOnly off (to support edge case
 	  // e.g. when searching by some countries which only have
@@ -108,12 +121,29 @@ function($http, $rootScope, $location, $timeout) {
 	  $timeout(s.search, 0);
 	  return;
 	}
-	
-	s.checkForGeocodedAccessionIds();
-        s.updateBounds();
-	s.updateColors();
-        s.updating = false;
-        s.notify('updated');
+	if(params.traitOverlay) {
+	  $http({
+	    url : API_PATH + '/evaluation_search',
+	    method : 'POST',
+	    data : {
+              accession_ids : getAccessionIds(),
+	      descriptor_name : params.traitOverlay,
+	    }
+	  }).then(
+	    function(resp) {
+	      // success handler
+	      s.traitData = resp.data;
+	      postProcessSearch();
+	    },
+	    function(resp) {
+	      // error handler
+	      console.log(resp);
+	    }
+	  );
+	}
+	else {
+	  postProcessSearch();
+	}
       },
       function(resp) {
         // error handler
@@ -122,6 +152,13 @@ function($http, $rootScope, $location, $timeout) {
       });
   };
 
+  function getAccessionIds() {
+    // return array an of accession ids in the current geojson data set
+    return _.map(s.data, function(d) {
+      return d.properties.accenumb;
+    });
+  }
+  
   s.checkForGeocodedAccessionIds = function() {
     var params = $location.search();
     var geocodedAcc = s.getAnyGeocodedAccession();
@@ -188,9 +225,51 @@ function($http, $rootScope, $location, $timeout) {
   };
   
   s.updateColors = function() {
-    _.each(s.data, function(acc) {
-      acc.properties.color = taxonChroma.get(acc.properties.taxon);
-    });
+    if($location.search().traitOverlay) {
+      s.traitHash = {};
+      // use a custom color scheme with a range of the selected trait
+      var max = 0;
+      // iterate the trait results once, to build a lookup table, and
+      // find the min/max observation value
+      var min = _.min(s.traitData, function(d) {
+	//console.log(d);
+	if(s.traitHash[d.accenumb]) {
+	  s.traitHash[d.accenumb].push([d.observation_value]);
+	}
+	else {
+	  s.traitHash[d.accenumb] = [d.observation_value];
+	}
+	if(d.observation_value > max) {
+	  max = d.observation_value;
+	}
+	return d.observation_value;
+      }).observation_value;
+      //console.log('min: ' + min);
+      //console.log('max: ' + max);
+      var scale = chroma.scale('Spectral').domain([max,min]);
+      //var scale = chroma.cubehelix().scale().domain([min,max]);
+      _.each(s.data, function(acc) {
+	var accNum = acc.properties.accenumb;
+	var traitValues = s.traitHash[acc.properties.accenumb];
+	if(traitValues !== undefined) {
+	  // it is not unusual to have multiple observations, so just
+	  // average them-- possible there is a better way to handle this case
+	  var avg = _.sum(traitValues, function(d) {
+	    return d;
+	  }) / traitValues.length;
+	  acc.properties.color = scale(avg);
+	} else {
+	  acc.properties.color = taxonChroma.defaultColor;
+	}
+	//console.log(accNum + ' ' + traitValue + ' ->' + acc.properties.color);
+      });
+    }
+    else {
+      // use default color scheme from taxonChroma
+      _.each(s.data, function(acc) {
+	acc.properties.color = taxonChroma.get(acc.properties.taxon);
+      });
+    }
   };
 
   s.getAnyGeocodedAccession = function() {

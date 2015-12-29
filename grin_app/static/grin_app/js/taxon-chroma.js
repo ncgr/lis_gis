@@ -31,7 +31,7 @@ var taxonChroma = {};
   var MIN_LIGHTNESS = 0.3;
   var moreBrewerColors = chroma.brewer.Set2; 
   
-  this.defaultColor = 'lightgrey'; // used for non-legume genera
+  this.defaultColor = '#d3d3d3'; // used for non-legume genera
 
   // some of these colors are carried over from the colors.json file
   // from the pholylotree module. they are all cbrewer classification

@@ -20,7 +20,7 @@ function($scope, $state, $http, $location, geoJsonService) {
     country : searchParams.country,
     taxonQuery : searchParams.taxonQuery,
     accessionIds : searchParams.accessionIds,
-    traitOverlay : null,
+    traitOverlay : searchParams.traitOverlay,
   };
   
   $scope.init = function() {
@@ -81,6 +81,14 @@ function($scope, $state, $http, $location, geoJsonService) {
       PI 661801,PI 642123,W6 17477,W6 36350';
   };
 
+  $scope.onTraitOverlayExample = function() {
+    $scope.model.limitToMapExtent = false;
+    $scope.model.country = null;
+    $scope.model.accessionIds = null;
+    $scope.model.taxonQuery = 'Phaseolus vulgaris';
+    $scope.model.traitOverlay = 'SEEDWGT';
+  };
+  
   $scope.init();
   
 });

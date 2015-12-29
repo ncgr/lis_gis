@@ -9,6 +9,7 @@ var app = angular.module('grin',
 			  'ui.router']);
 
 app.config(function($httpProvider, $stateProvider, $sceProvider) {
+  
   $stateProvider
     .state('search', {
       reloadOnSearch : true,
@@ -69,6 +70,8 @@ app.config(function($httpProvider, $stateProvider, $sceProvider) {
     
   $httpProvider.interceptors.push(httpErrorInterceptor);
   $httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+  $httpProvider.defaults.xsrfCookieName = 'csrftoken';
+  $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
 
 });
 
@@ -83,15 +86,6 @@ app.filter('highlight', function($sce) {
 });
 
 app.run( function($http, $cookies, $state, $rootScope) {
-  var csrfTokenKey = 'csrftoken';
-  var csrfHeader = 'X-CSRFToken';
-  $http.defaults.headers.post[csrfHeader] = $cookies.get(csrfTokenKey)
-  // http://django-angular.readthedocs.org/en/latest/basic-crud-operations.html
-  // Another quick change is required to Angular app config, without
-  // this DELETE requests fail CSRF test. Add the following two lines
-  $http.defaults.xsrfCookieName = csrfTokenKey;
-  $http.defaults.xsrfHeaderName = csrfHeader;
-
   $state.transitionTo('search');
 });
 

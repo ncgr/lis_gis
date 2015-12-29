@@ -41,6 +41,9 @@
   <table class="table table-striped" id="results-list">
     <tr>
       <th id="tour-accession-btn">accession</th>
+      <th id="tour-trait-btn" ng-if="model.geoJson.traitHash">
+	{{ model.$location.search().traitOverlay}}
+      </th>
       <th>taxon</th>
       <th class="nowrap">crop name</th>
       <th>orig country</th>
@@ -58,6 +61,11 @@
 		ng-click="onAccessionDetail(rec.properties.accenumb)"
 		ng-bind-html="rec.properties.accenumb | highlight: model.searchHilite">
 	</button>
+      </td>
+      <td ng-if="model.geoJson.traitHash">
+	<span ng-repeat="obs in model.geoJson.traitHash[rec.properties.accenumb]">
+	  {{obs}}
+	</span>
       </td>
       <td class="nowrap">
 	<span class="badge"
