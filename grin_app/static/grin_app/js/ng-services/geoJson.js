@@ -1,5 +1,5 @@
 app.service('geoJsonService',
-function($http, $rootScope, $location, $timeout) {
+	    function($http, $rootScope, $location, $timeout, $q) {
   
   var DEFAULT_CENTER = { 'lat' : 35.87, 'lng' : -109.47 };
   var MAX_RECS = 200;
@@ -11,6 +11,7 @@ function($http, $rootScope, $location, $timeout) {
   s.data = []; // an array of geoJson features
   s.traitData = []; // an array of json with observation_values
   s.traitHash = {}; // lookup hash for accenumb to array of obs. values
+  s.traitMetadata = {};
   s.traitLegend = {}; // all the info for map.js to build a legend
 
   s.map = null; // the leaflet map, Note: this belongs to
@@ -123,7 +124,7 @@ function($http, $rootScope, $location, $timeout) {
 	  return;
 	}
 	if(params.traitOverlay && s.data.length > 0) {
-	  $http({
+	  var promise1 = $http({
 	    url : API_PATH + '/evaluation_search',
 	    method : 'POST',
 	    data : {
@@ -134,13 +135,30 @@ function($http, $rootScope, $location, $timeout) {
 	    function(resp) {
 	      // success handler
 	      s.traitData = resp.data;
-	      postProcessSearch();
 	    },
 	    function(resp) {
 	      // error handler
 	      console.log(resp);
 	    }
 	  );
+	  var promise2 = $http({
+	    url : API_PATH + '/evaluation_metadata',
+	    method : 'GET',
+	    params : {
+              genus : params.taxonQuery.split()[0],
+	      descriptor_name : params.traitOverlay,
+	    }
+	  }).then(
+	    function(resp) {
+	      // success handler
+	      s.traitMetadata = resp.data;
+	    },
+	    function(resp) {
+	      // error handler
+	      console.log(resp);
+	    }
+	  );
+	  $q.all([promise1, promise2]).then(postProcessSearch);
 	}
 	else {
 	  postProcessSearch();
@@ -227,10 +245,8 @@ function($http, $rootScope, $location, $timeout) {
 
   function colorStrategyNumericTrait() {
     // use a custom color scheme with a range of the selected trait
-    var max = 0;
-    // iterate the trait results once, to build a lookup table, and
-    // find the min/max observation value
-    var min = _.min(s.traitData, function(d) {
+    // iterate the trait results once, to build a lookup table
+    _.each(s.traitData, function(d) {
       //console.log(d);
       if(s.traitHash[d.accenumb]) {
 	s.traitHash[d.accenumb].push(d.observation_value);
@@ -238,12 +254,9 @@ function($http, $rootScope, $location, $timeout) {
       else {
 	s.traitHash[d.accenumb] = [d.observation_value];
       }
-      if(d.observation_value > max) {
-	max = d.observation_value;
-      }
-      return d.observation_value;
-    }).observation_value;
-    
+    });
+    var min = s.traitMetadata.min;
+    var max = s.traitMetadata.max;
     var scale = chroma.scale('Spectral').domain([max,min]);
     _.each(s.data, function(acc) {
       var accNum = acc.properties.accenumb;
@@ -259,9 +272,7 @@ function($http, $rootScope, $location, $timeout) {
       } else {
 	acc.properties.color = taxonChroma.defaultColor;
       }
-      //console.log(accNum + ' ' + traitValue + ' ->' + acc.properties.color);
     });
-
     var steps = 10;
     var step = (max - min)/steps;
     var legendValues = _.map(_.range(min, max + step, step), function(n) {
@@ -289,61 +300,42 @@ function($http, $rootScope, $location, $timeout) {
       }
       observedCategories.push(d.observation_value);
     });
-    var observedCategories = _.uniq(observedCategories).sort(); 
-    var presetColors = chroma.brewer.Set1
-	.concat(chroma.brewer.Set2)
-	.concat(chroma.brewer.Set3);
-    var scale = function(n) {
-      var i = _.indexOf(observedCategories, n);
-      if(i == -1 || i > presetColors.length) {
-	return taxonChroma.defaultColor;
-      }
-      return presetColors[i];
-    }
+    
     _.each(s.data, function(acc) {
       var accNum = acc.properties.accenumb;
       var traitValues = s.traitHash[acc.properties.accenumb];
       if(traitValues !== undefined) {
 	// unsure how to handle case where multiple categories were
 	// observed, so just take the 1st
-	acc.properties.color = scale(traitValues[0]);
+	var val = traitValues[0];
+	acc.properties.color = s.traitMetadata.colors[val];
 	acc.properties.haveTrait = true;
       }
       else {
 	acc.properties.color = taxonChroma.defaultColor;
       }
     });
-
-    var legendValues = _.map(observedCategories, function(n) {
+    var legendValues = _.map(_.uniq(observedCategories).sort(), function(n) {
       return  {
     	label : n,
-    	color : scale(n),
+    	color : s.traitMetadata.colors[n],
       }
     });
     s.traitLegend = {
       min : null,
       max : null,
-      colorScale : scale,
+      colorScale : null,
       values : legendValues,
     };
   }
-  
-  function detectNumericTrait() {
-    // if all the trait data is numeric, then return true. this is a
-    // bit tricky, because some observations, e.g. 'HABIT' have mixed
-    // values like 1,2,3,4,MX.
-    return _.every(s.traitData, function(d) {
-      return ! _.isString(d.observation_value);
-    });
-  }
-  
+
   s.updateColors = function() {
 
     s.traitHash = {};
     s.traitLegend = {};
 
     if($location.search().traitOverlay) {
-      if(detectNumericTrait()) {
+      if(s.traitMetadata.trait_type === 'numeric') {
 	colorStrategyNumericTrait();
       }
       else {

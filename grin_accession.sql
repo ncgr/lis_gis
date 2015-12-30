@@ -72,6 +72,5 @@ ALTER TEXT SEARCH CONFIGURATION taxon
     WITH taxon_simple;
 
 -- update fts dictionary
-UPDATE grin_accession
-       SET taxon_fts = to_tsvector('english', coalesce(taxon,''));
-       
+UPDATE lis_germplasm.grin_accession
+SET taxon_fts = to_tsvector('english', coalesce(taxon,''));

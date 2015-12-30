@@ -15,10 +15,20 @@ SRID = 4326  # this needs to match the SRID on the location field in psql.
 DEFAULT_LIMIT = 200
 TWO_PLACES = Decimal('0.01')
 ACCESSION_TAB = 'lis_germplasm.grin_accession'
-ACC_SELECT_COLS = ('gid', 'taxon', 'latdec', 'longdec', 'accenumb', 'elevation',
-               'cropname', 'collsite', 'acqdate', 'origcty')
-
-
+ACC_SELECT_COLS = (
+    'gid', 'taxon', 'latdec', 'longdec', 'accenumb', 'elevation', 'cropname',
+    'collsite', 'acqdate', 'origcty'
+)
+# Brewer nominal category colors from chroma.js set1,2,3 concatenated:
+NOMINAL_COLORS = [
+    "#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#ffff33",
+    "#a65628", "#f781bf", "#999999", "#66c2a5", "#fc8d62", "#8da0cb", 
+    "#e78ac3", "#a6d854", "#ffd92f", "#e5c494", "#b3b3b3", "#8dd3c7", 
+    "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69", 
+    "#fccde5", "#d9d9d9", "#bc80bd", "#ccebc5", "#ffed6f"
+]
+NOMINAL_THRESHOLD = 5
+DEFAULT_COLOR = 'lightgrey'
 ORDER_BY_FRAG = '''
  ORDER BY ST_Distance(
   geographic_coord::geometry,
@@ -146,9 +156,9 @@ def evaluation_search(req):
         row['observation_value'] = _string2num(row['observation_value'])
         rows_clean.append(row)
     result = json.dumps(rows_clean, use_decimal=True)
-    logger.info(result)
     response = HttpResponse(result, content_type='application/json')
     return response
+
 
 def _string2num(s):
     '''
@@ -167,6 +177,89 @@ def _string2num(s):
     except ValueError:
         pass
     return s
+
+
+@ensure_csrf_cookie
+def evaluation_metadata(req):
+    '''Return JSON with trait metadata for the given genus and trait. This
+    enables the client to display a legend, and colorize accessions by
+    either numeric or category traits.
+
+    '''
+    assert req.method == 'GET', 'GET request method required'
+    params = req.GET.dict()
+    assert 'genus' in params, 'missing genus param'
+    assert 'descriptor_name' in params, 'missing descriptor_name param'
+    cursor = connection.cursor()
+    sql = '''
+    SELECT observation_value FROM lis_germplasm.legumes_grin_evaluation_data
+    WHERE taxon LIKE %(genus)s
+    AND descriptor_name = %(descriptor_name)s
+    '''
+    params['genus'] += '%'
+    #logger.info(cursor.mogrify(sql, params))
+    cursor.execute(sql, params)
+    rows = [ _string2num(row[0]) for row in cursor.fetchall() ]
+    if _detect_numeric_trait(rows):
+        handler = _generate_numeric_trait_metadata
+    else:
+        handler = _generate_category_trait_metadata
+    rows = handler(rows, params)
+    result = json.dumps(rows, use_decimal=True)
+    response = HttpResponse(result, content_type='application/json')
+    return response
+
+
+def _generate_numeric_trait_metadata(rows, params):
+    ''' Return JSON describing numeric trait including the data set min/max.'''
+    result = {
+        'descriptor_name' : params['descriptor_name'],
+        'trait_type' : 'numeric',
+        'min' : min(rows),
+        'max' : max(rows),
+    }
+    return result
+
+
+def _generate_category_trait_metadata(rows, params):
+    '''Return JSON describing nominal categories, including pre-selected
+    colors for all values in the data.
+    '''
+    uniq = sorted(list(set(rows)))
+    colors = {}
+    num_preset_colors = len(NOMINAL_COLORS)
+    for i, val in enumerate(uniq):
+        if i < num_preset_colors:
+            colors[val] = NOMINAL_COLORS[i]
+        else:
+            colors[val] = DEFAULT_COLOR
+    result = {
+        'descriptor_name' : params['descriptor_name'],
+        'trait_type' : 'nominal',
+        'colors' : colors,
+    }
+    return result
+
+
+def _detect_numeric_trait(rows):
+    '''
+    1. If there are any strings, assume this must not be a numeric trait.
+    2. If there are only ints within a narrow range, then assume it's a
+       category trait using ints as classes.
+    3. Otherwise by default it must be numeric.
+    '''
+    strings = [ val for val in rows if isinstance(val, basestring) ]
+    if len(strings) > 0:
+        return False  # have at least one string, must not be numeric.
+    ints = [ val for val in rows if isinstance(val, int) ]
+    if len(ints) == len(rows):
+        uniq = sorted(list(set(ints)))
+        if len(uniq) < NOMINAL_THRESHOLD:
+            # this trait's observations are a small number of ints, so
+            # (perhaps) that some evidence maybe this is a category not a
+            # measurement.
+            return False
+    return True
 
 
 @ensure_csrf_cookie

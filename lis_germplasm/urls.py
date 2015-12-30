@@ -25,6 +25,7 @@ urlpatterns = [
     url(r'^evaluation_descr_names$', 'grin_app.views.evaluation_descr_names'),
     url(r'^evaluation_detail$', 'grin_app.views.evaluation_detail'),
     url(r'^evaluation_search$', 'grin_app.views.evaluation_search'),
+    url(r'^evaluation_metadata$', 'grin_app.views.evaluation_metadata'),
 
     # disabling admin site until it's actually required/used --agr
     # url(r'^admin/', include(admin.site.urls)),
