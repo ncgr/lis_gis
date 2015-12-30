@@ -11,6 +11,8 @@ function($http, $rootScope, $location, $timeout) {
   s.data = []; // an array of geoJson features
   s.traitData = []; // an array of json with observation_values
   s.traitHash = {}; // lookup hash for accenumb to array of obs. values
+  s.traitLegend = {}; // all the info for map.js to build a legend
+
   s.map = null; // the leaflet map, Note: this belongs to
                 // mapController! don't update within in this service.
   s.bounds = L.latLngBounds(L.latLng(0,0), L.latLng(0,0));
@@ -223,46 +225,131 @@ function($http, $rootScope, $location, $timeout) {
     $location.search('geocodedOnly', bool);
     if(search) { s.search(); }
   };
+
+  function colorStrategyNumericTrait() {
+    // use a custom color scheme with a range of the selected trait
+    var max = 0;
+    // iterate the trait results once, to build a lookup table, and
+    // find the min/max observation value
+    var min = _.min(s.traitData, function(d) {
+      //console.log(d);
+      if(s.traitHash[d.accenumb]) {
+	s.traitHash[d.accenumb].push(d.observation_value);
+      }
+      else {
+	s.traitHash[d.accenumb] = [d.observation_value];
+      }
+      if(d.observation_value > max) {
+	max = d.observation_value;
+      }
+      return d.observation_value;
+    }).observation_value;
+    
+    var scale = chroma.scale('Spectral').domain([max,min]);
+    _.each(s.data, function(acc) {
+      var accNum = acc.properties.accenumb;
+      var traitValues = s.traitHash[acc.properties.accenumb];
+      if(traitValues !== undefined) {
+	// it is not unusual to have multiple observations, so just
+	// average them-- possible there is a better way to handle this case
+	var avg = _.sum(traitValues, function(d) {
+	  return d;
+	}) / traitValues.length;
+	acc.properties.color = scale(avg);
+	acc.properties.haveTrait = true;	
+      } else {
+	acc.properties.color = taxonChroma.defaultColor;
+      }
+      //console.log(accNum + ' ' + traitValue + ' ->' + acc.properties.color);
+    });
+
+    var steps = 10;
+    var step = (max - min)/steps;
+    var legendValues = _.map(_.range(min, max + step, step), function(n) {
+      return  {
+	label : n.toFixed(2),
+	color : scale(n),
+      }
+    });
+    s.traitLegend = {
+      min : min,
+      max : max,
+      colorScale : scale,
+      values : legendValues,
+    };
+  }
+
+  function colorStrategyCategoryTrait() {
+    var observedCategories = [];
+    _.each(s.traitData, function(d) {
+      if(s.traitHash[d.accenumb]) {
+	s.traitHash[d.accenumb].push(d.observation_value);
+      }
+      else {
+	s.traitHash[d.accenumb] = [d.observation_value];
+      }
+      observedCategories.push(d.observation_value);
+    });
+    var observedCategories = _.uniq(observedCategories).sort();
+    
+    var scale = function(n) {
+      var categories = observedCategories;
+      var presetColors = chroma.brewer.Set1; // 9 colors
+      var i = _.indexOf(categories, n);
+      if(i == -1 || i > 8) {
+	return taxonChroma.defaultColor;
+      }
+      return presetColors[i];
+    }
+    _.each(s.data, function(acc) {
+      var accNum = acc.properties.accenumb;
+      var traitValues = s.traitHash[acc.properties.accenumb];
+      if(traitValues !== undefined) {
+	// unsure how to handle case where multiple categories were
+	// observed, so just take the 1st
+	acc.properties.color = scale(traitValues[0]);
+	acc.properties.haveTrait = true;
+      }
+      else {
+	acc.properties.color = taxonChroma.defaultColor;
+      }
+    });
+
+    var legendValues = _.map(observedCategories, function(n) {
+      return  {
+    	label : n,
+    	color : scale(n),
+      }
+    });
+    s.traitLegend = {
+      min : null,
+      max : null,
+      colorScale : scale,
+      values : legendValues,
+    };
+  }
+  
+  function detectNumericTrait() {
+    // if all the trait data is numeric, then return true. this is a
+    // bit tricky, because some observations, e.g. 'HABIT' have mixed
+    // values like 1,2,3,4,MX.
+    return _.every(s.traitData, function(d) {
+      return ! _.isString(d.observation_value);
+    });
+  }
   
   s.updateColors = function() {
+
+    s.traitHash = {};
+    s.traitLegend = {};
+
     if($location.search().traitOverlay) {
-      s.traitHash = {};
-      // use a custom color scheme with a range of the selected trait
-      var max = 0;
-      // iterate the trait results once, to build a lookup table, and
-      // find the min/max observation value
-      var min = _.min(s.traitData, function(d) {
-	//console.log(d);
-	if(s.traitHash[d.accenumb]) {
-	  s.traitHash[d.accenumb].push([d.observation_value]);
-	}
-	else {
-	  s.traitHash[d.accenumb] = [d.observation_value];
-	}
-	if(d.observation_value > max) {
-	  max = d.observation_value;
-	}
-	return d.observation_value;
-      }).observation_value;
-      //console.log('min: ' + min);
-      //console.log('max: ' + max);
-      var scale = chroma.scale('Spectral').domain([max,min]);
-      //var scale = chroma.cubehelix().scale().domain([min,max]);
-      _.each(s.data, function(acc) {
-	var accNum = acc.properties.accenumb;
-	var traitValues = s.traitHash[acc.properties.accenumb];
-	if(traitValues !== undefined) {
-	  // it is not unusual to have multiple observations, so just
-	  // average them-- possible there is a better way to handle this case
-	  var avg = _.sum(traitValues, function(d) {
-	    return d;
-	  }) / traitValues.length;
-	  acc.properties.color = scale(avg);
-	} else {
-	  acc.properties.color = taxonChroma.defaultColor;
-	}
-	//console.log(accNum + ' ' + traitValue + ' ->' + acc.properties.color);
-      });
+      if(detectNumericTrait()) {
+	colorStrategyNumericTrait();
+      }
+      else {
+	colorStrategyCategoryTrait();
+      }
     }
     else {
       // use default color scheme from taxonChroma

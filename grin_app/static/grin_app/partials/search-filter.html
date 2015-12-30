@@ -107,7 +107,7 @@
 		    aria-hidden="true"></span>
 	      Go
 	    </button>
-	    <button ng-click="model.taxonQuery = ''; onOK();"
+	    <button ng-click="model.taxonQuery = null; model.traitOverlay = null; onOK();"
 		    class="btn btn-sm btn-default">
 	      <span class="glyphicon glyphicon-remove"
 		    aria-hidden="true"></span>
@@ -121,9 +121,7 @@
 	<td>
 	  <span ng-if="model.traitOverlay"
 		class="glyphicon glyphicon-asterisk" aria-hidden="true"></span>
-	  
 	  Overlay Characterization and Evaluation Data
-	
 	  <button ng-click="onTraitOverlayExample()"
 		  class="btn btn-xs btn-default">
 	    <span class="glyphicon glyphicon-question-sign"
@@ -136,15 +134,12 @@
 	    <select class="form-control"
 		    ng-disabled="! model.taxonQuery"
 		    ng-model="model.traitOverlay">
-	      
 	      <option value=""
 		      ng-if="! model.taxonQuery">(no taxon selected)</option>
-	      
 	      <option value=""
 		      ng-if="model.taxonQuery">
 		Select trait for {{model.taxonQuery}}
 	      </option>
-	      
 	      <option ng-repeat="name in model.traitDescriptors"
 		      value="{{name}}">
 		{{name}}
@@ -159,12 +154,10 @@
 	  </form>
 	</td>
       </tr>
-      
       <tr>
 	<td>
 	  <span ng-if="model.accessionIds"
 	      class="glyphicon glyphicon-asterisk" aria-hidden="true"></span>
-
 	  Search Accession IDs:
 	  <button ng-click="onExampleAccessions()"
 		  class="btn btn-xs btn-default">
@@ -197,7 +190,6 @@
 	  </form>
 	</td>
       </tr>
-            
       <tr>
 	<td>
 	  <span ng-if="model.country"

@@ -63,8 +63,11 @@
 	</button>
       </td>
       <td ng-if="model.geoJson.traitHash">
-	<span ng-repeat="obs in model.geoJson.traitHash[rec.properties.accenumb]">
-	  {{obs}}
+	<span ng-if="model.geoJson.traitHash[rec.properties.accenumb].length ===1">
+	  {{model.geoJson.traitHash[rec.properties.accenumb][0]}}
+	</span>
+	<span ng-if="model.geoJson.traitHash[rec.properties.accenumb].length > 1">
+	  {{model.geoJson.traitHash[rec.properties.accenumb].join(', ')}}
 	</span>
       </td>
       <td class="nowrap">

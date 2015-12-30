@@ -109,9 +109,26 @@
 <div id="map" style="margin-top: 0.2rem;">
 </div>
 
+<div id="legend"
+     class="well well-sm"
+     style="margin-top: 0.5rem"
+     ng-if="! model.geoJson.updating && model.$location.search().traitOverlay">
+
+  {{model.$location.search().traitOverlay}}
+
+  <span class="badge"
+	ng-repeat="legendItem in model.geoJson.traitLegend.values"
+	ng-style="{'background-color': legendItem.color }">
+    <span style="color: black">{{legendItem.label}}</span>
+  </span>
+  <span ng-if="! model.geoJson.traitLegend.values.length">
+    : No matching trait data found for these accessions.
+  </span>
+</div>
+
 <div class="alert alert-info"
      style="margin-top: 0.5rem"
-     ng-if="(! getVisibleMarkerCount()) && model.geoJsonService.data.length">
+     ng-if="! model.geoJson.updating && ! getVisibleMarkerCount() && model.geoJsonService.data.length">
 
    <button type="button" class="close" data-dismiss="alert">
     <span aria-hidden="true">&times;</span>

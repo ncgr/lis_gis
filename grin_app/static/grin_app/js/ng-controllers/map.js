@@ -11,6 +11,7 @@ function($scope, $state, $timeout, $location, geoJsonService) {
   $scope.model = {
     //legumeGenera : taxonChroma.legumeGenera, // for development only
     geoJson : geoJsonService,
+    $location : $location,
     map : null,  // the leaflet map
     geoJsonLayer : null,
     geoJsonService : geoJsonService,  // array of geoJson objects
@@ -196,13 +197,13 @@ function($scope, $state, $timeout, $location, geoJsonService) {
   }
     
   function fixMarkerZOrder() {
-    // workaround for leaflet not having correct z ordering for
-    // the layers as added
-    $scope.model.map.eachLayer(function(l) {
-      if(_.has(l, 'feature.properties')) {
-	l.bringToBack();
-      }
-    });
+    if($location.search().traitOverlay) {
+      $scope.model.map.eachLayer(function(l) {
+	if(_.has(l, 'feature.properties.haveTrait')) {
+	  l.bringToFront();
+	}
+      });
+    }
   }
   
   function addMaxResultsSymbology() {

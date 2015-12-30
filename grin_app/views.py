@@ -137,7 +137,7 @@ def evaluation_search(req):
         'accession_ids' : tuple(params['accession_ids'])
     }
     cursor = connection.cursor()
-    logger.info(cursor.mogrify(sql, sql_params))
+    # logger.info(cursor.mogrify(sql, sql_params))
     cursor.execute(sql, sql_params)
     rows = _dictfetchall(cursor)
     # observation_value is a string field, so cast to int or float as necessary
