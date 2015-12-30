@@ -151,6 +151,12 @@
 		    aria-hidden="true"></span>
 	      Go
 	    </button>
+	    <button ng-click="model.traitOverlay = null; onOK();"
+		    class="btn btn-sm btn-default">
+	      <span class="glyphicon glyphicon-remove"
+		    aria-hidden="true"></span>
+	      Clear
+	    </button>
 	  </form>
 	</td>
       </tr>
@@ -181,7 +187,7 @@
 		    aria-hidden="true"></span>
 	      Go
 	    </button>
-	    <button ng-click="model.accessionIds = ''; onOK()"
+	    <button ng-click="model.accessionIds = null; onOK()"
 		    class="btn btn-sm btn-default">
 	      <span class="glyphicon glyphicon-remove"
 		    aria-hidden="true"></span>
@@ -215,6 +221,12 @@
 	      <span class="glyphicon glyphicon-search"
 		    aria-hidden="true"></span>
 	      Go
+	    </button>
+	    <button ng-click="model.country = null; onOK()"
+		    class="btn btn-sm btn-default">
+	      <span class="glyphicon glyphicon-remove"
+		    aria-hidden="true"></span>
+	      Clear
 	    </button>
 	  </form>
 	</td>
