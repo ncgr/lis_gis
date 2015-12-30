@@ -77,7 +77,6 @@ function($http, $rootScope, $location, $timeout) {
     return bounds;
   };
 
-
   function postProcessSearch() {
     s.checkForGeocodedAccessionIds();
     s.updateBounds();
@@ -123,7 +122,7 @@ function($http, $rootScope, $location, $timeout) {
 	  $timeout(s.search, 0);
 	  return;
 	}
-	if(params.traitOverlay) {
+	if(params.traitOverlay && s.data.length > 0) {
 	  $http({
 	    url : API_PATH + '/evaluation_search',
 	    method : 'POST',
