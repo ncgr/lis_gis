@@ -146,6 +146,7 @@ def evaluation_search(req):
         row['observation_value'] = _string2num(row['observation_value'])
         rows_clean.append(row)
     result = json.dumps(rows_clean, use_decimal=True)
+    logger.info(result)
     response = HttpResponse(result, content_type='application/json')
     return response
 
@@ -157,14 +158,15 @@ def _string2num(s):
     floatval = None
     try:
         intval = int(s)
+        return intval
     except ValueError:
         pass
-    if not intval:
-        try:
-            floatval = float(s)
-        except ValueError:
-            pass
-    return floatval or intval or s
+    try:
+        floatval = float(s)
+        return floatval
+    except ValueError:
+        pass
+    return s
 
 
 @ensure_csrf_cookie
