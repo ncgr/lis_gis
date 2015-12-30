@@ -27,7 +27,7 @@ NOMINAL_COLORS = [
     "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69", 
     "#fccde5", "#d9d9d9", "#bc80bd", "#ccebc5", "#ffed6f"
 ]
-NOMINAL_THRESHOLD = 5
+NOMINAL_THRESHOLD = 10
 DEFAULT_COLOR = 'lightgrey'
 ORDER_BY_FRAG = '''
  ORDER BY ST_Distance(
@@ -193,11 +193,10 @@ def evaluation_metadata(req):
     cursor = connection.cursor()
     sql = '''
     SELECT observation_value FROM lis_germplasm.legumes_grin_evaluation_data
-    WHERE taxon LIKE %(genus)s
+    WHERE taxon ILIKE %(genus)s
     AND descriptor_name = %(descriptor_name)s
     '''
     params['genus'] += '%'
-    #logger.info(cursor.mogrify(sql, params))
     cursor.execute(sql, params)
     rows = [ _string2num(row[0]) for row in cursor.fetchall() ]
     if _detect_numeric_trait(rows):
