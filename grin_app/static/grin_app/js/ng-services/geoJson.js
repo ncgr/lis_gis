@@ -289,13 +289,13 @@ function($http, $rootScope, $location, $timeout) {
       }
       observedCategories.push(d.observation_value);
     });
-    var observedCategories = _.uniq(observedCategories).sort();
-    
+    var observedCategories = _.uniq(observedCategories).sort(); 
+    var presetColors = chroma.brewer.Set1
+	.concat(chroma.brewer.Set2)
+	.concat(chroma.brewer.Set3);
     var scale = function(n) {
-      var categories = observedCategories;
-      var presetColors = chroma.brewer.Set1; // 9 colors
-      var i = _.indexOf(categories, n);
-      if(i == -1 || i > 8) {
+      var i = _.indexOf(observedCategories, n);
+      if(i == -1 || i > presetColors.length) {
 	return taxonChroma.defaultColor;
       }
       return presetColors[i];
