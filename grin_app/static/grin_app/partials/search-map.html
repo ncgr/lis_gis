@@ -9,14 +9,14 @@
 
 <button id="change-base-map-btn"
 	class="btn btn-sm btn-default"
-	ng-click="model.baseMapSelect = true; model.geoCoordsSelect = false;">
+	ng-click="model.baseMapSelect = true; model.geoCoordsSelect = false; model.mapHeightSelect = false;">
   <span class="glyphicon glyphicon-picture"></span>
   Change base map
 </button>
 
 <button class="btn btn-sm btn-default"
 	id="enter-coords-btn"
-	ng-click="model.geoCoordsSelect = true; model.baseMapSelect = false;">
+	ng-click="model.geoCoordsSelect = true; model.baseMapSelect = false; model.mapHeightSelect = false;">
   <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>    
   Go to geographic coordinates
 </button>
@@ -29,6 +29,14 @@
   Go to my location
 </button>
 
+<button id="geolocate-btn"
+	type="submit" class="btn btn-sm btn-default"
+	ng-click="model.mapHeightSelect = true; model.baseMapSelect = false; model.geoCoordsSelect = false;">
+  <span class="glyphicon glyphicon-resize-vertical"
+	aria-hidden="true"></span>
+  Map height
+</button>
+
 <button id="tour-btn"
 	type="submit" class="btn btn-sm btn-default"
 	ng-click="onTour()">
@@ -37,6 +45,39 @@
   View Tour/Help
 </button>
 
+<div class="panel panel-info"
+     ng-if="model.mapHeightSelect"  style="margin-top: 0.5rem;">
+  <div class="panel-heading">
+    <button type="button" class="close"
+	    ng-click="model.mapHeightSelect = false; model.map.invalidateSize();">
+      <span aria-hidden="true">&times;</span>
+    </button>
+    <span class="glyphicon glyphicon-resize-vertical"></span>
+    Adjust map vertical size:
+  </div>
+  <div class="panel-body">
+    <button class="btn btn-sm btn-xs btn-default"
+	    ng-click="onMapHeight(20)">
+      <span class="glyphicon glyphicon-plus-sign"></span>
+      Taller
+    </button>
+    <button class="btn btn-sm btn-xs btn-default"
+	    ng-click="onMapHeight(-20)">
+      <span class="glyphicon glyphicon-minus-sign"></span>      
+      Shorter
+    </button>
+    <button class="btn btn-sm btn-success"
+	    ng-click="model.mapHeightSelect = false; model.map.invalidateSize();">
+      <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+      OK
+    </button>
+    <button class="btn btn-sm btn-default"
+	    ng-click="model.mapHeightSelect = false; model.map.invalidateSize();">
+      <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+      Cancel
+    </button>
+  </div>
+</div>
 
 <div class="panel panel-info"
      ng-if="model.baseMapSelect"  style="margin-top: 0.5rem;">
@@ -106,7 +147,9 @@
   </div>
 </div>
 
-<div id="map" style="margin-top: 0.2rem;">
+<div id="map"
+     style="margin-top: 0.2rem;"
+     ng-style="{ height: '' + model.$location.search().mapHeight + 'px'}">
 </div>
 
 <div id="legend"

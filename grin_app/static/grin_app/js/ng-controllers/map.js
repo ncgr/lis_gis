@@ -21,6 +21,7 @@ function($scope, $state, $timeout, $location, geoJsonService) {
     },
     geoCoordsSelect : false, // show geocoords selector ui
     baseMapSelect : false,   // show basemap selector ui
+    mapHeightSelect : false, // show map height selector ui
     baseMapLayer : null,
     maxResultsCircle : null,
     countries : [],
@@ -50,6 +51,10 @@ function($scope, $state, $timeout, $location, geoJsonService) {
   };
 
   $scope.init = function() {
+
+    if(! ('mapHeight' in $location.search())) {
+      $location.search('mapHeight', 400);
+    }
     
     $scope.model.map = L.map('map', {
       'center' : [$scope.model.center.lat, $scope.model.center.lng],
@@ -180,9 +185,15 @@ function($scope, $state, $timeout, $location, geoJsonService) {
       });
     }
     $scope.model.geoCoordsSelect = false;
-    $scope.model.baseMapSelect = false;
   };
 
+  $scope.onMapHeight = function(amount) {
+    // user hit map height adjustment button
+    var height = parseInt($location.search().mapHeight);
+    height += amount;
+    $location.search('mapHeight', height);
+  };
+  
   $scope.onTour = function() {
     app.tour();
   };
