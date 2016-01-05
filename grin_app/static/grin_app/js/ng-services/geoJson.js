@@ -280,7 +280,7 @@ function($http, $rootScope, $location, $timeout, $q) {
 	var avg = _.sum(traitValues, function(d) {
 	  return d;
 	}) / traitValues.length;
-	acc.properties.color = scale(avg);
+	acc.properties.color = scale(avg).hex();
 	acc.properties.haveTrait = true;	
       } else {
 	acc.properties.color = taxonChroma.defaultColor;
@@ -291,7 +291,7 @@ function($http, $rootScope, $location, $timeout, $q) {
     var legendValues = _.map(_.range(min, max + step, step), function(n) {
       return  {
 	label : n.toFixed(2),
-	color : scale(n),
+	color : scale(n).hex(),
       }
     });
     s.traitLegend = {
