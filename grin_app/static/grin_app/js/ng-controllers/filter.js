@@ -21,6 +21,7 @@ function($scope, $state, $http, $location, geoJsonService) {
     taxonQuery : searchParams.taxonQuery,
     accessionIds : searchParams.accessionIds,
     traitOverlay : searchParams.traitOverlay,
+    traitScale : searchParams.traitScale,
   };
   
   $scope.init = function() {
@@ -31,13 +32,9 @@ function($scope, $state, $http, $location, geoJsonService) {
       // error callback
       console.log(resp);
     });
-    $http.get(API_PATH + '/evaluation_descr_names').then(function(resp) {
-      // success callback
-      $scope.model.traitDescriptors = resp.data;
-    }, function(resp){
-      // error callback
-      console.log(resp);
-    });
+    if($scope.model.taxonQuery) {
+      $scope.onTaxonQuery($scope.model.taxonQuery);
+    }
   };
 
   $scope.onOK = function() {
@@ -73,6 +70,35 @@ function($scope, $state, $http, $location, geoJsonService) {
     }
   };
 
+  $scope.onTaxonQuery = function(taxon) {
+    // taxon query field was typed or updated. filter the trait
+    // descriptors to match
+    if(! taxon || taxon.length < 3) {
+      return;
+    }
+    $scope.model.traitDescriptors = null;
+    var oldTrait = $scope.model.traitOverlay;
+    $http( {
+      url : API_PATH + '/evaluation_descr_names',
+      method : 'GET',
+      params : {
+	'taxon' : taxon,
+      },
+    }).then(
+      function(resp) {
+	// success handler
+	$scope.model.traitDescriptors = resp.data;
+	if(oldTrait in $scope.model.traitDescriptors) {
+	  $scope.model.traitOverlay = oldTrait;
+	}
+      },
+      function(resp) {
+	// error handler
+	console.log(resp);
+      }
+    );
+  };
+  
   $scope.onExampleAccessions = function() {
     $scope.model.limitToMapExtent = false;
     $scope.model.country = null;
@@ -85,8 +111,18 @@ function($scope, $state, $http, $location, geoJsonService) {
     $scope.model.limitToMapExtent = false;
     $scope.model.country = null;
     $scope.model.accessionIds = null;
-    $scope.model.taxonQuery = 'Phaseolus vulgaris';
     $scope.model.traitOverlay = 'SEEDWGT';
+    $scope.model.taxonQuery = 'Phaseolus vulgaris';
+    $scope.onTaxonQuery($scope.model.taxonQuery);
+  };
+
+  $scope.onExampleTaxonQuery = function() {
+    $scope.model.taxonQuery = 'Arachis hypogaea';
+    $scope.model.limitToMapExtent = false;
+    $scope.model.country = null;
+    $scope.model.accessionIds = null;
+    $scope.model.traitOverlay = null;
+    $scope.onTaxonQuery($scope.model.taxonQuery);
   };
   
   $scope.init();

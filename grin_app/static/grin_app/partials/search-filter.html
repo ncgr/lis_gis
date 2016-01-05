@@ -87,7 +87,7 @@
 		class="glyphicon glyphicon-asterisk" aria-hidden="true"></span>
 	  
 	  Search Taxon:
-	  <button ng-click="model.taxonQuery = 'Arachis hypogaea'; model.limitToMapExtent = false; model.country = null; model.accessionIds = null;"
+	  <button ng-click="onExampleTaxonQuery()"
 		  class="btn btn-xs btn-default">
 	    <span class="glyphicon glyphicon-question-sign"
 		  aria-hidden="true"></span>
@@ -101,6 +101,7 @@
 		   ng-attr-auto-focus="! model.autofocusField || model.autofocusField === 'taxonFilter'"
 		   size="40"
 		   maxlength="256"
+		   ng-change="onTaxonQuery(model.taxonQuery)"
 		   ng-model="model.taxonQuery">
 	    </input>
 	    <button type="submit" class="btn btn-sm btn-default">
@@ -137,9 +138,9 @@
 		    ng-model="model.traitOverlay">
 	      <option value=""
 		      ng-if="! model.taxonQuery">(no taxon selected)</option>
-	      <option value=""
-		      ng-if="model.taxonQuery">
-		Select trait for {{model.taxonQuery}}
+	      <option value="">
+		select trait for {{model.taxonQuery}}
+		({{model.traitDescriptors.length | number }})
 	      </option>
 	      <option ng-repeat="name in model.traitDescriptors"
 		      value="{{name}}">
