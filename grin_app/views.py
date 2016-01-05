@@ -112,13 +112,18 @@ def index(req):
 def evaluation_descr_names(req):
     '''Return JSON for all distinct trait descriptor names'''
     assert req.method == 'GET', 'GET request method required'
+    params = req.GET.dict()
+    assert 'taxon' in params, 'missing taxon param'
     sql = '''
     SELECT DISTINCT descriptor_name
     FROM lis_germplasm.legumes_grin_evaluation_data
+    WHERE taxon ILIKE %(taxon)s
     ORDER BY descriptor_name
     '''
+    sql_params = { 'taxon' : '%' + params['taxon'] + '%'}
     cursor = connection.cursor()
-    cursor.execute(sql)
+    logger.info(cursor.mogrify(sql, sql_params))
+    cursor.execute(sql, sql_params)
     names = [row[0] for row in cursor.fetchall()]
     result = json.dumps(names)
     response = HttpResponse(result, content_type='application/json')
@@ -186,18 +191,34 @@ def evaluation_metadata(req):
     either numeric or category traits.
 
     '''
-    assert req.method == 'GET', 'GET request method required'
-    params = req.GET.dict()
+    assert req.method == 'POST', 'POST request method required'
+    params = json.loads(req.body)
     assert 'genus' in params, 'missing genus param'
     assert 'descriptor_name' in params, 'missing descriptor_name param'
+    assert 'trait_scale' in params, 'missing trait_scale param'
+    assert 'accession_ids' in params, 'missing accession_ids param'
     cursor = connection.cursor()
-    sql = '''
-    SELECT observation_value FROM lis_germplasm.legumes_grin_evaluation_data
-    WHERE taxon ILIKE %(genus)s
-    AND descriptor_name = %(descriptor_name)s
-    '''
-    params['genus'] += '%'
-    cursor.execute(sql, params)
+    if params['trait_scale'] == 'global':
+        sql = '''
+        SELECT observation_value 
+        FROM lis_germplasm.legumes_grin_evaluation_data
+        WHERE taxon ILIKE %(genus)s
+        AND descriptor_name = %(descriptor_name)s
+        '''
+    else:  # local trait scale, limit to specific accession list
+        sql = '''
+        SELECT observation_value 
+        FROM lis_germplasm.legumes_grin_evaluation_data
+        WHERE accenumb IN %(accession_ids)s
+        AND taxon ILIKE %(genus)s
+        AND descriptor_name = %(descriptor_name)s
+        '''
+    sql_params = {
+        'genus' : '%' + params['genus'] + '%',
+        'descriptor_name' : params['descriptor_name'],
+        'accession_ids' : tuple(params['accession_ids'])
+    }
+    cursor.execute(sql, sql_params)
     rows = [ _string2num(row[0]) for row in cursor.fetchall() ]
     if _detect_numeric_trait(rows):
         handler = _generate_numeric_trait_metadata

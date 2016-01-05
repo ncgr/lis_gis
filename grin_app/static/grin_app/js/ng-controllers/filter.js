@@ -52,6 +52,7 @@ function($scope, $state, $http, $location, geoJsonService) {
     geoJsonService.setCountry($scope.model.country, false);
     geoJsonService.setAccessionIds($scope.model.accessionIds, false);
     geoJsonService.setTraitOverlay($scope.model.traitOverlay, false);
+    geoJsonService.setTraitScale($scope.model.traitScale, false);
     geoJsonService.search();
   };
  

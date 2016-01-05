@@ -1,5 +1,5 @@
 app.service('geoJsonService',
-	    function($http, $rootScope, $location, $timeout, $q) {
+function($http, $rootScope, $location, $timeout, $q) {
   
   var DEFAULT_CENTER = { 'lat' : 35.87, 'lng' : -109.47 };
   var MAX_RECS = 200;
@@ -39,6 +39,9 @@ app.service('geoJsonService',
     }
     if(! ('traitOverlay' in params)) {
       $location.search('traitOverlay', '');
+    }
+    if(! ('traitScale' in params)) {
+      $location.search('traitScale', 'local');
     }
     if(! ('country' in params)) {
       $location.search('country', '');
@@ -146,10 +149,12 @@ app.service('geoJsonService',
 	  );
 	  var promise2 = $http({
 	    url : API_PATH + '/evaluation_metadata',
-	    method : 'GET',
-	    params : {
+	    method : 'POST',
+	    data : {
               genus : params.taxonQuery.split()[0],
 	      descriptor_name : params.traitOverlay,
+	      accession_ids : params.traitScale === 'local' ? getAccessionIds() : [],
+	      trait_scale : params.traitScale,
 	    }
 	  }).then(
 	    function(resp) {
@@ -241,6 +246,11 @@ app.service('geoJsonService',
     if(search) { s.search(); }
   };
 
+  s.setTraitScale = function(scale, search) {
+    $location.search('traitScale', scale);
+    if(search) { s.search(); }
+  };
+	      
   s.setGeocodedAccessionsOnly = function(bool, search) {
     $location.search('geocodedOnly', bool);
     if(search) { s.search(); }
