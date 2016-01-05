@@ -37,6 +37,9 @@ app.service('geoJsonService',
     if(! ('taxonQuery' in params)) {
       $location.search('taxonQuery', '');
     }
+    if(! ('traitOverlay' in params)) {
+      $location.search('traitOverlay', '');
+    }
     if(! ('country' in params)) {
       $location.search('country', '');
     }
