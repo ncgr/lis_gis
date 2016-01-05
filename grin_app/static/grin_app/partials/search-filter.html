@@ -2,6 +2,7 @@
 
 <button id="search-btn"
 	class="btn btn-sm btn-default"
+	ng-if="! model.searchOptions"
 	ng-click="model.searchOptions = ! model.searchOptions ; model.autofocusField = 'taxonFilter';">
   <span class="glyphicon glyphicon-search" aria-hidden="true"></span>  
   Search
