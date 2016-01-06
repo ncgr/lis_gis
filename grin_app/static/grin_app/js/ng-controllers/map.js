@@ -7,6 +7,7 @@ app.controller('mapController',
 function($scope, $state, $timeout, $location, geoJsonService) {
   
   var DEFAULT_BASEMAP = 'ESRI - NatGeo (default, reference map)';
+  var DEFAULT_MAP_HEIGHT = parseInt(window.innerHeight / 3);
   
   $scope.model = {
     //legumeGenera : taxonChroma.legumeGenera, // for development only
@@ -21,6 +22,8 @@ function($scope, $state, $timeout, $location, geoJsonService) {
     },
     geoCoordsSelect : false, // show geocoords selector ui
     baseMapSelect : false,   // show basemap selector ui
+    mapHeight : DEFAULT_MAP_HEIGHT,
+    mapHeightUndo : DEFAULT_MAP_HEIGHT,
     mapHeightSelect : false, // show map height selector ui
     baseMapLayer : null,
     maxResultsCircle : null,
@@ -53,7 +56,9 @@ function($scope, $state, $timeout, $location, geoJsonService) {
   $scope.init = function() {
 
     if(! ('mapHeight' in $location.search())) {
-      $location.search('mapHeight', 400);
+      $location.search('mapHeight', DEFAULT_MAP_HEIGHT);
+    } else {
+      $scope.model.mapHeight = parseInt($location.search().mapHeight);
     }
     
     $scope.model.map = L.map('map', {
@@ -187,11 +192,33 @@ function($scope, $state, $timeout, $location, geoJsonService) {
     $scope.model.geoCoordsSelect = false;
   };
 
-  $scope.onMapHeight = function(amount) {
-    // user hit map height adjustment button
-    var height = parseInt($location.search().mapHeight);
-    height += amount;
+  $scope.onMapHeight = function(direction) {
+    // user hit map height adjustment button.
+    var amount;
+    if(direction === '+') {
+      amount = window.innerHeight / 20;
+    } else {
+      amount = -1 * (window.innerHeight / 20);
+    }
+    var height = $scope.model.mapHeight;
+    height += parseInt(amount);
+
+    if(height  <= 0) {
+      height = parseInt(window.innerHeight / 20);
+    }
+    else if(height > window.innerHeight) {
+      height = window.innerHeight;
+    }
+    $scope.model.mapHeight = height;
     $location.search('mapHeight', height);
+  };
+
+  $scope.onMapHeightCancel = function() {
+    // user cancelled the height adjustment
+    $scope.model.mapHeightSelect = false;
+    $location.search('mapHeight', $scope.model.mapHeightUndo);
+    $scope.model.mapHeight = $scope.model.mapHeightUndo;
+    $scope.model.map.invalidateSize();
   };
   
   $scope.onTour = function() {

@@ -65,12 +65,12 @@
   </div>
   <div class="panel-body">
     <button class="btn btn-sm btn-xs btn-default"
-	    ng-click="onMapHeight(20)">
+	    ng-click="onMapHeight('+')">
       <span class="glyphicon glyphicon-plus-sign"></span>
       Taller
     </button>
     <button class="btn btn-sm btn-xs btn-default"
-	    ng-click="onMapHeight(-20)">
+	    ng-click="onMapHeight('-')">
       <span class="glyphicon glyphicon-minus-sign"></span>      
       Shorter
     </button>
@@ -80,7 +80,7 @@
       OK
     </button>
     <button class="btn btn-sm btn-default"
-	    ng-click="model.mapHeightSelect = false; model.map.invalidateSize();">
+	    ng-click="onMapHeightCancel()">
       <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
       Cancel
     </button>
@@ -155,9 +155,8 @@
   </div>
 </div>
 
-<div id="map"
-     style="margin-top: 0.2rem;"
-     ng-style="{ height: '' + model.$location.search().mapHeight + 'px'}">
+<div id="map" style="margin-top: 0.2rem;"
+     ng-style="{ height: '' + model.mapHeight + 'px'}">
 </div>
 
 <div id="legend"
