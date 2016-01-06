@@ -24,7 +24,7 @@
 
 </head>
 <body>
-  <div ui-view class="container-fluid">
+  <div ui-view class="container-fluid l-fit-height">
     <h3>
       <a href="http://{{ request.get_host }}"><img
 	src="http://legumeinfo.org/sites/all/themes/legumeinfo_theme/images/legumeinfo_logo.png" height="30" alt="LIS" /></a>
@@ -32,10 +32,26 @@
 	Legume Information System</a>
 	| Germplasm Map
     </h3>
-    <div ui-view="errors"></div>
-    <div ui-view="map"></div>
-    <div ui-view="filter"></div>
-    <div ui-view="list"></div>
+    <div class="l-fit-height-row">
+      <div class="l-fit-height-row-content">
+	<div ui-view="errors"></div>
+      </div>
+    </div>
+    <div class="l-fit-height-row">
+      <div class="l-fit-height-row-content">
+	<div ui-view="map"></div>
+      </div>
+    </div>
+    <div class="l-fit-height-row">
+      <div class="l-fit-height-row-content">
+	<div ui-view="filter"></div>
+      </div>
+    </div>
+    <div class="l-fit-height-row-expanded">
+      <div class="l-fit-height-row-content l-scroll">
+	<div ui-view="list" class="l-scroll-content"></div>
+      </div>
+    </div>
   </div>
   
   <!--[if lt IE 9]>
@@ -62,7 +78,7 @@
   <script src="{% static 'bower_components/angular-auto-focus/angular-auto-focus.js'%}" ></script>
   <script src="{% static 'bower_components/Leaflet.label/dist/leaflet.label.js'%}" ></script>
 
-  <script language="javascript">
+  <script>
    // where static resources (js, img, html) are served on this http server 
    var STATIC_PATH = "{% static ''%}";
    // where is the django web application (set to '' for devel with
