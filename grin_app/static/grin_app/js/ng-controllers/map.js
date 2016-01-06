@@ -7,8 +7,8 @@ app.controller('mapController',
 function($scope, $state, $timeout, $location, geoJsonService) {
   
   var DEFAULT_BASEMAP = 'ESRI - NatGeo (default, reference map)';
-  var DEFAULT_MAP_HEIGHT = parseInt(window.innerHeight / 3);
-  
+  var DEFAULT_MAP_HEIGHT = parseInt(window.innerHeight / 2.5);
+
   $scope.model = {
     //legumeGenera : taxonChroma.legumeGenera, // for development only
     geoJson : geoJsonService,
@@ -65,8 +65,9 @@ function($scope, $state, $timeout, $location, geoJsonService) {
       'center' : [$scope.model.center.lat, $scope.model.center.lng],
       'zoom' : $location.search().zoom,
     });
+  
     $scope.model.map.attributionControl.addAttribution(
-     'Data: USDA <a href="http://www.ars-grin.gov/npgs/" target="new">GRIN/NPGS</a>');
+      'Data: USDA <a href="http://www.ars-grin.gov/npgs/" target="new">GRIN/NPGS</a>');
     geoJsonService.map = $scope.model.map;
     
     // add the default basemap
@@ -96,6 +97,8 @@ function($scope, $state, $timeout, $location, geoJsonService) {
       filter: filterNonGeocoded,
     });
     $scope.model.geoJsonLayer.addTo($scope.model.map);
+
+   
     
     geoJsonService.subscribe($scope, 'updated', function() {
       
@@ -126,6 +129,10 @@ function($scope, $state, $timeout, $location, geoJsonService) {
       $scope.model.geoJsonLayer.clearLayers();
       $scope.model.geoJsonLayer.addData($scope.model.geoJsonService.data);
 
+      if($scope.model.map.getSize().y != $scope.model.mapHeight) {
+	$scope.model.map.invalidateSize();
+      }
+      
       $timeout(addMaxResultsSymbology, 0);
       $timeout(fixMarkerZOrder, 0);
     });
