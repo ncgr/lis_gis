@@ -189,7 +189,7 @@ function($http, $rootScope, $location, $timeout, $q) {
   s.checkForGeocodedAccessionIds = function() {
     var params = $location.search();
     var geocodedAcc = s.getAnyGeocodedAccession();
-    if(! geocodedAcc) {
+    if(! geocodedAcc && ! params.limitToMapExtent) {
       if(params.accessionIds) {
 	$rootScope.warnings = ['None of the requested accession ids (' +
 	       params.accessionIds + ') have geographic \

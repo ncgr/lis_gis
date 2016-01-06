@@ -160,6 +160,11 @@ function($scope, $state, $timeout, $location, geoJsonService) {
     if(b && '_southWest' in b) {
       geoJsonService.setBounds(b, false);
       $scope.model.map.fitBounds(b);
+      if($scope.model.map.getZoom() > 10) {
+	// in case of single geocoded accession, fudge the zoom to something
+	// reasonable
+	$scope.model.map.setZoom(10);
+      }
     }
   };
   
