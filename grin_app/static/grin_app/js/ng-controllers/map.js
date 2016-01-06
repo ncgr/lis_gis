@@ -65,6 +65,8 @@ function($scope, $state, $timeout, $location, geoJsonService) {
       'center' : [$scope.model.center.lat, $scope.model.center.lng],
       'zoom' : $location.search().zoom,
     });
+    $scope.model.map.attributionControl.addAttribution(
+     'Data: USDA <a href="http://www.ars-grin.gov/npgs/" target="new">GRIN/NPGS</a>');
     geoJsonService.map = $scope.model.map;
     
     // add the default basemap
