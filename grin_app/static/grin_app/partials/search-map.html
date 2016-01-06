@@ -7,6 +7,14 @@
   {{k}}
 </div>
 
+<button id="reframe-btn"
+	type="submit" class="btn btn-xs btn-default"
+	ng-click="onZoomToAccessions()">
+  <span class="glyphicon glyphicon-eye-open"
+	aria-hidden="true"></span>
+  Reframe map to accessions
+</button>
+
 <button id="change-base-map-btn"
 	class="btn btn-xs btn-default"
 	ng-click="model.baseMapSelect = true; model.geoCoordsSelect = false; model.mapHeightSelect = false;">
@@ -29,7 +37,7 @@
   Go to my location
 </button>
 
-<button id="geolocate-btn"
+<button id="map-height-btn"
 	type="submit" class="btn btn-xs btn-default"
 	ng-click="model.mapHeightSelect = true; model.baseMapSelect = false; model.geoCoordsSelect = false;">
   <span class="glyphicon glyphicon-resize-vertical"

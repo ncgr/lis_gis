@@ -187,12 +187,19 @@ app.tour = function () {
         placement: 'top',
       },
       {
+        title: 'Reframe map',
+        content: 'If you want to zoom in on the current list of accessions, \
+          use this button.',
+        target: 'reframe-btn',
+        placement: 'bottom',
+      },
+      {
         title: 'Change Base Map',
         content: 'You can adjust the base map for a different appearance, if \
          desired. This does not effect your search results!',
         target: 'change-base-map-btn',
         placement: 'bottom',
-      },    
+      },
       {
         title: 'Geographic Coordinates',
         content: 'Click this button to view the current center of the map in \
@@ -210,6 +217,12 @@ app.tour = function () {
         placement: 'bottom',
       },
       {
+        title: 'Map Height',
+        content: 'You can adjust the map vertical appearance by using \
+                   this tool.',
+        target: 'map-height-btn',
+        placement: 'bottom',
+      },      {
         title: 'Revisit this tour',
         content: 'Click this button anytime to re-open this tour of the web \
          app. Thanks!',
