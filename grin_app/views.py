@@ -122,7 +122,7 @@ def evaluation_descr_names(req):
     '''
     sql_params = { 'taxon' : '%' + params['taxon'] + '%'}
     cursor = connection.cursor()
-    logger.info(cursor.mogrify(sql, sql_params))
+    # logger.info(cursor.mogrify(sql, sql_params))
     cursor.execute(sql, sql_params)
     names = [row[0] for row in cursor.fetchall()]
     result = json.dumps(names)
