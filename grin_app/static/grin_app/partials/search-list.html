@@ -125,14 +125,15 @@
       <span aria-hidden="true">&times;</span>
     </button>
     <h3 class="modal-title">
-      Accession: {{model.acc.properties.accenumb}}
+      Accession: {{model.accId}}
       <img ng-if="! model.acc"
 	   ng-src="{{model.STATIC_PATH}}grin_app/images/ajax-loader.gif"/>
     </h3>
   </div>
   <div class="modal-body">
-
-    <button class="btn btn-primary" type="button" ng-click="onOK()">
+    <button class="btn btn-primary" type="button"
+	    ng-if="model.acc"
+	    ng-click="onOK()">
       <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
       OK
     </button>
@@ -144,7 +145,9 @@
       View {{model.acc.properties.accenumb}} on Map
     </button>
     
-    <button class="btn btn-default" type="button" ng-click="onGoLISGRIN()">
+    <button class="btn btn-default" type="button"
+	    ng-if="model.acc"
+	    ng-click="onGoLISGRIN()">
       <span class="glyphicon glyphicon-search" aria-hidden="true"></span>      
       Search LIS GRIN Connect for {{model.acc.properties.accenumb}}
     </button>
@@ -160,8 +163,10 @@
            {{model.acc.properties.species}} at LIS
     </button>
 
-       <table class="table table-striped" style="margin-top: 0.5rem;">
-	 <caption>Accession Details</caption>
+    <table class="table table-striped"
+	   ng-if="model.acc"
+	   style="margin-top: 0.5rem;">
+      <caption>Accession Details</caption>
       <tr ng-if="model.acc.properties.taxon">
 	<td>taxon</td>
 	<td ng-bind-html="model.acc.properties.taxon"></td>
@@ -341,7 +346,9 @@
 	</td>
       </tr>
     </table>
-     <button class="btn btn-primary" type="button" ng-click="onOK()">
+    <button class="btn btn-primary" type="button"
+	    ng-if="model.acc"
+	    ng-click="onOK()">
       <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
       OK
     </button>
