@@ -7,7 +7,12 @@ app.controller('mapController',
 function($scope, $state, $timeout, $location, geoJsonService) {
   
   var DEFAULT_BASEMAP = 'ESRI - NatGeo (default, reference map)';
-  var DEFAULT_MAP_HEIGHT = parseInt(window.innerHeight / 2.5);
+
+  /* note: this is the default height used by leafletjs. if another
+   * default size is set, it will result in the map size being
+   * invlidated and causing an initieal reload of the search (which we
+   * dont want to happen )*/
+  var DEFAULT_MAP_HEIGHT = 350;
 
   $scope.model = {
     //legumeGenera : taxonChroma.legumeGenera, // for development only
@@ -130,7 +135,7 @@ function($scope, $state, $timeout, $location, geoJsonService) {
       $scope.model.geoJsonLayer.addData($scope.model.geoJsonService.data);
 
       if($scope.model.map.getSize().y != $scope.model.mapHeight) {
-	$scope.model.map.invalidateSize();
+        $scope.model.map.invalidateSize();
       }
       
       $timeout(addMaxResultsSymbology, 0);
