@@ -85,7 +85,7 @@ app.filter('highlight', function($sce) {
   }
 });
 
-app.run( function($http, $cookies, $state, $rootScope) {
+app.run( function($state) {
   $state.transitionTo('search');
 });
 
