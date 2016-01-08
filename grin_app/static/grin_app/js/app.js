@@ -2,8 +2,7 @@
 "use strict";
 
 var app = angular.module('grin',
-			 ['ngCookies',
-			  'ngSanitize',
+			 ['ngSanitize',
 			  'mp.autoFocus',
 			  'ui.bootstrap',
 			  'ui.router']);
