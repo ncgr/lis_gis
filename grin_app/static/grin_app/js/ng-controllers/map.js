@@ -6,7 +6,9 @@
 app.controller('mapController',
 function($scope, $state, $timeout, $location, geoJsonService) {
   
-  var DEFAULT_BASEMAP = 'ESRI - NatGeo (default, reference map)';
+  var DEFAULT_BASEMAP = $location.search().baseMap ||
+                        Cookies.get('baseMap') ||
+                        'ESRI - NatGeo (default, reference map)';
 
   /* note: this is the default height used by leafletjs. if another
    * default size is set, it will result in the map size being
@@ -102,9 +104,9 @@ function($scope, $state, $timeout, $location, geoJsonService) {
       filter: filterNonGeocoded,
     });
     $scope.model.geoJsonLayer.addTo($scope.model.map);
+    Cookies.set('baseMap', DEFAULT_BASEMAP);
+    $location.search('baseMap', DEFAULT_BASEMAP);
 
-   
-    
     geoJsonService.subscribe($scope, 'updated', function() {
       
       // update map and scope.model with any changes in bounds in the
@@ -189,6 +191,8 @@ function($scope, $state, $timeout, $location, geoJsonService) {
     baseMap.addTo($scope.model.map);
     $scope.model.baseMapLayer = baseMap;
     $scope.model.baseMapSelect = false;
+    $location.search('baseMap', name);
+    Cookies.set('baseMap', name);
   };
   
   $scope.onSetCenter = function() {
