@@ -115,6 +115,7 @@ function($http, $rootScope, $location, $timeout, $q) {
         country : params.country,
         accession_ids : params.accessionIds,
 	trait_overlay : params.traitOverlay,
+	trait_exclude_unchar : params.traitExcludeUnchar,
         limit: params.maxRecs,
       }
     }).then(
@@ -243,6 +244,11 @@ function($http, $rootScope, $location, $timeout, $q) {
 
   s.setTraitOverlay = function(trait, search) {
     $location.search('traitOverlay', trait);
+    if(search) { s.search(); }
+  };
+
+  s.setTraitExcludeUnchar = function(bool, search) {
+    $location.search('traitExcludeUnchar', bool);
     if(search) { s.search(); }
   };
 

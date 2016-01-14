@@ -22,6 +22,7 @@ function($scope, $state, $http, $location, geoJsonService) {
     accessionIds : searchParams.accessionIds,
     traitOverlay : searchParams.traitOverlay,
     traitScale : searchParams.traitScale,
+    traitExcludeUnchar : searchParams.traitExcludeUnchar,
   };
   
   $scope.init = function() {
@@ -53,6 +54,7 @@ function($scope, $state, $http, $location, geoJsonService) {
     geoJsonService.setAccessionIds($scope.model.accessionIds, false);
     geoJsonService.setTraitOverlay($scope.model.traitOverlay, false);
     geoJsonService.setTraitScale($scope.model.traitScale, false);
+    geoJsonService.setTraitExcludeUnchar($scope.model.traitExcludeUnchar, false)
     geoJsonService.search();
   };
  

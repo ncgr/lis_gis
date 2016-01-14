@@ -160,21 +160,36 @@
 		    aria-hidden="true"></span>
 	      Clear
 	    </button>
-	    <div class="checkbox" ng-if="model.traitOverlay">
-	      Symbolize trait using:
-	      <label>
-		<input type="radio"
-		       ng-model="model.traitScale"
-		       value="local">
-		Local values
-	      </label>
-	      <label>
-		<input type="radio"
-		       ng-model="model.traitScale"
-		       value="global">
-		Global values
-	      </label>
+
+	    <div class="form-group" ng-if="model.traitOverlay">
+	      <div class="checkbox">
+		<label>
+		  <input type="checkbox"
+			 ng-model="model.traitExcludeUnchar">
+		  Exclude uncharacterized accessions from map overlay.
+		</label>
+	      </div>
 	    </div>
+	    <br/>
+	    <div class="form-group" ng-if="model.traitOverlay">
+	      Symbolize numeric observations using:
+	      <div class="radio">
+		<label>
+		  <input type="radio"
+			 ng-model="model.traitScale"
+			 value="local">
+		  Local values
+		</label>
+		<label>
+		  <input type="radio"
+			 ng-model="model.traitScale"
+			 value="global"/>
+		  Global values
+		</label>
+		.
+	      </div>
+	    </div>
+	    
 	  </form>
 	</td>
       </tr>

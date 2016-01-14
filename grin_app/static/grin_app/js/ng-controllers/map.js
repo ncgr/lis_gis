@@ -134,7 +134,17 @@ function($scope, $state, $timeout, $location, geoJsonService) {
       
       // remove previous map markers, and then update with the new geojson
       $scope.model.geoJsonLayer.clearLayers();
-      $scope.model.geoJsonLayer.addData($scope.model.geoJsonService.data);
+      
+      var filteredGeoJson = $scope.model.geoJsonService.data;
+      if($location.search().traitExcludeUnchar) {
+	// exclude uncharacterized accessions for this trait
+	filteredGeoJson = _.filter($scope.model.geoJsonService.data,
+         function(d) {
+	   var accId = d.properties.accenumb;
+	   return accId in $scope.model.geoJsonService.traitHash;
+	  });
+      }
+      $scope.model.geoJsonLayer.addData(filteredGeoJson);
 
       if($scope.model.map.getSize().y != $scope.model.mapHeight) {
         $scope.model.map.invalidateSize();
