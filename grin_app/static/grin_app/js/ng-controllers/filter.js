@@ -54,7 +54,7 @@ function($scope, $state, $http, $location, geoJsonService) {
     geoJsonService.setAccessionIds($scope.model.accessionIds, false);
     geoJsonService.setTraitOverlay($scope.model.traitOverlay, false);
     geoJsonService.setTraitScale($scope.model.traitScale, false);
-    geoJsonService.setTraitExcludeUnchar($scope.model.traitExcludeUnchar, false)
+    geoJsonService.setTraitExcludeUnchar($scope.model.traitExcludeUnchar, false);
     geoJsonService.search();
   };
  
