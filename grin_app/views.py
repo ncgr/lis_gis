@@ -39,6 +39,7 @@ ORDER_BY_FRAG = '''
 '''
 LIMIT_FRAG = 'LIMIT %(limit)s'
 COUNTRY_REGEX = re.compile(r'[a-z]{3,3}', re.I)
+TAXON_FTS_BOOLEAN_REGEX = re.compile(r'^(\w+\s*[\||\&]\s*\w+)+$')
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +56,7 @@ def _include_geo_bounds(p):
 
 GRIN_ACC_WHERE_FRAGS = {
     'fts' : {
-        'include' : lambda p: '|' in p.get('q', '') or '&' in p.get('q', ''),
+        'include' : lambda p: TAXON_FTS_BOOLEAN_REGEX.match(p.get('q', '')),
         'sql' : "taxon_fts @@ to_tsquery('english', %(q)s)",
     },
     'fts_simple' : {
@@ -110,17 +111,32 @@ def index(req):
 
 @ensure_csrf_cookie
 def evaluation_descr_names(req):
-    '''Return JSON for all distinct trait descriptor names'''
+    '''Return JSON for all distinct trait descriptor names matching the
+    given taxon. (the trait overlay choice is only available after a
+    taxon is selected). Join on the grin_accession table to use the
+    FTS index on taxon there.
+    '''
     assert req.method == 'GET', 'GET request method required'
     params = req.GET.dict()
     assert 'taxon' in params, 'missing taxon param'
+    params['q'] = params['taxon']
+    where_clauses = []
+    for key, val in GRIN_ACC_WHERE_FRAGS.items():
+        if val['include'](params):
+            where_clauses.append(val['sql'])
+    if len(where_clauses) == 0:
+        where_sql = ''
+    else:
+        where_sql = 'WHERE %s' % ' AND '.join(where_clauses)
     sql = '''
     SELECT DISTINCT descriptor_name
-    FROM lis_germplasm.legumes_grin_evaluation_data
-    WHERE taxon ILIKE %(taxon)s
+    FROM lis_germplasm.legumes_grin_evaluation_data eval
+    JOIN lis_germplasm.grin_accession acc
+    USING (accenumb)
+    %s
     ORDER BY descriptor_name
-    '''
-    sql_params = { 'taxon' : '%' + params['taxon'] + '%'}
+    ''' % where_sql
+    sql_params = {'q' : params['taxon']}
     cursor = connection.cursor()
     # logger.info(cursor.mogrify(sql, sql_params))
     cursor.execute(sql, sql_params)
@@ -186,7 +202,7 @@ def _string2num(s):
 
 @ensure_csrf_cookie
 def evaluation_metadata(req):
-    '''Return JSON with trait metadata for the given genus and trait. This
+    '''Return JSON with trait metadata for the given taxon and trait. This
     enables the client to display a legend, and colorize accessions by
     either numeric or category traits.
 
