@@ -41,7 +41,7 @@ function($http, $rootScope, $location, $timeout, $q) {
       $location.search('traitOverlay', '');
     }
     if(! ('traitScale' in params)) {
-      $location.search('traitScale', 'local');
+      $location.search('traitScale', 'global');
     }
     if(! ('country' in params)) {
       $location.search('country', '');
@@ -151,7 +151,7 @@ function($http, $rootScope, $location, $timeout, $q) {
 	    url : API_PATH + '/evaluation_metadata',
 	    method : 'POST',
 	    data : {
-              genus : params.taxonQuery.split()[0],
+              taxon : params.taxonQuery,
 	      descriptor_name : params.traitOverlay,
 	      accession_ids : params.traitScale === 'local' ? getAccessionIds() : [],
 	      trait_scale : params.traitScale,

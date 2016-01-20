@@ -87,6 +87,10 @@ GRIN_ACC_WHERE_FRAGS = {
 }
 
 GRIN_EVAL_WHERE_FRAGS = {
+    'descriptor_name' : {
+        'include' : lambda p: p.get('descriptor_name', None),
+        'sql' : 'descriptor_name = %(descriptor_name)s',
+    },
     'accession prefix' : {
         'include' : lambda p: p.get('prefix', None),
         'sql' : 'accession_prefix = %(prefix)s',
@@ -130,8 +134,8 @@ def evaluation_descr_names(req):
         where_sql = 'WHERE %s' % ' AND '.join(where_clauses)
     sql = '''
     SELECT DISTINCT descriptor_name
-    FROM lis_germplasm.legumes_grin_evaluation_data eval
-    JOIN lis_germplasm.grin_accession acc
+    FROM lis_germplasm.legumes_grin_evaluation_data
+    JOIN lis_germplasm.grin_accession
     USING (accenumb)
     %s
     ORDER BY descriptor_name
@@ -150,8 +154,8 @@ def evaluation_descr_names(req):
 def evaluation_search(req):
     '''Return JSON array of observation_value for all trait records
     matching a set of accession ids, and matching the descriptor_name
-    field. Used for creating a map overlay of trait data.
-
+    field. Used for creating map markers or map overlays with specific
+    accesions' trait data.
     '''
     assert req.method == 'POST', 'POST request method required'
     params = json.loads(req.body)
@@ -202,62 +206,113 @@ def _string2num(s):
 
 @ensure_csrf_cookie
 def evaluation_metadata(req):
-    '''Return JSON with trait metadata for the given taxon and trait. This
-    enables the client to display a legend, and colorize accessions by
-    either numeric or category traits.
+    '''Return JSON with trait metadata for the given taxon and trait
+    descriptor_name. This enables the client to display a legend, and
+    colorize accessions by either numeric or category traits.
 
     '''
     assert req.method == 'POST', 'POST request method required'
     params = json.loads(req.body)
-    assert 'genus' in params, 'missing genus param'
+    assert 'taxon' in params, 'missing taxon param'
     assert 'descriptor_name' in params, 'missing descriptor_name param'
     assert 'trait_scale' in params, 'missing trait_scale param'
     assert 'accession_ids' in params, 'missing accession_ids param'
     cursor = connection.cursor()
-    if params['trait_scale'] == 'global':
-        sql = '''
-        SELECT observation_value 
-        FROM lis_germplasm.legumes_grin_evaluation_data
-        WHERE taxon ILIKE %(genus)s
-        AND descriptor_name = %(descriptor_name)s
-        '''
-    else:  # local trait scale, limit to specific accession list
-        sql = '''
-        SELECT observation_value 
-        FROM lis_germplasm.legumes_grin_evaluation_data
-        WHERE accenumb IN %(accession_ids)s
-        AND taxon ILIKE %(genus)s
-        AND descriptor_name = %(descriptor_name)s
-        '''
+    # full text search on the taxon field in accessions table, also
+    # joining on taxon to get relevant evaluation metadata.
+    where_clauses = []
     sql_params = {
-        'genus' : '%' + params['genus'] + '%',
-        'descriptor_name' : params['descriptor_name'],
-        'accession_ids' : tuple(params['accession_ids'])
+        'q' : params['taxon'],
+        'descriptor_name' : params['descriptor_name']
     }
-    cursor.execute(sql, sql_params)
-    rows = [ _string2num(row[0]) for row in cursor.fetchall() ]
-    if _detect_numeric_trait(rows):
-        handler = _generate_numeric_trait_metadata
+    for key, val in GRIN_ACC_WHERE_FRAGS.items()+GRIN_EVAL_WHERE_FRAGS.items():
+        if val['include'](sql_params):
+            where_clauses.append(val['sql'])
+    if len(where_clauses) == 0:
+        where_sql = ''
     else:
-        handler = _generate_category_trait_metadata
-    rows = handler(rows, params)
-    result = json.dumps(rows, use_decimal=True)
+        where_sql = 'WHERE %s' % ' AND '.join(where_clauses)
+    sql = '''
+    SELECT DISTINCT taxon, descriptor_name, obs_type, obs_min, obs_max, 
+           obs_nominal_values
+    FROM lis_germplasm.grin_evaluation_metadata
+    JOIN lis_germplasm.grin_accession
+    USING (taxon)
+    %s
+    ''' % where_sql
+    logger.info(cursor.mogrify(sql, sql_params))
+    cursor.execute(sql, sql_params)
+    trait_metadata = _dictfetchall(cursor)
+    if(len(trait_metadata) == 0):
+        # early out if there were no matching metadata records
+        return HttpResponse({}, content_type='application/json')
+
+    obs_type = trait_metadata[0]['obs_type']
+    if obs_type == 'numeric':
+        if params['trait_scale'] == 'local':
+            # must perform another query to restrict observations to this
+            # set of accessions (local, not global)
+            sql = '''
+            SELECT observation_value 
+            FROM lis_germplasm.legumes_grin_evaluation_data
+            WHERE accenumb IN %(accession_ids)s
+            AND descriptor_name = %(descriptor_name)s
+            '''
+            sql_params = {
+                'descriptor_name' : params['descriptor_name'],
+                'accession_ids' : tuple(params['accession_ids'])
+            }
+            logger.info(cursor.mogrify(sql, sql_params))
+            cursor.execute(sql, sql_params)
+            obs_values = [ _string2num(row[0]) for row in cursor.fetchall() ]
+            result = {
+                'taxon_query' : params['taxon'],
+                'descriptor_name' : params['descriptor_name'],
+                'trait_type' : 'numeric',
+                'min' : min(obs_values),
+                'max' : max(obs_values),
+            }
+        elif params['trait_scale'] == 'global':
+            mins = [rec['obs_min'] for rec in trait_metadata]
+            maxes = [rec['obs_max'] for rec in trait_metadata]
+            result = {
+                'taxon_query' : params['taxon'],
+                'descriptor_name' : params['descriptor_name'],
+                'trait_type' : 'numeric',
+                'min' : reduce(lambda x, y: x + y, mins) / len(mins),
+                'max' : reduce(lambda x, y: x + y, maxes) / len(maxes),
+            }
+    elif obs_type == 'nominal':
+        vals = set()
+        for rec in trait_metadata:
+            vals |= set(rec['obs_nominal_values'])
+        num_preset_colors = len(NOMINAL_COLORS)
+        colors = {}
+        for i, val in enumerate(vals):
+            if i < num_preset_colors:
+                colors[val] = NOMINAL_COLORS[i]
+            else:
+                colors[val] = DEFAULT_COLOR
+        result = {
+            'taxon_query' : params['taxon'],
+            'descriptor_name' : params['descriptor_name'],
+            'trait_type' : 'nominal',
+            'obs_nominal_values' : sorted(vals),
+            'colors' : colors,
+        }
+    logger.info(result)
+    json_result = json.dumps(result, use_decimal=True)
     response = HttpResponse(result, content_type='application/json')
     return response
 
 
-def _generate_numeric_trait_metadata(rows, params):
+def _generate_numeric_trait_metadata(descriptor_name, obs_min, obs_max):
     ''' Return JSON describing numeric trait including the data set min/max.'''
-    result = {
-        'descriptor_name' : params['descriptor_name'],
-        'trait_type' : 'numeric',
-        'min' : min(rows),
-        'max' : max(rows),
-    }
+   
     return result
 
 
-def _generate_category_trait_metadata(rows, params):
+def _generate_category_trait_metadata(descriptor_name, obs_vals):
     '''Return JSON describing nominal categories, including pre-selected
     colors for all values in the data.
     '''
@@ -275,27 +330,6 @@ def _generate_category_trait_metadata(rows, params):
         'colors' : colors,
     }
     return result
-
-
-def _detect_numeric_trait(rows):
-    '''
-    1. If there are any strings, assume this must not be a numeric trait.
-    2. If there are only ints within a narrow range, then assume it's a
-       category trait using ints as classes.
-    3. Otherwise by default it must be numeric.
-    '''
-    strings = [ val for val in rows if isinstance(val, basestring) ]
-    if len(strings) > 0:
-        return False  # have at least one string, must not be numeric.
-    ints = [ val for val in rows if isinstance(val, int) ]
-    if len(ints) == len(rows):
-        uniq = sorted(list(set(ints)))
-        if len(uniq) < NOMINAL_THRESHOLD:
-            # this trait's observations are a small number of ints, so
-            # (perhaps) that some evidence maybe this is a category not a
-            # measurement.
-            return False
-    return True
 
 
 @ensure_csrf_cookie
