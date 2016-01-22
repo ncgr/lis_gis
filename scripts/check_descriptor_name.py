@@ -2,7 +2,7 @@
 
 import psycopg2
 
-PSQL_DB = 'dbname=grin user=agr'
+PSQL_DB = 'dbname=drupal user=www'
 
 
 def main():

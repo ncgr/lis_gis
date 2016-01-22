@@ -6,7 +6,7 @@ genera are loaded/updated.
 '''
 import psycopg2
 
-PSQL_DB = 'dbname=grin user=agr'
+PSQL_DB = 'dbname=drupal user=www'
 DATE_FMT = '%Y%m%d'
 PNT_FMT = "ST_GeographyFromText('SRID=4326;POINT(%(longdec)s %(latdec)s)')"
 

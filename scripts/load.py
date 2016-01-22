@@ -18,7 +18,7 @@ import petl as etl
 import psycopg2
 from datetime import datetime as dt
 
-PSQL_DB = 'dbname=grin user=agr'
+PSQL_DB = 'dbname=drupal user=www'
 DATE_FMT = '%Y%m%d'
 PNT_FMT = "ST_GeographyFromText('SRID=4326;POINT(%(longdec)s %(latdec)s)')"
 

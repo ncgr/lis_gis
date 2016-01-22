@@ -7,7 +7,7 @@ genera evaluation data are loaded/updated.
 '''
 import psycopg2
 
-PSQL_DB = 'dbname=grin user=agr'
+PSQL_DB = 'dbname=drupal user=www'
 NOMINAL_THRESHOLD = 10
 
 conn = psycopg2.connect(PSQL_DB)
