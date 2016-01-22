@@ -45,12 +45,12 @@ create table lis_germplasm.grin_accession (
    released text
 );
 
-create unique index accenumb_idx on grin_accession (lower(accenumb));
-create index geog_coord_idx on grin_accession using gist (geographic_coord);
-create index grin_accession_idx on grin_accession (lower(grin_accession));
-create index species_idx on grin_accession (lower(species));
-create index taxon_idx on grin_accession (lower(taxon));
-create index taxon_fts_idx on grin_accession using gin(taxon_fts);
+CREATE UNIQUE INDEX ON lis_germplasm.grin_accession (accenumb);
+CREATE INDEX ON lis_germplasm.grin_accession USING gist (geographic_coord);
+-- CREATE INDEX ON lis_germplasm.grin_accession hash (lower(grin_accession));
+CREATE INDEX ON lis_germplasm.grin_accession (lower(species));
+CREATE INDEX ON lis_germplasm.grin_accession (lower(taxon));
+CREATE INDEX ON lis_germplasm.grin_accession USING gin(taxon_fts);
 
 -- Setup full text search. this could be done with stemming (although
 -- stemming won't work on taxon because they are latin words and
@@ -74,3 +74,5 @@ ALTER TEXT SEARCH CONFIGURATION taxon
 -- update fts dictionary
 UPDATE lis_germplasm.grin_accession
 SET taxon_fts = to_tsvector('english', coalesce(taxon,''));
+
+VACUUM ANALYZE VERBOSE lis_germplasm.grin_accession;
