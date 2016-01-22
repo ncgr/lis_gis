@@ -246,6 +246,11 @@ function($http, $rootScope, $location, $timeout, $q) {
     if(search) { s.search(); }
   };
 
+  s.setTraitExcludeUnchar = function(bool, search) {
+    $location.search('traitExcludeUnchar', bool);
+    if(search) { s.search(); }
+  };
+
   s.setTraitScale = function(scale, search) {
     $location.search('traitScale', scale);
     if(search) { s.search(); }
