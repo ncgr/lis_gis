@@ -114,6 +114,7 @@ function($scope, $state, $http, $location, geoJsonService) {
     $scope.model.accessionIds = null;
     $scope.model.traitOverlay = 'SEEDWGT';
     $scope.model.taxonQuery = 'Phaseolus vulgaris';
+    $scope.model.traitScale = 'local';
     $scope.onTaxonQuery($scope.model.taxonQuery);
   };
 

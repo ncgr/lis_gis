@@ -123,6 +123,7 @@ def evaluation_descr_names(req):
     assert req.method == 'GET', 'GET request method required'
     params = req.GET.dict()
     assert 'taxon' in params, 'missing taxon param'
+    assert params['taxon'], 'empty taxon param'
     params['q'] = params['taxon']
     where_clauses = []
     for key, val in GRIN_ACC_WHERE_FRAGS.items():
@@ -217,6 +218,7 @@ def evaluation_metadata(req):
     assert 'descriptor_name' in params, 'missing descriptor_name param'
     assert 'trait_scale' in params, 'missing trait_scale param'
     assert 'accession_ids' in params, 'missing accession_ids param'
+    assert params['taxon'], 'empty taxon param'
     cursor = connection.cursor()
     # full text search on the taxon field in accessions table, also
     # joining on taxon to get relevant evaluation metadata.
@@ -240,7 +242,7 @@ def evaluation_metadata(req):
     USING (taxon)
     %s
     ''' % where_sql
-    logger.info(cursor.mogrify(sql, sql_params))
+    # logger.info(cursor.mogrify(sql, sql_params))
     cursor.execute(sql, sql_params)
     trait_metadata = _dictfetchall(cursor)
     if(len(trait_metadata) == 0):
@@ -262,7 +264,7 @@ def evaluation_metadata(req):
                 'descriptor_name' : params['descriptor_name'],
                 'accession_ids' : tuple(params['accession_ids'])
             }
-            logger.info(cursor.mogrify(sql, sql_params))
+            # logger.info(cursor.mogrify(sql, sql_params))
             cursor.execute(sql, sql_params)
             obs_values = [ _string2num(row[0]) for row in cursor.fetchall() ]
             result = {
@@ -300,9 +302,8 @@ def evaluation_metadata(req):
             'obs_nominal_values' : sorted(vals),
             'colors' : colors,
         }
-    logger.info(result)
-    json_result = json.dumps(result, use_decimal=True)
-    response = HttpResponse(result, content_type='application/json')
+    response = HttpResponse(json.dumps(result, use_decimal=True),
+                            content_type='application/json')
     return response
 
 

@@ -129,7 +129,7 @@ function($http, $rootScope, $location, $timeout, $q) {
 	  $timeout(s.search, 0);
 	  return;
 	}
-	if(params.traitOverlay && s.data.length > 0) {
+	if(params.taxonQuery && params.traitOverlay && s.data.length > 0) {
 	  var promise1 = $http({
 	    url : API_PATH + '/evaluation_search',
 	    method : 'POST',
@@ -303,7 +303,7 @@ function($http, $rootScope, $location, $timeout, $q) {
   }
 
   function colorStrategyCategoryTrait() {
-    var observedCategories = [];
+
     _.each(s.traitData, function(d) {
       if(s.traitHash[d.accenumb]) {
 	s.traitHash[d.accenumb].push(d.observation_value);
@@ -311,30 +311,31 @@ function($http, $rootScope, $location, $timeout, $q) {
       else {
 	s.traitHash[d.accenumb] = [d.observation_value];
       }
-      observedCategories.push(d.observation_value);
     });
     
-    _.each(s.data, function(acc) {
-      var accNum = acc.properties.accenumb;
-      var traitValues = s.traitHash[acc.properties.accenumb];
+    _.each(s.data, function(d) {
+      var accNum = d.properties.accenumb;
+      var traitValues = s.traitHash[d.properties.accenumb];
       if(traitValues !== undefined) {
 	// unsure how to handle case where multiple categories were
 	// observed, so just take the 1st
 	var val = traitValues[0];
-	acc.properties.color = s.traitMetadata.colors[val];
-	acc.properties.haveTrait = true;
+	d.properties.color = s.traitMetadata.colors[val];
+	d.properties.haveTrait = true;
       }
       else {
-	acc.properties.color = taxonChroma.defaultColor;
+	d.properties.color = taxonChroma.defaultColor;
       }
     });
-    var legendValues = _.map(_.uniq(observedCategories).sort(), function(n) {
-      return  {
-    	label : n,
-    	color : s.traitMetadata.colors[n],
-      }
-    });
-    s.traitLegend = {
+
+    var legendValues = _.map(s.traitMetadata.obs_nominal_values,
+	function(n) {
+	  return  {
+	    label : n,
+	    color : s.traitMetadata.colors[n],
+	  }
+	});
+    s.traitLegend = { 
       min : null,
       max : null,
       colorScale : null,
