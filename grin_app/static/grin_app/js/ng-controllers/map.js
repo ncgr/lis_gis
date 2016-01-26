@@ -136,7 +136,7 @@ function($scope, $state, $timeout, $location, geoJsonService) {
       $scope.model.geoJsonLayer.clearLayers();
       
       var filteredGeoJson = $scope.model.geoJsonService.data;
-      if($location.search().traitExcludeUnchar) {
+      if($location.search().traitExcludeUnchar === 'true') {
 	// exclude uncharacterized accessions for this trait
 	filteredGeoJson = _.filter($scope.model.geoJsonService.data,
          function(d) {

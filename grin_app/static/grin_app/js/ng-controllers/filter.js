@@ -15,14 +15,14 @@ function($scope, $state, $http, $location, geoJsonService) {
     autofocusField : null,
     alert : null,
     $location : $location,
-    limitToMapExtent : searchParams.limitToMapExtent,
+    limitToMapExtent : (searchParams.limitToMapExtent === 'true'),
     maxRecs : searchParams.maxRecs,
     country : searchParams.country,
     taxonQuery : searchParams.taxonQuery,
     accessionIds : searchParams.accessionIds,
     traitOverlay : searchParams.traitOverlay,
     traitScale : searchParams.traitScale,
-    traitExcludeUnchar : searchParams.traitExcludeUnchar,
+    traitExcludeUnchar : (searchParams.traitExcludeUnchar === 'true'),
   };
   
   $scope.init = function() {
