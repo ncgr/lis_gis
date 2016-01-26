@@ -110,7 +110,7 @@ function($http, $rootScope, $location, $timeout, $q) {
         ne_lng : s.bounds._northEast.lng,
         sw_lat : s.bounds._southWest.lat,
         sw_lng : s.bounds._southWest.lng,
-        limit_geo_bounds : params.limitToMapExtent,
+        limit_geo_bounds : parseBool(params.limitToMapExtent),
 	geocoded_only : params.geocodedOnly,
         country : params.country,
         accession_ids : params.accessionIds,

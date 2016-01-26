@@ -70,7 +70,7 @@ function($scope, $state, $timeout, $location, geoJsonService) {
     
     $scope.model.map = L.map('map', {
       'center' : [$scope.model.center.lat, $scope.model.center.lng],
-      'zoom' : $location.search().zoom,
+      'zoom' : parseInt($location.search().zoom),
     });
   
     $scope.model.map.attributionControl.addAttribution(
@@ -136,7 +136,8 @@ function($scope, $state, $timeout, $location, geoJsonService) {
       $scope.model.geoJsonLayer.clearLayers();
       
       var filteredGeoJson = $scope.model.geoJsonService.data;
-      if($location.search().traitExcludeUnchar === 'true') {
+      if(parseBool($location.search().traitExcludeUnchar) &&
+	 $location.search().traitOverlay) {
 	// exclude uncharacterized accessions for this trait
 	filteredGeoJson = _.filter($scope.model.geoJsonService.data,
          function(d) {
@@ -268,7 +269,7 @@ function($scope, $state, $timeout, $location, geoJsonService) {
   }
     
   function fixMarkerZOrder() {
-    if($location.search().traitOverlay) {
+    if(Boolean($location.search().traitOverlay)) {
       $scope.model.map.eachLayer(function(l) {
 	if(_.has(l, 'feature.properties.haveTrait')) {
 	  l.bringToFront();

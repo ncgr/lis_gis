@@ -235,3 +235,4 @@ app.tour = function () {
   Cookies.set(tourId, true, { expires: 365 });
 };
 
+function parseBool(val) { return val === true || val === "true"; }
