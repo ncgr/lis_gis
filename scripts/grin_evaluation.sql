@@ -1,7 +1,11 @@
 ALTER TABLE lis_germplasm.legumes_grin_evaluation_data ADD accenumb text;
 
 CREATE INDEX ON lis_germplasm.legumes_grin_evaluation_data (descriptor_name);
-CREATE INDEX ON lis_germplasm.legumes_grin_evaluation_data (accenumb) ;
+CREATE INDEX ON lis_germplasm.legumes_grin_evaluation_data (accenumb);
+
+-- this next index may appear to be redundant, but it actually
+-- prevents a sequential scan in the query in evaluation_descr_names()
+CREATE INDEX ON lis_germplasm.legumes_grin_evaluation_data (accenumb, descriptor_name);
 
 UPDATE lis_germplasm.legumes_grin_evaluation_data
 SET accenumb = accession_prefix || ' ' || accession_number;
