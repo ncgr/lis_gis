@@ -271,8 +271,8 @@ def evaluation_metadata(req):
                 'taxon_query' : params['taxon'],
                 'descriptor_name' : params['descriptor_name'],
                 'trait_type' : 'numeric',
-                'min' : min(obs_values),
-                'max' : max(obs_values),
+                'min' : min(obs_values) if obs_values else 0,
+                'max' : max(obs_values) if obs_values else 0,
             }
         elif params['trait_scale'] == 'global':
             mins = [rec['obs_min'] for rec in trait_metadata]
