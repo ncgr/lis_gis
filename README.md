@@ -1,14 +1,11 @@
 # lis_gis
-Prototype of LIS GIS for germplasm and other geographic info, using angular-js, boostrap, and leaflet-js.
+Map viewer for and search interface for USDA/GRIN germplasm accessions and traits.
 
 server requirements
-* django
-* python
-* postgresql and postgis
+* Python 2.7.x
+* Django
+* PostgreSQL and Postgis
 
 ## python setup
-pip install -r requirements.text
-
-## TODO
-more docs...
+pip install -r requirements.txt
 
