@@ -30,7 +30,7 @@
   <span ng-if="model.$location.search().traitOverlay" class="badge">
     {{ model.$location.search().traitOverlay }}
     <button class="btn btn-xs btn-default"
-	    ng-click="model.traitOverlay = ''; onOK();">
+	    ng-click="model.traitOverlay = ''; model.traitExcludeUnchar = false; onOK();">
       <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
     </button>
   </span>
@@ -154,7 +154,7 @@
 		    aria-hidden="true"></span>
 	      Go
 	    </button>
-	    <button ng-click="model.traitOverlay = null; onOK();"
+	    <button ng-click="model.traitOverlay = null; model.traitExcludeUnchar = false; onOK();"
 		    class="btn btn-sm btn-default">
 	      <span class="glyphicon glyphicon-remove"
 		    aria-hidden="true"></span>
