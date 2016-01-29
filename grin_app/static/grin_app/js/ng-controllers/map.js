@@ -311,7 +311,23 @@ function($scope, $state, $timeout, $location, geoJsonService) {
     });
     return ct;
   }
-  
+
+  $scope.showHiddenAccHelp = function() {
+    if($scope.model.geoJson.updating) {
+      return false;
+    }
+    if(! geoJsonService.data.length) {
+      return false;
+    }
+    if(parseBool($location.search().traitExcludeUnchar)) {
+      return false;
+    }
+    if($scope.getVisibleMarkerCount() === 0) {
+      return true;
+    }
+    return false;
+  }
+
   function filterNonGeocoded(featureData, layer) {
     /* GeoJson spec allows null coordinates (e.g. non-geocoded
      * accessions in our situation). However leafletjs errors on the
