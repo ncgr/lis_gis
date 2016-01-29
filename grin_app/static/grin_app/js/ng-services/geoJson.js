@@ -24,6 +24,7 @@ function($http, $rootScope, $location, $timeout, $q) {
   s.init = function() {
     // set default search values on $location service
     var params = $location.search();
+
     if(! ('limitToMapExtent' in params) &&
        ! ('accessionIds' in params)) {
       $location.search('limitToMapExtent', true);
@@ -405,7 +406,7 @@ function($http, $rootScope, $location, $timeout, $q) {
      http://www.codelord.net/2015/05/04/angularjs-notifying-about-changes-from-services-to-controllers/
   */
   s.subscribe = function(scope, eventName, callback) {
-    if(! _.contains(s.events, eventName)) {
+    if(! _.includes(s.events, eventName)) {
       throw 'invalid eventName ' + eventName;
     }
     var handler = $rootScope.$on('geoJsonService_'+eventName, callback);
