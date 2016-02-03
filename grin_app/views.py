@@ -3,6 +3,7 @@ import simplejson as json
 import decimal
 import re
 from decimal import Decimal
+from django.conf import settings
 from django.db import connection
 from django.shortcuts import render
 from django.http import HttpResponse
@@ -110,7 +111,7 @@ GRIN_EVAL_WHERE_FRAGS = {
 def index(req):
     '''Render the index template, which will boot up angular-js.
     '''
-    return render(req, 'grin_app/index.html')
+    return render(req, 'grin_app/index.html', context=settings.BRANDING)
 
 
 @ensure_csrf_cookie

@@ -7,7 +7,7 @@
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   
-  <title>LIS | Germplasm</title>
+  <title>{{ site_abbrev }} | {{ site_subheading }} </title>
   
   <link rel="stylesheet" type="text/css"
 	href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css"/>
@@ -26,11 +26,14 @@
 <body>
   <div ui-view class="container-fluid l-fit-height">
     <h3>
-      <a href="http://{{ request.get_host }}"><img
-	src="http://legumeinfo.org/sites/all/themes/legumeinfo_theme/images/legumeinfo_logo.png" height="30" alt="LIS" /></a>
-      <a href="http://{{ request.get_host }}" style="color: #87a96b;">
-	Legume Information System</a>
-	| Germplasm Map
+      <a href="{{ home_url }}"><img
+	src="{{ logo_url }}"
+        height="30"
+        alt="{{ site_abbrev }}" /></a>
+      <a href="{{ home_url }}">
+	{{ site_heading }}
+      </a>
+      | {{ site_subheading }}
     </h3>
     <div class="l-fit-height-row">
       <div class="l-fit-height-row-content">
@@ -82,6 +85,14 @@
    // where is the django web application (set to '' for devel with
    // django runserver, set to '/germplasm/map' for LIS deploy)
    var API_PATH = '/germplasm/map';
+   // get branding from the settings.py
+   var BRANDING = {
+     home_url : '{{ home_url }}',
+     logo_url : '{{ logo_url }}',
+     site_abbrev : '{{ site_abbrev }}',
+     site_heading : '{{ site_heading }}',
+     site_subheading : '{{ site_subheading }}',
+   };
   </script>
   
   <script src="{% static 'grin_app/js/app.js'%}"></script>

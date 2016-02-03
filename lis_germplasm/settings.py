@@ -136,3 +136,12 @@ LOGGING = {
         },
     },
 }
+
+BRANDING = {
+    'home_url' : '/',
+    'logo_url' : 'http://legumeinfo.org/sites/all/themes/legumeinfo_theme/images/legumeinfo_logo.png',
+    'site_heading' : 'Legume Information System',
+    'site_subheading' : 'Germplasm Map',
+    'site_abbrev' : 'LIS',
+}
+

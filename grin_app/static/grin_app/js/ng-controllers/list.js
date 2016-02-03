@@ -19,9 +19,9 @@ function($scope,
     $location : $location,
     searchHilite: null,
     hiliteAccNumb : null,
-    STATIC_PATH : STATIC_PATH,
     showAssistiveButton : false,
     showAssistiveText : null,
+    STATIC_PATH : STATIC_PATH,
   };
 
   $scope.init = function() {
@@ -173,14 +173,14 @@ function($scope,
   };
 
   function onGoExternalLISTaxon(accDetail)  {
-    var url = 'http://legumeinfo.org/organism/' +
+    var url = '/organism/' +
 	encodeURIComponent(accDetail.properties.genus) + '/' +
 	encodeURIComponent(accDetail.properties.species);
     $window.open(url, 'LIS');
   }
 
   function onGoExternalLISGRIN(accDetail) {
-    var url = 'http://legumeinfo.org/grinconnect/query?grin_acc_no='+
+    var url = '/grinconnect/query?grin_acc_no='+
 	encodeURIComponent(accDetail.properties.accenumb);
     $window.open(url, 'LIS');
   }
@@ -218,6 +218,7 @@ function ($scope, $uibModalInstance, $http, accId) {
     evaluation : null,
     hideLISSpeciesLink : true,
     STATIC_PATH : STATIC_PATH,
+    BRANDING : BRANDING,
   };
 
   function getAccessionDetail() {

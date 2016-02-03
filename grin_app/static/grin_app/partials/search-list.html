@@ -149,7 +149,8 @@
 	    ng-if="model.acc"
 	    ng-click="onGoLISGRIN()">
       <span class="glyphicon glyphicon-search" aria-hidden="true"></span>      
-      Search LIS GRIN Connect for {{model.acc.properties.accenumb}}
+      Search {{model.BRANDING.site_abbrev}} GRIN Connect for
+      {{model.acc.properties.accenumb}}
     </button>
      
     <button ng-if="model.acc.properties.genus && model.acc.properties.species"
@@ -160,7 +161,7 @@
       <span class="glyphicon glyphicon-leaf"
 	    aria-hidden="true"></span>
       View {{model.acc.properties.genus}}
-           {{model.acc.properties.species}} at LIS
+           {{model.acc.properties.species}} at {{model.BRANDING.site_abbrev}}
     </button>
 
     <table class="table table-striped"
