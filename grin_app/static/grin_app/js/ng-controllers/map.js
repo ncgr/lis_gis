@@ -114,9 +114,9 @@ function($scope, $state, $timeout, $location, geoJsonService) {
     Cookies.set('baseMap', DEFAULT_BASEMAP);
     $location.search('baseMap', DEFAULT_BASEMAP);
 
-    //  geoJsonService.subscribe($scope, 'selectedAccessionUpdated', function() {
-    //    cleanupMarkerPopup();
-  //});
+    geoJsonService.subscribe($scope, 'selectedAccessionUpdated', function() {
+      cleanupMarkerPopup();
+    });
     
     geoJsonService.subscribe($scope, 'updated', function() {
       
@@ -190,6 +190,7 @@ function($scope, $state, $timeout, $location, geoJsonService) {
     
     $scope.model.map.on('popupopen', function(e) {
       // use timeout to enter ng async event
+      currentPopup = e.popup;
       $timeout(function() {
 	var accId = e.popup.accId;
 	if(accId) {
@@ -363,6 +364,24 @@ function($scope, $state, $timeout, $location, geoJsonService) {
      * accessions in our situation). However leafletjs errors on the
      * null coordinates, so filter them out here */
     return (featureData.geometry.coordinates !== null);
+  }
+
+  var currentPopup = null;
+  function cleanupMarkerPopup() {
+    if(currentPopup) {
+      if( geoJsonService.selectedAccession === null ||
+	  geoJsonService.selectedAccession !== currentPopup.accId) {
+	$scope.model.map.closePopup(currentPopup);
+	currentPopup = null;
+      }
+    }
+    if(geoJsonService.selectedAccession !== null && ! currentPopup ) {
+      $scope.model.geoJsonLayer.eachLayer( function(layer) {
+	if(layer._popup.accId == geoJsonService.selectedAccession) {
+	  layer.openPopup();
+	}
+      });
+    }
   }
 
   $scope.init();
