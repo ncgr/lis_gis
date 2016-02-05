@@ -33,9 +33,8 @@ var taxonChroma = {};
   
   this.defaultColor = '#d3d3d3'; // used for non-legume genera
 
-  // some of these colors are carried over from the colors.json file
-  // from the pholylotree module. they are all cbrewer classification
-  // colors.
+  // these colors are all Brewer category colors. Some are carried
+  // over to match what was originally on the LIS site.
   this.legumeGenera = {
     apios :        moreBrewerColors[0],
     arachis :      '#bcbd22',
