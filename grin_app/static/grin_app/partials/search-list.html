@@ -55,7 +55,7 @@
       <th>elev&nbsp;(m.)</th>
     </tr>
     <tr ng-repeat="rec in model.geoJson.data"
-	ng-class="{'hilite-row' : model.hiliteAccNumb == rec.properties.accenumb}">
+	ng-class="{'hilite-row' : model.geoJson.selectedAccession == rec.properties.accenumb}">
       <td class="nowrap">
 	<button class="btn btn-xs btn-default accdetail-button"
 		ng-click="onAccessionDetail(rec.properties.accenumb)"

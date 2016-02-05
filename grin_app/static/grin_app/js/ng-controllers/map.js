@@ -15,7 +15,7 @@ function($scope, $state, $timeout, $location, geoJsonService) {
    * invlidated and causing an initieal reload of the search (which we
    * dont want to happen )*/
   var DEFAULT_MAP_HEIGHT = 350;
-
+  
   $scope.model = {
     //legumeGenera : taxonChroma.legumeGenera, // for development only
     geoJson : geoJsonService,
@@ -95,11 +95,18 @@ function($scope, $state, $timeout, $location, geoJsonService) {
       },
       onEachFeature: function (feature, layer) {
 	// bind a popup to each feature
-	var content = feature.properties.accenumb +
-	    '<br/>' + feature.properties.taxon;
+	var accId = feature.properties.accenumb;
+	var content = accId + '<br/>' + feature.properties.taxon;
 	var popup = L.popup();
+	popup.accId = accId; // cache the accession number in a property
 	popup.setContent(content);
-        layer.bindPopup(popup);
+	layer.bindPopup(popup);
+	if(accId === geoJsonService.selectedAccession) {
+	  // for some reason openPopup won't work immediately, so delay 1 tick
+	  $timeout(function() {
+	    layer.openPopup();
+}, 0);
+	}
       },
       filter: filterNonGeocoded,
     });
@@ -107,6 +114,10 @@ function($scope, $state, $timeout, $location, geoJsonService) {
     Cookies.set('baseMap', DEFAULT_BASEMAP);
     $location.search('baseMap', DEFAULT_BASEMAP);
 
+    //  geoJsonService.subscribe($scope, 'selectedAccessionUpdated', function() {
+    //    cleanupMarkerPopup();
+  //});
+    
     geoJsonService.subscribe($scope, 'updated', function() {
       
       // update map and scope.model with any changes in bounds in the
@@ -153,7 +164,6 @@ function($scope, $state, $timeout, $location, geoJsonService) {
       
       $timeout(addMaxResultsSymbology, 0);
       $timeout(fixMarkerZOrder, 0);
-      $timeout(cleanupMarkerPopup, 0);
     });
 
     $scope.model.map.on('moveend', function(e) {
@@ -181,14 +191,17 @@ function($scope, $state, $timeout, $location, geoJsonService) {
     $scope.model.map.on('popupopen', function(e) {
       // use timeout to enter ng async event
       $timeout(function() {
-	// the accession number, in some use cases, is stored as a
-	// property on the popup.
-	var accNum = e.popup.getContent().split('<')[0];
-	if( ! accNum) {
-	  return;
+	var accId = e.popup.accId;
+	if(accId) {
+	  geoJsonService.setSelectedAccession(accId);
 	}
-	$scope.model.accPopup = e.popup;
-	$scope.model.accPopupNum = accNum;
+      }, 0);
+    });
+    
+    $scope.model.map.on('popupclose', function(e) {
+      // use timeout to enter ng async event
+      $timeout(function() {
+	//markerPopup = null;
       }, 0);
     });
 
@@ -293,21 +306,6 @@ function($scope, $state, $timeout, $location, geoJsonService) {
 	}
       });
     }
-  }
-
-  function cleanupMarkerPopup() {
-    if(! $scope.model.accPopupNum) {
-      return;
-    }
-    var haveAccessionInResults = _.find(geoJsonService.data, function(d) {
-      return d.properties.accenumb === $scope.model.accPopupNum;
-    });
-    if(haveAccessionInResults) { return; }
-    // the popup's accession num is no longer in result set, so clean
-    // up the popup from map ui.
-    $scope.model.map.closePopup($scope.model.accPopup);
-    $scope.model.accPopup = null;
-    $scope.model.accPopupNum = null;
   }
   
   function addMaxResultsSymbology() {

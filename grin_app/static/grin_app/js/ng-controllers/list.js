@@ -18,7 +18,6 @@ function($scope,
     geoJson: geoJsonService,
     $location : $location,
     searchHilite: null,
-    hiliteAccNumb : null,
     showAssistiveButton : false,
     showAssistiveText : null,
     STATIC_PATH : STATIC_PATH,
@@ -29,30 +28,17 @@ function($scope,
     geoJsonService.subscribe($scope, 'updated', function() {
       // callback for geoJsonService updated search results
       updateQueryHiliting();
-      updateSingleAccessionHilite();
       updateAssistiveButton();
     });
-    
-    geoJsonService.map.on('popupopen', function(e) {
-      // use timeout to enter ng async event
-      $timeout(function() {
-	// the accession number, in some use cases, is stored as a
-	// property on the popup.
-	var accNum = e.popup.getContent().split('<')[0];
-	if( ! accNum) {
-	  return;
-	}
-	hiliteAccNumbInTable(accNum);
-      }, 0);
-    });
-    
-    geoJsonService.map.on('popupclose', function(e) {
-      // the accession number, in some use cases, is stored as a
-      // property on the popup.
-      // use timeout to enter ng async event      
-      $timeout(function() {
-	$scope.model.hiliteAccNumb = null;	
-      }, 0);
+
+    geoJsonService.subscribe($scope, 'selectedAccessionUpdated', function() {
+      // scroll to top of results list, because the selected accession
+      // will be hilited there
+      var resultsList = $('#search-results');
+      var scroll = resultsList.scrollTop();
+      if(scroll > 0) {
+	$(resultsList).animate({ scrollTop: 0 }, "slow");
+      }
     });
   };
 
@@ -95,6 +81,8 @@ function($scope,
     var lat = accDetail.geometry.coordinates[1];
     var center = { 'lat' : lat, 'lng' : lng };
 
+    geoJsonService.setSelectedAccession(accNum);
+    
     // register callback from geoJsonService after search is updated
     // for new extent.
     var unsub = geoJsonService.subscribe($scope, 'updated', function() {
@@ -106,7 +94,6 @@ function($scope,
     	    .setLatLng(center)
     	    .setContent(content)
     	    .openOn(geoJsonService.map);
-	hiliteAccNumbInTable(accNum);
 	// bring the matching marker forward in the map view
 	var marker = _.find(geoJsonService.map._layers, function(l) {
     	  if(_.has(l, 'feature.properties.accenumb')) {
@@ -154,24 +141,7 @@ function($scope,
     $scope.model.showAssistiveButton = true;
     $scope.model.showAssistiveText = acc.properties.taxon;
   }
-  
-  function hiliteAccNumbInTable(accNum) {
-    // splice the record to beginning of geoJson dataset
-    var accession = _.find(geoJsonService.data, function(d) {
-      return (d.properties.accenumb === accNum);
-    });
-    if( ! accession) {
-      return;
-    }
-    var idx = _.indexOf(geoJsonService.data, accession);
-    if(idx === -1) {
-      return;
-    }
-    geoJsonService.data.splice(idx, 1);
-    geoJsonService.data.splice(0, 0, accession);
-    $scope.model.hiliteAccNumb = accNum;    
-  };
-
+ 
   function onGoExternalLISTaxon(accDetail)  {
     var url = '/organism/' +
 	encodeURIComponent(accDetail.properties.genus) + '/' +
@@ -196,12 +166,6 @@ function($scope,
     query = query.replace(/\s+\|\s+/,'|');
     query = query.replace(/\s+\&\s+/,'&');
     $scope.model.searchHilite = query.trim();
-  }
-
-  function updateSingleAccessionHilite() {
-    if(geoJsonService.data.length !== 1) { return; }
-    var accId = geoJsonService.data[0].properties.accenumb;
-    hiliteAccNumbInTable(accId);
   }
   
   $scope.init();

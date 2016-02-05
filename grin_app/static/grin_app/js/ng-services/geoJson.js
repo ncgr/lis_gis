@@ -9,6 +9,7 @@ function($http, $rootScope, $location, $timeout, $q) {
   
   s.updating = false;
   s.data = []; // an array of geoJson features
+  s.selectedAccession; // single accession object currently selected (if any)
   s.traitData = []; // an array of json with observation_values
   s.traitHash = {}; // lookup hash for accenumb to array of obs. values
   s.traitMetadata = {};
@@ -19,7 +20,7 @@ function($http, $rootScope, $location, $timeout, $q) {
   s.bounds = L.latLngBounds(L.latLng(0,0), L.latLng(0,0));
   
   // array of event names we are publishing
-  s.events = ['updated', 'willUpdate'];
+  s.events = ['updated', 'willUpdate', 'selectedAccessionUpdated'];
   
   s.init = function() {
     // set default search values on $location service
@@ -90,6 +91,7 @@ function($http, $rootScope, $location, $timeout, $q) {
     s.updateBounds();
     s.updateColors();
     s.updating = false;
+    s.setSelectedAccession(s.selectedAccession);
     s.notify('updated');
   }
   
@@ -202,6 +204,32 @@ function($http, $rootScope, $location, $timeout, $q) {
       }
     }
   };
+
+  s.setSelectedAccession = function(accId) {
+    var accession = _.find(s.data, function(d) {
+      return (d.properties.accenumb === accId);
+    });
+    if( ! accession) {
+      // the accession id is not in the current result set, so clear
+      // the selection
+      accId = null;
+      changed = true;
+    }
+    else {
+      // splice the record to beginning of geoJson dataset
+      var idx = _.indexOf(s.data, accession);
+      if(idx === -1) {
+	return;
+      }
+      s.data.splice(idx, 1);
+      s.data.splice(0, 0, accession);
+    }
+    var changed = (s.selectedAccession !== accId);
+    s.selectedAccession = accId;
+    if(changed) {
+      s.notify('selectedAccessionUpdated');
+    }
+  }
   
   s.setBounds = function(bounds, doSearch) {
     if(s.bounds.equals(bounds) && s.data.length > 0) {
