@@ -284,14 +284,40 @@ CREATE INDEX legumes_grin_evaluation_data_accenumb_descriptor_name_idx ON legume
 
 CREATE INDEX legumes_grin_evaluation_data_accenumb_idx ON legumes_grin_evaluation_data USING btree (accenumb);
 
-ALTER TABLE legumes_grin_evaluation_data CLUSTER ON legumes_grin_evaluation_data_accenumb_idx;
+
+--
+-- Name: legumes_grin_evaluation_data_accession_number_idx; Type: INDEX; Schema: lis_germplasm; Owner: www; Tablespace: 
+--
+
+CREATE INDEX legumes_grin_evaluation_data_accession_number_idx ON legumes_grin_evaluation_data USING btree (accession_number);
 
 
 --
--- Name: legumes_grin_evaluation_data_descriptor_name_idx; Type: INDEX; Schema: lis_germplasm; Owner: www; Tablespace: 
+-- Name: legumes_grin_evaluation_data_accession_prefix_idx; Type: INDEX; Schema: lis_germplasm; Owner: www; Tablespace: 
 --
 
-CREATE INDEX legumes_grin_evaluation_data_descriptor_name_idx ON legumes_grin_evaluation_data USING btree (descriptor_name);
+CREATE INDEX legumes_grin_evaluation_data_accession_prefix_idx ON legumes_grin_evaluation_data USING btree (accession_prefix);
+
+
+--
+-- Name: legumes_grin_evaluation_data_descr_name_idx; Type: INDEX; Schema: lis_germplasm; Owner: www; Tablespace: 
+--
+
+CREATE INDEX legumes_grin_evaluation_data_descr_name_idx ON legumes_grin_evaluation_data USING btree (descriptor_name);
+
+
+--
+-- Name: legumes_grin_evaluation_data_full_accnumb; Type: INDEX; Schema: lis_germplasm; Owner: www; Tablespace: 
+--
+
+CREATE INDEX legumes_grin_evaluation_data_full_accnumb ON legumes_grin_evaluation_data USING btree (lower(accenumb));
+
+
+--
+-- Name: legumes_grin_evaluation_data_taxon_idx; Type: INDEX; Schema: lis_germplasm; Owner: www; Tablespace: 
+--
+
+CREATE INDEX legumes_grin_evaluation_data_taxon_idx ON legumes_grin_evaluation_data USING btree (lower((taxon)::text));
 
 
 --
