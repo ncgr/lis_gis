@@ -46,7 +46,7 @@ function($scope,
     var modalInstance = $uibModal.open({
       animation: true,
       templateUrl: 'accession-modal-content.html',
-      controller: 'ModalInstanceCtrl',
+      controller: 'accessionDetailController',
       size: 'lg',
       resolve: {
         accId: function() { return accId; },
@@ -172,98 +172,3 @@ function($scope,
   
 });
 
-app.controller('ModalInstanceCtrl',
-function ($scope, $uibModalInstance, $http, accId) {
-  $scope.accId = accId;
-
-  $scope.model = {
-    accId : accId,
-    acc : null,
-    evaluation : null,
-    hideLISSpeciesLink : true,
-    STATIC_PATH : STATIC_PATH,
-    BRANDING : BRANDING,
-  };
-
-  function getAccessionDetail() {
-    // fetch all detail for this accession id
-    $http({
-      url : API_PATH + '/accession_detail',
-      method : 'GET',
-      params : { accenumb : $scope.accId },
-    }).then(function(resp) {
-      // success callback
-      $scope.model.acc = resp.data[0];
-      getEvaluationDetail();
-      checkLISSpeciesPage();
-    }, function(resp) {
-      // error callback
-    });
-  }
-
-  $scope.init = function() {
-    getAccessionDetail()
-  };
-  
-  $scope.onOK = function () {
-    // user hit ok button
-    $uibModalInstance.close({ choice: 'ok'});
-  };
-  
-  $scope.onGoMap = function () {
-    // user hit view on map button
-    $uibModalInstance.close({
-      choice :'go-internal-map',
-      accDetail : $scope.model.acc,
-    });
-  };
-  
-  $scope.onGoLISTaxon = function () {
-    // user View taxon at LIS button
-    $uibModalInstance.close({
-      choice : 'go-external-lis-taxon',
-      accDetail : $scope.model.acc,
-    });
-  };
-  
-  $scope.onGoLISGRIN = function () {
-    // user hit search USDA GRIN button
-    $uibModalInstance.close({
-      choice : 'go-external-lis-grin',
-      accDetail : $scope.model.acc,
-    });
-  };
- 
-  function getEvaluationDetail() {
-     // fetch all trait/evaluation details for this accession id
-    $http({
-      url : API_PATH + '/evaluation_detail',
-      method : 'GET',
-      params : { accenumb : $scope.accId },
-    }).then(function(resp) {
-      // success callback
-      $scope.model.evaluation = resp.data;
-    }, function(resp) {
-      // error callback
-    });
-  }
- 
-  function checkLISSpeciesPage() {
-    /* attempt check whether there is actually a taxon page at
-     * lis matching, e.g. http://legumeinfo.org/organism/Cajanus/cajan
-     * note: this may fail from other hosts outside of production,
-     * because of 'Access-Control-Allow-Origin' header. */
-    var acc = $scope.model.acc.properties;
-    var lisURL = '/organism/' + acc.genus + '/' + acc.species;
-    $http({ url : lisURL, method : 'HEAD' }).then(function(resp) {
-      // success callback
-      $scope.model.hideLISSpeciesLink = false;
-    }, function(resp) {
-      // error callback
-      $scope.model.hideLISSpeciesLink = true;
-    });
-  }
- 
-  $scope.init();
-  
-});
