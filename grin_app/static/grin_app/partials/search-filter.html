@@ -1,6 +1,7 @@
 <div id="tour-start" style="margin-top: 0.5rem;"></div>
 
 <button id="search-btn"
+	type="button"
 	class="btn btn-sm btn-default"
 	ng-if="! model.searchOptions"
 	ng-click="model.searchOptions = ! model.searchOptions ; model.autofocusField = 'taxonFilter';">
@@ -13,15 +14,16 @@
 
    <span ng-if="model.$location.search().accessionIds" class="badge">
     {{ model.$location.search().accessionIds }}
-    <button class="btn btn-xs btn-default"
+     <button type="button"
+	     class="btn btn-xs btn-default"
 	    ng-click="model.accessionIds = ''; onOK();">
       <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-    </button>
+     </button>
   </span>
   
   <span ng-if="model.$location.search().taxonQuery" class="badge">
     {{ model.$location.search().taxonQuery }}
-    <button class="btn btn-xs btn-default"
+    <button type="button" class="btn btn-xs btn-default"
 	    ng-click="model.taxonQuery = ''; model.traitOverlay = ''; onOK();">
       <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
     </button>
@@ -29,7 +31,7 @@
   
   <span ng-if="model.$location.search().traitOverlay" class="badge">
     {{ model.$location.search().traitOverlay }}
-    <button class="btn btn-xs btn-default"
+    <button type="button" class="btn btn-xs btn-default"
 	    ng-click="model.traitOverlay = ''; model.traitExcludeUnchar = false; onOK();">
       <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
     </button>
@@ -38,7 +40,8 @@
   <span ng-if="model.$location.search().limitToMapExtent"
 	class="badge">
     limit search to current map extent
-    <button class="btn btn-xs btn-default"
+    <button type="button"
+	    class="btn btn-xs btn-default"
 	    ng-click="model.limitToMapExtent = false ; onOK(); ">
       <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
     </button>
@@ -87,7 +90,8 @@
 		class="glyphicon glyphicon-asterisk" aria-hidden="true"></span>
 	  
 	  Search Taxon:
-	  <button ng-click="onExampleTaxonQuery()"
+	  <button type="button"
+		  ng-click="onExampleTaxonQuery()"
 		  class="btn btn-xs btn-default">
 	    <span class="glyphicon glyphicon-question-sign"
 		  aria-hidden="true"></span>
@@ -109,7 +113,8 @@
 		    aria-hidden="true"></span>
 	      Go
 	    </button>
-	    <button ng-click="model.taxonQuery = null; model.traitOverlay = null; onOK();"
+	    <button type="button"
+		    ng-click="model.taxonQuery = null; model.traitOverlay = null; onOK();"
 		    class="btn btn-sm btn-default">
 	      <span class="glyphicon glyphicon-remove"
 		    aria-hidden="true"></span>
@@ -124,7 +129,8 @@
 	  <span ng-if="model.traitOverlay"
 		class="glyphicon glyphicon-asterisk" aria-hidden="true"></span>
 	  Overlay Characterization and Evaluation
-	  <button ng-click="onTraitOverlayExample()"
+	  <button type="button"
+		  ng-click="onTraitOverlayExample()"
 		  class="btn btn-xs btn-default">
 	    <span class="glyphicon glyphicon-question-sign"
 		  aria-hidden="true"></span>
@@ -133,60 +139,44 @@
 	</td>
 	<td>
 	  <form class="form-inline" ng-submit="onOK()">
-	    <select class="form-control"
-		    ng-disabled="! model.taxonQuery"
-		    ng-model="model.traitOverlay">
-	      <option value="" ng-if="model.taxonQuery">
-		Select trait for {{model.taxonQuery}}
-		({{model.traitDescriptors.length | number }})
-	      </option>
-	      <option value="" ng-if="! model.taxonQuery">
-		No taxon selected
-	      </option>
-	      <option ng-repeat="name in model.traitDescriptors"
-		      value="{{name}}">
-		{{name}}
-	      </option>
-	    </select>
-	    <button type="submit" class="btn btn-sm btn-default"
-		    ng-disabled="! model.taxonQuery">
-	      <span class="glyphicon glyphicon-search"
-		    aria-hidden="true"></span>
-	      Go
-	    </button>
-	    <button ng-click="model.traitOverlay = null; model.traitExcludeUnchar = false; onOK();"
-		    class="btn btn-sm btn-default">
-	      <span class="glyphicon glyphicon-remove"
-		    aria-hidden="true"></span>
-	      Clear
-	    </button>
-	    <div class="form-group" ng-if="model.traitOverlay">
-	      <div class="checkbox">
-		<label>
-		  <input type="checkbox"
-			 ng-model="model.traitExcludeUnchar">
-		  Exclude uncharacterized accessions from map overlay.
-		</label>
-	      </div>
+	    <div class="form-group">
+	      <select class="form-control"
+		      ng-disabled="! model.taxonQuery"
+		      ng-model="model.traitOverlay">
+		<option value="" ng-if="model.taxonQuery">
+		  Select trait for {{model.taxonQuery}}
+		  ({{model.traitDescriptors.length | number }})
+		</option>
+		<option value="" ng-if="! model.taxonQuery">
+		  No taxon selected
+		</option>
+		<option ng-repeat="name in model.traitDescriptors"
+			value="{{name}}">
+		  {{name}}
+		</option>
+	      </select>
+	      <button type="submit" class="btn btn-sm btn-default"
+		      ng-disabled="! model.taxonQuery">
+		<span class="glyphicon glyphicon-search"
+		      aria-hidden="true"></span>
+		Go
+	      </button>
+	      <button type="button"
+		      ng-click="model.traitOverlay = null; model.traitExcludeUnchar = false; onOK();"
+		      class="btn btn-sm btn-default">
+		<span class="glyphicon glyphicon-remove"
+		      aria-hidden="true"></span>
+		Clear
+	      </button>
+	      <button type="button"
+		      ng-disabled="! model.traitOverlay"
+		      ng-click="onTraitOverlayOptions()"
+		      class="btn btn-sm btn-default">
+		<span class="glyphicon glyphicon-picture"
+		      aria-hidden="true"></span>
+		Display Options
+	      </button>
 	    </div>
-	    <br/>
-	    <div class="form-group" ng-if="model.traitOverlay">
-	      Symbolize numeric observations using:
-	      <div class="radio">
-		<label>
-		  <input type="radio"
-			 ng-model="model.traitScale"
-			 value="local">
-		  Local values
-		</label>
-		<label>
-		  <input type="radio"
-			 ng-model="model.traitScale"
-			 value="global"/>
-		  Global values
-		</label>
-		.
-	      </div>
 	  </form>
 	</td>
       </tr>
@@ -195,7 +185,8 @@
 	  <span ng-if="model.accessionIds"
 	      class="glyphicon glyphicon-asterisk" aria-hidden="true"></span>
 	  Search Accession IDs:
-	  <button ng-click="onExampleAccessions()"
+	  <button type="button"
+		  ng-click="onExampleAccessions()"
 		  class="btn btn-xs btn-default">
 	    <span class="glyphicon glyphicon-question-sign"
 		  aria-hidden="true"></span>
@@ -217,7 +208,8 @@
 		    aria-hidden="true"></span>
 	      Go
 	    </button>
-	    <button ng-click="model.accessionIds = null; onOK()"
+	    <button type="button"
+		    ng-click="model.accessionIds = null; onOK()"
 		    class="btn btn-sm btn-default">
 	      <span class="glyphicon glyphicon-remove"
 		    aria-hidden="true"></span>
@@ -252,7 +244,8 @@
 		    aria-hidden="true"></span>
 	      Go
 	    </button>
-	    <button ng-click="model.country = null; onOK()"
+	    <button type="button"
+		    ng-click="model.country = null; onOK()"
 		    class="btn btn-sm btn-default">
 	      <span class="glyphicon glyphicon-remove"
 		    aria-hidden="true"></span>
@@ -306,13 +299,15 @@
       </tr>
       <tr>
 	<td colspan="2">
-	  <button class="btn btn-success" ng-click="onOK()">
+	  <button type="button"
+		  class="btn btn-success" ng-click="onOK()">
 	    <span class="glyphicon glyphicon-ok"
 		  aria-hidden="true"></span>
 	    
 	    OK
 	  </button>
-	  <button class="btn btn-default"
+	  <button type="button"
+		  class="btn btn-default"
 		  ng-click="model.searchOptions = false">
 	    <span class="glyphicon glyphicon-remove"
 		  aria-hidden="true"></span>
@@ -324,3 +319,69 @@
   </div>
 </div>
 
+<script type="text/ng-template"
+	id="trait-overlay-options.html">
+  <div class="modal-header">
+    <button type="button" class="close"
+	    ng-click="onOK()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+    <h3 class="modal-title">
+      <span class="glyphicon glyphicon-picture" aria-hidden="true"></span>
+      Display Options for {{ model.traitOverlay }}
+    </h3>
+  </div>
+  <div class="modal-body">
+    <div class="form-group">
+      <div class="well well-sm">
+	Uncharacterized Accessions:
+	
+	<div class="checkbox">
+	  <label>
+	    <input type="checkbox"
+		   ng-model="model.traitExcludeUnchar">
+	    Hide {{ model.traitOverlay }}
+	    uncharacterized accessions from map frame.
+	  </label>
+	</div>
+	(This option may reduce clutter on the map, if some accessions
+	are missing observations for this trait. Uncharacterized
+	accessions will still appear in the results table.)
+      </div>
+      <div class="well well-sm">
+	Numeric ranges:
+	
+	If {{model.traitOverlay}} is a numeric trait, symbolize
+	observations with the range of:
+	<div class="radio">
+	  <label>
+	    <input type="radio"
+		   ng-model="model.traitScale"
+		   value="local">
+	    Local values (observations from search results only)
+	  </label>
+	  <br/>
+	  <label>
+	    <input type="radio"
+		   ng-model="model.traitScale"
+		   value="global"/>
+	    Global values (all observations for the selected taxon)
+	  </label>
+	</div>
+      </div>
+    </div>
+    <button type="button"
+	    class="btn btn-success" type="button"
+	    ng-click="onOK()">
+      <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+      OK
+    </button>
+    <button type="button"
+	    class="btn btn-default"
+	    ng-click="onCancel()">
+      <span class="glyphicon glyphicon-remove"
+	    aria-hidden="true"></span>
+      Cancel
+    </button>
+  </div>
+</script>

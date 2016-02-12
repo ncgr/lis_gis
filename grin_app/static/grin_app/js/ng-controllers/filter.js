@@ -4,7 +4,7 @@
 "use strict";
 
 app.controller('filterController',
-function($scope, $state, $http, $location, geoJsonService) {
+function($scope, $state, $http, $location, $uibModal, geoJsonService) {
 
   var searchParams = $location.search();
 
@@ -120,6 +120,30 @@ function($scope, $state, $http, $location, geoJsonService) {
     $scope.onTaxonQuery($scope.model.taxonQuery);
   };
 
+  $scope.onTraitOverlayOptions = function() {
+    var modal = $uibModal.open({
+      animation: true,
+      templateUrl: 'trait-overlay-options.html',
+      controller: 'traitOverlayOptionsController',
+      size: 'lg',
+      resolve: {
+	model : function() {
+	  return  {
+	    traitOverlay : $scope.model.traitOverlay,
+	    traitScale : $scope.model.traitScale,
+	    traitExcludeUnchar : $scope.model.traitExcludeUnchar,
+	}},
+      }
+    });
+    modal.result.then(function (result) {
+      if(! result) { return; } /* cancelled */
+      $scope.model.traitScale = result.traitScale;
+      $scope.model.traitExcludeUnchar = result.traitExcludeUnchar;
+    }, function () {
+      // modal otherwise dismissed callback (ignore result) e.g. backdrop click
+    });
+  };
+  
   $scope.onExampleTaxonQuery = function() {
     $scope.model.taxonQuery = 'Arachis hypogaea';
     $scope.model.limitToMapExtent = false;
