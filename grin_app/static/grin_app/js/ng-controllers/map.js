@@ -110,6 +110,20 @@ function($scope, $state, $timeout, $location, geoJsonService) {
       },
       filter: filterNonGeocoded,
     });
+
+    // add a scale bar
+    L.control.scale().addTo($scope.model.map);
+
+    // add a north arrow
+    var north = L.control({position: "bottomright"});
+    north.onAdd = function(map) {
+      var div = L.DomUtil.create("div", "info legend");
+      div.innerHTML = '<img src="' +
+	STATIC_PATH + 'grin_app/images/north-arrow.png">';
+      return div;
+    }
+    north.addTo($scope.model.map);
+
     $scope.model.geoJsonLayer.addTo($scope.model.map);
     Cookies.set('baseMap', DEFAULT_BASEMAP);
     $location.search('baseMap', DEFAULT_BASEMAP);
