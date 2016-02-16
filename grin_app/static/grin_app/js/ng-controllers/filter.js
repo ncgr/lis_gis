@@ -20,6 +20,8 @@ function($scope, $state, $http, $location, $uibModal, geoJsonService) {
     country : searchParams.country,
     taxonQuery : searchParams.taxonQuery,
     accessionIds : searchParams.accessionIds,
+    accessionIdsColor : searchParams.accessionIdsColor,
+    accessionIdsInclusive : parseBool(searchParams.accessionIdsInclusive),
     traitOverlay : searchParams.traitOverlay,
     traitScale : searchParams.traitScale,
     traitExcludeUnchar : parseBool(searchParams.traitExcludeUnchar),
@@ -143,7 +145,36 @@ function($scope, $state, $http, $location, $uibModal, geoJsonService) {
       // modal otherwise dismissed callback (ignore result) e.g. backdrop click
     });
   };
+
   
+  $scope.onAccessionIdOptions = function() {
+    var modal = $uibModal.open({
+      animation: true,
+      templateUrl: 'accession-search-options.html',
+      controller: 'accessionSearchOptionsController',
+      size: 'lg',
+      resolve: {
+	model : function() {
+	  return  {
+	    accessionIds : $scope.model.accessionIds,
+	    accessionIdsColor : $scope.model.accessionIdsColor,
+	    accessionIdsInclusive : $scope.model.accessionIdsInclusive,
+	    brewerColors : chroma.brewer.Set1.concat(
+	      chroma.brewer.Set2,
+	      chroma.brewer.Set3),
+	}},
+      }
+    });
+    modal.result.then(function (result) {
+      if(! result) { return; } /* cancelled */
+      $scope.model.accessionIds = result.accessionIds;
+      $scope.model.accessionIdsColor = result.accessionIdsColor;
+      $scope.model.accessionIdsInclusive = result.accessionIdsInclusive;
+    }, function () {
+      // modal otherwise dismissed callback (ignore result) e.g. backdrop click
+    });
+  };
+
   $scope.onExampleTaxonQuery = function() {
     $scope.model.taxonQuery = 'Arachis hypogaea';
     $scope.model.limitToMapExtent = false;
