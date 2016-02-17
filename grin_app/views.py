@@ -425,8 +425,8 @@ def countries(req):
 @ensure_csrf_cookie
 def search(req):
     '''Search by map bounds and return GeoJSON results.'''
-    assert req.method == 'GET', 'GET request method required'
-    params = req.GET.dict()
+    assert req.method == 'POST', 'POST request method required'
+    params = json.loads(req.body)
     if 'limit' not in params:
         params['limit'] = DEFAULT_LIMIT
     where_clauses = []
