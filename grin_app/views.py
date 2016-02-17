@@ -126,10 +126,10 @@ def evaluation_descr_names(req):
     assert 'taxon' in params, 'missing taxon param'
     assert params['taxon'], 'empty taxon param'
     params['q'] = params['taxon']
-    where_clauses = []
-    for key, val in GRIN_ACC_WHERE_FRAGS.items():
-        if val['include'](params):
-            where_clauses.append(val['sql'])
+    where_clauses = [
+        val['sql'] for key, val in GRIN_ACC_WHERE_FRAGS.items()
+        if val['include'](params)
+    ]
     if len(where_clauses) == 0:
         where_sql = ''
     else:
@@ -223,14 +223,15 @@ def evaluation_metadata(req):
     cursor = connection.cursor()
     # full text search on the taxon field in accessions table, also
     # joining on taxon to get relevant evaluation metadata.
-    where_clauses = []
     sql_params = {
         'q' : params['taxon'],
         'descriptor_name' : params['descriptor_name']
     }
-    for key, val in GRIN_ACC_WHERE_FRAGS.items()+GRIN_EVAL_WHERE_FRAGS.items():
-        if val['include'](sql_params):
-            where_clauses.append(val['sql'])
+    where_clauses = [
+        val['sql'] for
+        key, val in GRIN_ACC_WHERE_FRAGS.items() + GRIN_EVAL_WHERE_FRAGS.items()
+        if val['include'](sql_params)
+    ]
     if len(where_clauses) == 0:
         where_sql = ''
     else:
@@ -350,10 +351,10 @@ def evaluation_detail(req):
         'acc_num' : acc_num,
         'suffix' : suffix,
     }
-    where_clauses = []
-    for key, val in GRIN_EVAL_WHERE_FRAGS.items():
-        if val['include'](sql_params):
-            where_clauses.append(val['sql'])
+    where_clauses = [
+        val['sql'] for key, val in GRIN_EVAL_WHERE_FRAGS.items()
+        if val['include'](sql_params)
+    ]
     where_sql = ' AND '.join(where_clauses)
     sql = '''
     SELECT accession_prefix,
@@ -429,10 +430,10 @@ def search(req):
     params = json.loads(req.body)
     if 'limit' not in params:
         params['limit'] = DEFAULT_LIMIT
-    where_clauses = []
-    for key, val in GRIN_ACC_WHERE_FRAGS.items():
-        if val['include'](params):
-            where_clauses.append(val['sql'])
+    where_clauses = [
+        val['sql'] for key, val in GRIN_ACC_WHERE_FRAGS.items()
+        if val['include'](params)
+    ]
     if len(where_clauses) == 0:
         where_sql = ''
     else:
