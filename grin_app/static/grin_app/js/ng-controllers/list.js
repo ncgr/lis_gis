@@ -133,7 +133,7 @@ function($scope,
   };
   
   function updateAssistiveButton() {
-    var params = $location.search();
+    var params = geoJsonService.getSearchParams();
     if(! ('accessionIds' in params)) { return; }
     if(geoJsonService.data.length !== 1) { return; }
     if(! geoJsonService.getAnyGeocodedAccession()) { return; };
@@ -156,7 +156,7 @@ function($scope,
   }
 
   function updateQueryHiliting() {
-    var params = $location.search();
+    var params = geoJsonService.getSearchParams();
     $scope.model.searchHilite = null;
     var query = params.taxonQuery || params.accessionIds;
     if(! query) { return; }

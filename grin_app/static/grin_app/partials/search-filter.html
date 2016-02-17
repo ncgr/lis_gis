@@ -12,8 +12,8 @@
 <span id="current-search-filters">
   <!-- make a removable badge for each current search filter  -->
 
-   <span ng-if="model.$location.search().accessionIds" class="badge">
-    {{ model.$location.search().accessionIds }}
+   <span ng-if="accessionIdsDescr()" class="badge">
+    {{ accessionIdsDescr() }}
      <button type="button"
 	     class="btn btn-xs btn-default"
 	    ng-click="model.accessionIds = ''; onOK();">
@@ -115,7 +115,7 @@
 	      Go
 	    </button>
 	    <button type="button"
-		    ng-click="model.taxonQuery = null; model.traitOverlay = null; onOK();"
+		    ng-click="model.taxonQuery = null; model.traitOverlay = null;"
 		    class="btn btn-sm btn-default">
 	      <span class="glyphicon glyphicon-remove"
 		    aria-hidden="true"></span>
@@ -163,7 +163,7 @@
 		Go
 	      </button>
 	      <button type="button"
-		      ng-click="model.traitOverlay = null; model.traitExcludeUnchar = false; onOK();"
+		      ng-click="model.traitOverlay = null; model.traitExcludeUnchar = false;"
 		      class="btn btn-sm btn-default">
 		<span class="glyphicon glyphicon-remove"
 		      aria-hidden="true"></span>
@@ -202,7 +202,6 @@
 		   class="form-control"
 		   ng-attr-auto-focus="! model.autofocusField || model.autofocusField === 'accessionIdsFilter'"
 		   size="40"
-		   maxlength="256"
 		   ng-model="model.accessionIds">
 	    </input>
 	    <button type="submit" class="btn btn-sm btn-default">
@@ -211,7 +210,7 @@
 	      Go
 	    </button>
 	    <button type="button"
-		    ng-click="model.accessionIds = null; onOK()"
+		    ng-click="model.accessionIds = null;"
 		    class="btn btn-sm btn-default">
 	      <span class="glyphicon glyphicon-remove"
 		    aria-hidden="true"></span>
@@ -255,7 +254,7 @@
 	      Go
 	    </button>
 	    <button type="button"
-		    ng-click="model.country = null; onOK()"
+		    ng-click="model.country = null;"
 		    class="btn btn-sm btn-default">
 	      <span class="glyphicon glyphicon-remove"
 		    aria-hidden="true"></span>

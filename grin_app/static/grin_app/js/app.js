@@ -3,6 +3,7 @@
 
 var app = angular.module('grin',
 			 ['ngSanitize',
+			  'ngStorage',
 			  'mp.autoFocus',
 			  'ui.bootstrap',
 			  'ui.router']);

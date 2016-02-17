@@ -1,5 +1,5 @@
 app.service('geoJsonService',
-function($http, $rootScope, $location, $timeout, $q) {
+function($http, $rootScope, $location, $timeout, $q, $localStorage) {
   
   var DEFAULT_CENTER = { 'lat' : 35.87, 'lng' : -109.47 };
   var MAX_RECS = 200;
@@ -24,7 +24,7 @@ function($http, $rootScope, $location, $timeout, $q) {
   
   s.init = function() {
     // set default search values on $location service
-    var params = $location.search();
+    var params = s.getSearchParams();;
 
     if(! ('limitToMapExtent' in params) &&
        ! ('accessionIds' in params)) {
@@ -102,12 +102,13 @@ function($http, $rootScope, $location, $timeout, $q) {
     s.data = [];
     s.traitData = [];
     s.traitHash = {};
-    var params = $location.search();
+    
+    var params = s.getSearchParams();
     
     $http({
       url : API_PATH + '/search',
-      method : 'GET',
-      params : {
+      method : 'POST',
+      data : {
         q : params.taxonQuery,
         ne_lat : s.bounds._northEast.lat,
         ne_lng : s.bounds._northEast.lng,
@@ -128,8 +129,7 @@ function($http, $rootScope, $location, $timeout, $q) {
 	  // retry search with geocodedOnly off (to support edge case
 	  // e.g. when searching by some countries which only have
 	  // non-geographic accessions.)
-	  params.geocodedOnly = false;
-	  $timeout(s.search, 0);
+	  s.setGeocodedAccessionsOnly(false, true);
 	  return;
 	}
 	if(params.taxonQuery && params.traitOverlay && s.data.length > 0) {
@@ -188,9 +188,22 @@ function($http, $rootScope, $location, $timeout, $q) {
       return d.properties.accenumb;
     });
   }
-  
-  s.checkForGeocodedAccessionIds = function() {
+
+  s.getSearchParams = function() {
+    // return a shallow copy of $location.search() object, merging in
+    // properties for any local storage params, e.g. accessionIds
+    // which have overflowed the limit for URL param.
     var params = $location.search();
+    var mergedParams = {};
+    angular.extend(mergedParams, params);
+    if($localStorage.accessionIds) {
+      mergedParams.accessionIds = $localStorage.accessionIds;
+    }
+    return mergedParams;
+  }
+
+  s.checkForGeocodedAccessionIds = function() {
+    var params = s.getSearchParams();
     var geocodedAcc = s.getAnyGeocodedAccession();
     if(! geocodedAcc && ! params.limitToMapExtent) {
       if(params.accessionIds) {
@@ -265,8 +278,33 @@ function($http, $rootScope, $location, $timeout, $q) {
   };
 
   s.setAccessionIds = function(accessionIds, search) {
-    $location.search('accessionIds', accessionIds);
+    // if there 'too many' accessionIds, it *will* overflow the
+    // allowed URL length with search parameters, so use localstorage.
+    delete $localStorage.accessionIds;
+    $location.search('accessionIds', null);
+    
+    if(accessionIds) {
+      var ids = accessionIds.split(',');
+      if(ids.length <= 10) {
+	// use url query parameter
+	$location.search('accessionIds', accessionIds);
+      }
+      else {
+	// use local storage api
+	$localStorage.accessionIds = accessionIds;
+      }
+    }
     s.initialBoundsUpdated = false;
+    if(search) { s.search(); }
+  };
+
+  s.setAccessionIdsColor = function(color, search) {
+    $location.search('accessionIdsColor', color);
+    if(search) { s.search(); }
+  };
+  
+  s.setAccessionIdsInclusive = function(bool, search) {
+    $location.search('accessionIdsInclusive', bool);
     if(search) { s.search(); }
   };
 
@@ -294,7 +332,6 @@ function($http, $rootScope, $location, $timeout, $q) {
     // use a custom color scheme with a range of the selected trait
     // iterate the trait results once, to build a lookup table
     _.each(s.traitData, function(d) {
-      //console.log(d);
       if(s.traitHash[d.accenumb]) {
 	s.traitHash[d.accenumb].push(d.observation_value);
       }
@@ -382,7 +419,7 @@ function($http, $rootScope, $location, $timeout, $q) {
     s.traitHash = {};
     s.traitLegend = {};
 
-    if($location.search().traitOverlay) {
+    if(s.getSearchParams().traitOverlay) {
       if(s.traitMetadata.trait_type === 'numeric') {
 	colorStrategyNumericTrait();
       }
@@ -410,7 +447,7 @@ function($http, $rootScope, $location, $timeout, $q) {
      * bounds before sending updated event to listeners
      * (e.g. mapController) Use Leafletjs to perform all the bounds
      * calculations and extent fitting. */
-    var params = $location.search();
+    var params = s.getSearchParams();
     var accessionIds = _.get(params, 'accessionIds');
     if( ! accessionIds) { return; }
     if(s.initialBoundsUpdated || s.data.length == 0) { return; }
