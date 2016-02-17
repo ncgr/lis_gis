@@ -318,9 +318,19 @@ function($scope, $state, $timeout, $location, geoJsonService) {
   }
     
   function fixMarkerZOrder() {
+    // attempt to handle some cases where certain markers need to
+    // bubble to top
     if(parseBool(params.traitOverlay)) {
       $scope.model.map.eachLayer(function(l) {
 	if(_.has(l, 'feature.properties.haveTrait')) {
+	  l.bringToFront();
+	}
+      });
+    }
+    if(params.accessionIds) {
+      var accIds = params.accessionIds.split(',');
+      $scope.model.map.eachLayer(function(l) {
+	if(accIds.indexOf(_.get(l, 'feature.properties.accenumb')) !== -1) {
 	  l.bringToFront();
 	}
       });

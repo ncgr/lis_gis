@@ -24,7 +24,7 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
   
   s.init = function() {
     // set default search values on $location service
-    var params = s.getSearchParams();;
+    var params = s.getSearchParams();
 
     if(! ('limitToMapExtent' in params) &&
        ! ('accessionIds' in params)) {
@@ -87,7 +87,6 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
   };
 
   function postProcessSearch() {
-    s.checkForGeocodedAccessionIds();
     s.updateBounds();
     s.updateColors();
     s.updating = false;
@@ -109,7 +108,7 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
       url : API_PATH + '/search',
       method : 'POST',
       data : {
-        q : params.taxonQuery,
+        taxon_query : params.taxonQuery,
         ne_lat : s.bounds._northEast.lat,
         ne_lng : s.bounds._northEast.lng,
         sw_lat : s.bounds._southWest.lat,
@@ -118,6 +117,7 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
 	geocoded_only : params.geocodedOnly,
         country : params.country,
         accession_ids : params.accessionIds,
+	accession_ids_inclusive : parseBool(params.accessionIdsInclusive),
 	trait_overlay : params.traitOverlay,
         limit: params.maxRecs,
       }
@@ -194,6 +194,10 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
     // properties for any local storage params, e.g. accessionIds
     // which have overflowed the limit for URL param.
     var params = $location.search();
+    // url query string overrides anything in localStorage
+    if(params.accessionIds) {
+      delete $localStorage.accessionIds;
+    }
     var mergedParams = {};
     angular.extend(mergedParams, params);
     if($localStorage.accessionIds) {
@@ -201,22 +205,6 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
     }
     return mergedParams;
   }
-
-  s.checkForGeocodedAccessionIds = function() {
-    var params = s.getSearchParams();
-    var geocodedAcc = s.getAnyGeocodedAccession();
-    if(! geocodedAcc && ! params.limitToMapExtent) {
-      if(params.accessionIds) {
-	$rootScope.warnings = ['None of the requested accession ids (' +
-	       params.accessionIds + ') have geographic \
-               coordinates, so they will not appear on the map.'];
-      }
-      else if(params.country) {
-	$rootScope.warnings = ['None of the matching accessions have \
-          geographic coordinates, so they will not appear on the map.'];
-      }
-    }
-  };
 
   s.setSelectedAccession = function(accId) {
     var accession = _.find(s.data, function(d) {
@@ -416,10 +404,12 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
 
   s.updateColors = function() {
 
+    var params = s.getSearchParams();
+    
     s.traitHash = {};
     s.traitLegend = {};
 
-    if(s.getSearchParams().traitOverlay) {
+    if(params.traitOverlay) {
       if(s.traitMetadata.trait_type === 'numeric') {
 	colorStrategyNumericTrait();
       }
@@ -431,6 +421,16 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
       // use default color scheme from taxonChroma
       _.each(s.data, function(acc) {
 	acc.properties.color = taxonChroma.get(acc.properties.taxon);
+      });
+    }
+
+    // override all over coloring schems, with accessionIds coloring, if any
+    if(params.accessionIds && params.accessionIdsColor) {
+      var accIds = params.accessionIds.split(',');
+      _.each(s.data, function(acc) {
+	if(accIds.indexOf(acc.properties.accenumb) !== -1) {
+	  acc.properties.color = params.accessionIdsColor;
+	}
       });
     }
   };
