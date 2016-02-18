@@ -1,12 +1,12 @@
 # lis_gis
-Map viewer for and search interface for USDA/GRIN germplasm accessions and traits.
+Map viewer for and search interface for USDA/GRIN germplasm accessions and traits. See http://legumeinfo.org/germplasm/map for a live demo.
 server requirements
 * Python 2.7.x
 * Django
 * PostgreSQL and PostGIS
 
 ## PostgreSQL setup
-Create a database and before loading the schema.sql, created the spatial extension (assuming PostGIS is already available in your PostgrSQL install). Creating the schema will fail unless PostGIS extension is created first.
+Create a database and before loading the schema.sql, create the spatial extension (assuming PostGIS is already available in your PostgrSQL install). Creating the schema will fail unless PostGIS extension is created first.
 
 ```
 createdb lis_gis
