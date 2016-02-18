@@ -21,23 +21,23 @@
      </button>
   </span>
   
-  <span ng-if="model.$location.search().taxonQuery" class="badge">
-    {{ model.$location.search().taxonQuery }}
+  <span ng-if="model.geoJson.params.taxonQuery" class="badge">
+    {{ model.geoJson.params.taxonQuery }}
     <button type="button" class="btn btn-xs btn-default"
 	    ng-click="model.taxonQuery = ''; model.traitOverlay = ''; onOK();">
       <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
     </button>
   </span>
   
-  <span ng-if="model.$location.search().traitOverlay" class="badge">
-    {{ model.$location.search().traitOverlay }}
+  <span ng-if="model.geoJson.params.traitOverlay" class="badge">
+    {{ model.geoJson.params.traitOverlay }}
     <button type="button" class="btn btn-xs btn-default"
 	    ng-click="model.traitOverlay = ''; model.traitExcludeUnchar = false; onOK();">
       <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
     </button>
   </span>
 
-  <span ng-if="model.$location.search().limitToMapExtent"
+  <span ng-if="model.geoJson.params.limitToMapExtent"
 	class="badge">
     limit search to current map extent
     <button type="button"
@@ -47,16 +47,16 @@
     </button>
   </span>
   
-  <span ng-if="model.$location.search().maxRecs" class="badge">
-    max results: {{ model.$location.search().maxRecs | number }}
+  <span ng-if="model.geoJson.params.maxRecs" class="badge">
+    max results: {{ model.geoJson.params.maxRecs | number }}
     <button class="btn btn-xs btn-default"
 	    ng-click="onRemoveMaxResults()">
       <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
     </button>
   </span>
   
-  <span ng-if="model.$location.search().country" class="badge">
-    country: {{ model.$location.search().country }}
+  <span ng-if="model.geoJson.params.country" class="badge">
+    country: {{ model.geoJson.params.country }}
     <button class="btn btn-xs btn-default"
 	    ng-click="model.country = null; onOK();">
       <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
@@ -299,8 +299,7 @@
 	  <div class="checkbox">
 	    <label>
 	      <input type="checkbox"
-		     ng-model="model.limitToMapExtent"
-		     ng-change="onOK()">
+		     ng-model="model.limitToMapExtent">
 	      </input>
 	      Limit to current map extent
 	    </label>

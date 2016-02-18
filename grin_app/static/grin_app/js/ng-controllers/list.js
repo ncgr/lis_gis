@@ -133,8 +133,7 @@ function($scope,
   };
   
   function updateAssistiveButton() {
-    var params = geoJsonService.getSearchParams();
-    if(! ('accessionIds' in params)) { return; }
+    if(! ('accessionIds' in geoJsonService.params)) { return; }
     if(geoJsonService.data.length !== 1) { return; }
     if(! geoJsonService.getAnyGeocodedAccession()) { return; };
     var acc = geoJsonService.data[0];
@@ -156,9 +155,9 @@ function($scope,
   }
 
   function updateQueryHiliting() {
-    var params = geoJsonService.getSearchParams();
     $scope.model.searchHilite = null;
-    var query = params.taxonQuery || params.accessionIds;
+    var query = geoJsonService.params.taxonQuery
+	       || geoJsonService.params.accessionIds;
     if(! query) { return; }
     // logical operators may (usually) work as ng string
     // highlighting, but the whitespace needs to be cleaned up a bit

@@ -21,40 +21,48 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
   
   // array of event names we are publishing
   s.events = ['updated', 'willUpdate', 'selectedAccessionUpdated'];
+
   
   s.init = function() {
+    
     // set default search values on $location service
-    var params = s.getSearchParams();
-
-    if(! ('limitToMapExtent' in params) &&
-       ! ('accessionIds' in params)) {
-      $location.search('limitToMapExtent', true);
-    }
-    if(! ('zoom' in params)) {
+    s.params = s.getSearchParams();
+  
+    if(! ('zoom' in s.params)) {
       $location.search('zoom', DEFAULT_ZOOM);
     }
-    if(! ('maxRecs' in params)) {
+    if(! ('maxRecs' in s.params)) {
       $location.search('maxRecs', MAX_RECS);
     }
-    if(! ('taxonQuery' in params)) {
+    if(! ('taxonQuery' in s.params)) {
       $location.search('taxonQuery', '');
     }
-    if(! ('traitOverlay' in params)) {
+    if(! ('traitOverlay' in s.params)) {
       $location.search('traitOverlay', '');
     }
-    if(! ('traitScale' in params)) {
+    if(! ('traitScale' in s.params)) {
       $location.search('traitScale', 'global');
     }
-    if(! ('country' in params)) {
+    if(! ('country' in s.params)) {
       $location.search('country', '');
     }
-    if(! ('geocodedOnly' in params)) {
+    if(! ('geocodedOnly' in s.params)) {
       $location.search('geocodedOnly', false);
     }
-    if (! ('lng' in params)) {
+    if(! ('traitExcludeUnchar' in s.params)) {
+      $location.search('traitExcludeUnchar', false);
+    }
+    if(! ('limitToMapExtent' in s.params) &&
+       ! ('accessionIds' in s.params)) {
+      $location.search('limitToMapExtent', true);
+    }
+    if (! ('lng' in s.params)) {
       $location.search('lat', DEFAULT_CENTER.lat);
       $location.search('lng', DEFAULT_CENTER.lng);
     }
+    // store updated search params in property of service, for ease of
+    // use by controllers and views.
+    s.params = s.getSearchParams();
   };
 
   s.showAllNearbySameTaxon = function() {
@@ -87,6 +95,7 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
   };
 
   function postProcessSearch() {
+    s.params = s.getSearchParams();
     s.updateBounds();
     s.updateColors();
     s.updating = false;
@@ -101,44 +110,43 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
     s.data = [];
     s.traitData = [];
     s.traitHash = {};
-    
-    var params = s.getSearchParams();
+    s.params = s.getSearchParams();
     
     $http({
       url : API_PATH + '/search',
       method : 'POST',
       data : {
-        taxon_query : params.taxonQuery,
+        taxon_query : s.params.taxonQuery,
         ne_lat : s.bounds._northEast.lat,
         ne_lng : s.bounds._northEast.lng,
         sw_lat : s.bounds._southWest.lat,
         sw_lng : s.bounds._southWest.lng,
-        limit_geo_bounds : parseBool(params.limitToMapExtent),
-	geocoded_only : params.geocodedOnly,
-        country : params.country,
-        accession_ids : params.accessionIds,
-	accession_ids_inclusive : parseBool(params.accessionIdsInclusive),
-	trait_overlay : params.traitOverlay,
-        limit: params.maxRecs,
+        limit_geo_bounds : parseBool(s.params.limitToMapExtent),
+	geocoded_only : s.params.geocodedOnly,
+        country : s.params.country,
+        accession_ids : s.params.accessionIds,
+	accession_ids_inclusive : parseBool(s.params.accessionIdsInclusive),
+	trait_overlay : s.params.traitOverlay,
+        limit: s.params.maxRecs,
       }
     }).then(
       function(resp) {
         // success handler;
         s.data = resp.data;
-	if(s.data.length === 0 && params.geocodedOnly) {
+	if(s.data.length === 0 && s.params.geocodedOnly) {
 	  // retry search with geocodedOnly off (to support edge case
 	  // e.g. when searching by some countries which only have
 	  // non-geographic accessions.)
 	  s.setGeocodedAccessionsOnly(false, true);
 	  return;
 	}
-	if(params.taxonQuery && params.traitOverlay && s.data.length > 0) {
+	if(s.params.taxonQuery && s.params.traitOverlay && s.data.length > 0) {
 	  var promise1 = $http({
 	    url : API_PATH + '/evaluation_search',
 	    method : 'POST',
 	    data : {
               accession_ids : getAccessionIds(),
-	      descriptor_name : params.traitOverlay,
+	      descriptor_name : s.params.traitOverlay,
 	    }
 	  }).then(
 	    function(resp) {
@@ -154,10 +162,10 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
 	    url : API_PATH + '/evaluation_metadata',
 	    method : 'POST',
 	    data : {
-              taxon : params.taxonQuery,
-	      descriptor_name : params.traitOverlay,
-	      accession_ids : params.traitScale === 'local' ? getAccessionIds() : [],
-	      trait_scale : params.traitScale,
+              taxon : s.params.taxonQuery,
+	      descriptor_name : s.params.traitOverlay,
+	      accession_ids : s.params.traitScale === 'local' ? getAccessionIds() : [],
+	      trait_scale : s.params.traitScale,
 	    }
 	  }).then(
 	    function(resp) {
@@ -198,12 +206,33 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
     if(params.accessionIds) {
       delete $localStorage.accessionIds;
     }
-    var mergedParams = {};
-    angular.extend(mergedParams, params);
+    var merged = {};
+    angular.extend(merged, params);
     if($localStorage.accessionIds) {
-      mergedParams.accessionIds = $localStorage.accessionIds;
+      merged.accessionIds = $localStorage.accessionIds;
     }
-    return mergedParams;
+    // force some parameters to be booleans ($location.search() has
+    // the unfortunate feature of being untyped; depending on how data
+    // was set
+    if('limitToMapExtent' in merged) {
+      merged.limitToMapExtent = parseBool(merged.limitToMapExtent);
+    }
+    if('geocodedOnly' in merged) {
+      merged.geocodedOnly = parseBool(merged.geocodedOnly);
+    }
+    if('traitExcludeUnchar' in merged) {
+      merged.traitExcludeUnchar = parseBool(merged.traitExcludeUnchar);
+    }
+    if('zoom' in merged) {
+      merged.zoom = parseInt(merged.zoom);
+    }
+    if('maxRecs' in merged) {
+      merged.maxRecs = parseInt(merged.maxRecs);
+    }    
+    if('mapHeight' in merged) {
+      merged.mapHeight = parseInt(merged.mapHeight);
+    }    
+    return merged;
   }
 
   s.setSelectedAccession = function(accId) {
@@ -403,13 +432,10 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
   }
 
   s.updateColors = function() {
-
-    var params = s.getSearchParams();
-    
     s.traitHash = {};
     s.traitLegend = {};
 
-    if(params.traitOverlay) {
+    if(s.params.traitOverlay) {
       if(s.traitMetadata.trait_type === 'numeric') {
 	colorStrategyNumericTrait();
       }
@@ -425,11 +451,11 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
     }
 
     // override all over coloring schems, with accessionIds coloring, if any
-    if(params.accessionIds && params.accessionIdsColor) {
-      var accIds = params.accessionIds.split(',');
+    if(s.params.accessionIds && s.params.accessionIdsColor) {
+      var accIds = s.params.accessionIds.split(',');
       _.each(s.data, function(acc) {
 	if(accIds.indexOf(acc.properties.accenumb) !== -1) {
-	  acc.properties.color = params.accessionIdsColor;
+	  acc.properties.color = s.params.accessionIdsColor;
 	}
       });
     }
@@ -447,8 +473,7 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
      * bounds before sending updated event to listeners
      * (e.g. mapController) Use Leafletjs to perform all the bounds
      * calculations and extent fitting. */
-    var params = s.getSearchParams();
-    var accessionIds = _.get(params, 'accessionIds');
+    var accessionIds = _.get(s.params, 'accessionIds');
     if( ! accessionIds) { return; }
     if(s.initialBoundsUpdated || s.data.length == 0) { return; }
     var geocodedAcc = s.getAnyGeocodedAccession();

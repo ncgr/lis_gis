@@ -6,8 +6,6 @@
 app.controller('filterController',
 function($scope, $state, $http, $location, $uibModal, geoJsonService) {
 
-  var params = geoJsonService.getSearchParams();
-
   $scope.model = {
     geoJson: geoJsonService,
     countries: [],
@@ -15,22 +13,20 @@ function($scope, $state, $http, $location, $uibModal, geoJsonService) {
     autofocusField : null,
     alert : null,
     $location : $location,
-    limitToMapExtent : parseBool(params.limitToMapExtent),
-    maxRecs : params.maxRecs,
-    country : params.country,
-    taxonQuery : params.taxonQuery,
-    accessionIds : params.accessionIds,
-    accessionIdsColor : params.accessionIdsColor,
-    accessionIdsInclusive : parseBool(params.accessionIdsInclusive),
-    traitOverlay : params.traitOverlay,
-    traitScale : params.traitScale,
-    traitExcludeUnchar : parseBool(params.traitExcludeUnchar),
+    limitToMapExtent : parseBool(geoJsonService.params.limitToMapExtent),
+    maxRecs : geoJsonService.params.maxRecs,
+    country : geoJsonService.params.country,
+    taxonQuery : geoJsonService.params.taxonQuery,
+    accessionIds : geoJsonService.params.accessionIds,
+    accessionIdsColor : geoJsonService.params.accessionIdsColor,
+    accessionIdsInclusive : parseBool(geoJsonService.params.accessionIdsInclusive),
+    traitOverlay : geoJsonService.params.traitOverlay,
+    traitScale : geoJsonService.params.traitScale,
+    traitExcludeUnchar : parseBool(geoJsonService.params.traitExcludeUnchar),
   };
   
   $scope.init = function() {
-    geoJsonService.subscribe($scope, 'updated', function() {
-      params = geoJsonService.getSearchParams();
-    });
+
     $http.get(API_PATH + '/countries').then(function(resp) {
       // success callback
       $scope.model.countries = resp.data;
@@ -164,7 +160,7 @@ function($scope, $state, $http, $location, $uibModal, geoJsonService) {
 
   // get a short label for displaying in the current-search-filters area
   $scope.accessionIdsDescr = function() {
-    var idsStr = params.accessionIds;
+    var idsStr = geoJsonService.params.accessionIds;
     if(! idsStr) { return null; }
     var ids = idsStr.split(',');
     if(ids.length > 5) {

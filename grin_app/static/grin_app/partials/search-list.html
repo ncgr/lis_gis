@@ -16,7 +16,7 @@
 </div>
 
 <div class="alert alert-warning" style="margin-top: 0.5rem"
-     ng-if="! model.geoJson.updating && model.geoJson.data.length == model.$location.search().maxRecs">
+     ng-if="! model.geoJson.updating && model.geoJson.data.length == model.geoJson.params.maxRecs">
   
   <button type="button" class="close" data-dismiss="alert">
     <span aria-hidden="true">&times;</span>
@@ -30,7 +30,7 @@
 </div>
 
 <div style="margin-top: 0.5rem"
-     ng-if="! model.geoJson.updating && model.geoJson.data.length !== model.$location.search().maxRecs">
+     ng-if="! model.geoJson.updating && model.geoJson.data.length !== model.geoJson.params.maxRecs">
   <strong>Results:
     {{model.geoJson.data.length}}
   </strong>
@@ -42,7 +42,7 @@
     <tr>
       <th id="tour-accession-btn">accession</th>
       <th id="tour-trait-btn" ng-if="model.geoJson.traitHash">
-	{{ model.$location.search().traitOverlay}}
+	{{ model.geoJson.params.traitOverlay}}
       </th>
       <th>taxon</th>
       <th class="nowrap">crop name</th>

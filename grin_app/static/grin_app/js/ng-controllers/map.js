@@ -5,10 +5,8 @@
 
 app.controller('mapController',
 function($scope, $state, $timeout, $location, geoJsonService) {
-
-  var params = geoJsonService.getSearchParams();
   
-  var DEFAULT_BASEMAP = params.baseMap ||
+  var DEFAULT_BASEMAP = geoJsonService.params.baseMap ||
                         Cookies.get('baseMap') ||
                         'ESRI - NatGeo (default, reference map)';
 
@@ -26,8 +24,8 @@ function($scope, $state, $timeout, $location, geoJsonService) {
     geoJsonLayer : null,
     geoJsonService : geoJsonService,  // array of geoJson objects
     center : {
-      lat : params.lat,
-      lng : params.lng,
+      lat : geoJsonService.params.lat,
+      lng : geoJsonService.params.lng,
     },
     geoCoordsSelect : false, // show geocoords selector ui
     baseMapSelect : false,   // show basemap selector ui
@@ -64,15 +62,15 @@ function($scope, $state, $timeout, $location, geoJsonService) {
 
   $scope.init = function() {
 
-    if(! ('mapHeight' in params)) {
+    if(! ('mapHeight' in geoJsonService.params)) {
       $location.search('mapHeight', DEFAULT_MAP_HEIGHT);
     } else {
-      $scope.model.mapHeight = parseInt(params.mapHeight);
+      $scope.model.mapHeight = geoJsonService.params.mapHeight;
     }
     
     $scope.model.map = L.map('map', {
       'center' : [$scope.model.center.lat, $scope.model.center.lng],
-      'zoom' : parseInt(params.zoom),
+      'zoom' : geoJsonService.params.zoom,
     });
   
     $scope.model.map.attributionControl.addAttribution(
@@ -131,13 +129,10 @@ function($scope, $state, $timeout, $location, geoJsonService) {
     $location.search('baseMap', DEFAULT_BASEMAP);
 
     geoJsonService.subscribe($scope, 'selectedAccessionUpdated', function() {
-      params = geoJsonService.getSearchParams();
       cleanupMarkerPopup();
     });
     
     geoJsonService.subscribe($scope, 'updated', function() {
-
-      params = geoJsonService.getSearchParams();
       
       // update map and scope.model with any changes in bounds in the
       // bounds, or the center of the geoJsonService
@@ -166,7 +161,8 @@ function($scope, $state, $timeout, $location, geoJsonService) {
       $scope.model.geoJsonLayer.clearLayers();
       
       var filteredGeoJson = $scope.model.geoJsonService.data;
-      if(parseBool(params.traitExcludeUnchar) && params.traitOverlay) {
+      if(geoJsonService.params.traitExcludeUnchar &&
+	 geoJsonService.params.traitOverlay) {
 	// exclude uncharacterized accessions for this trait
 	filteredGeoJson = _.filter($scope.model.geoJsonService.data,
          function(d) {
@@ -320,15 +316,15 @@ function($scope, $state, $timeout, $location, geoJsonService) {
   function fixMarkerZOrder() {
     // attempt to handle some cases where certain markers need to
     // bubble to top
-    if(parseBool(params.traitOverlay)) {
+    if(geoJsonService.params.traitOverlay) {
       $scope.model.map.eachLayer(function(l) {
 	if(_.has(l, 'feature.properties.haveTrait')) {
 	  l.bringToFront();
 	}
       });
     }
-    if(params.accessionIds) {
-      var accIds = params.accessionIds.split(',');
+    if(geoJsonService.params.accessionIds) {
+      var accIds = geoJsonService.params.accessionIds.split(',');
       $scope.model.map.eachLayer(function(l) {
 	if(accIds.indexOf(_.get(l, 'feature.properties.accenumb')) !== -1) {
 	  l.bringToFront();
@@ -341,7 +337,7 @@ function($scope, $state, $timeout, $location, geoJsonService) {
     if($scope.maxResultsCircle) {
       $scope.model.map.removeLayer($scope.maxResultsCircle);
     }
-    if(geoJsonService.data.length !== parseInt(params.maxRecs)) {
+    if(geoJsonService.data.length !== geoJsonService.params.maxRecs) {
       return;
     }
     var bounds = geoJsonService.getBoundsOfGeoJSONPoints();
@@ -378,7 +374,7 @@ function($scope, $state, $timeout, $location, geoJsonService) {
     if(! geoJsonService.data.length) {
       return false;
     }
-    if(parseBool(params.traitExcludeUnchar)) {
+    if(geoJsonService.params.traitExcludeUnchar) {
       return false;
     }
     if($scope.getVisibleMarkerCount() === 0) {

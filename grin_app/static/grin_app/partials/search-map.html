@@ -162,9 +162,9 @@
 <div id="legend"
      class="well well-sm"
      style="margin-top: 0.5rem"
-     ng-if="! model.geoJson.updating && model.$location.search().traitOverlay">
+     ng-if="! model.geoJson.updating && model.geoJson.params.traitOverlay">
 
-  {{model.$location.search().traitOverlay}}
+  {{model.geoJson.params.traitOverlay}}
 
   <span class="badge"
 	ng-repeat="legendItem in model.geoJson.traitLegend.values"

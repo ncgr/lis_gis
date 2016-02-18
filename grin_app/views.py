@@ -45,16 +45,6 @@ TAXON_FTS_BOOLEAN_REGEX = re.compile(r'^(\w+\s*[\||\&]\s*\w+)+$')
 logger = logging.getLogger(__name__)
 
 
-def _include_geo_bounds(p):
-    if p.get('taxon_query', None):
-        if p.get('limit_geo_bounds', None) == 'true':
-            return True
-        else:
-            return False
-    if p.get('country', None):
-        return False
-    return True
-
 GRIN_ACC_WHERE_FRAGS = {
     'fts' : {
         'include' : lambda p: TAXON_FTS_BOOLEAN_REGEX.match(p.get('taxon_query', '')),
@@ -69,11 +59,11 @@ GRIN_ACC_WHERE_FRAGS = {
         'sql' : 'origcty = %(country)s',
     },
     'geocoded_only' : {
-        'include' : lambda p: p.get('limit_geo_bounds', None) == 'true' or p.get('geocoded_only', None) == 'true',
+        'include' : lambda p: p.get('limit_geo_bounds', None) in (True, 'true') or p.get('geocoded_only', None) in (True, 'true'),
         'sql' : 'latdec <> 0 AND longdec <> 0',
     },
     'limit_geo_bounds' : {
-        'include' : lambda p: p.get('limit_geo_bounds', None) == 'true',
+        'include' : lambda p: p.get('limit_geo_bounds', None) in (True, 'true'),
         'sql' : '''
            latdec <> 0 AND longdec <> 0 AND
            ST_Contains(
@@ -456,6 +446,7 @@ def search(req):
         'limit': params['limit'],
         'srid' : SRID,
     }
+    # logger.info(cursor.mogrify(sql, sql_params))
     cursor.execute(sql, sql_params)
     rows = _dictfetchall(cursor)
 
