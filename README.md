@@ -16,13 +16,13 @@ psql lis_gis
 createuser www
 ```
 
-# Restore from a db dump
+### Restore from a db dump
 
 ```
 pg_restore -O -C -d lis_gis lis_germplasm.dump
 ```
 
-# Or start from empty database
+### Or start from empty database
 
 ```
 psql lis_gis < scripts/schema.sql
