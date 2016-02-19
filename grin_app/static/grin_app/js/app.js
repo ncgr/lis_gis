@@ -166,8 +166,7 @@ app.tour = function () {
          The Taxon Search may be plain text or use logical \
          AND (&amp;) and OR (|) operators. For example <br/> \
          <code>Arachis hypogaea</code> or <br/>\
-         <code>sylvestris | burchellii</code> or <br/>\
-         <code>medicago &amp; brevispina</code>.\
+         <code>sylvestris | burchellii</code>.\
          You may click OK to close the search parameters panel.',
         target: 'tour-start',
         placement: 'top',
