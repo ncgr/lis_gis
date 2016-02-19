@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
-import socket
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -21,15 +20,16 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '$&u3g!sy=vl7od%0io!7yw*n0t(3c@1dsulgr9%bxszz_evj3!'
+# SECRET_KEY = '----change me ----'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 if socket.gethostname()[0:4] == 'lis-':
     ALLOWED_HOSTS = [socket.gethostname(), 'localhost']
 else:
-    ALLOWED_HOSTS = [socket.gethostname(), 'legumeinfo.org', 'legumeinfo.com',
-                     'www.legumeinfo.org', 'www.legumeinfo.com']
+    ALLOWED_HOSTS = [socket.gethostname(), 'peanutbase.org', 'peanutbase.com',
+                     'www.peanutbase.org', 'www.peanutbase.com']
+
 
 # Application definition
 
@@ -139,9 +139,9 @@ LOGGING = {
 
 BRANDING = {
     'home_url' : '/',
-    'logo_url' : 'http://legumeinfo.org/sites/all/themes/legumeinfo_theme/images/legumeinfo_logo.png',
-    'site_heading' : 'Legume Information System',
+    'logo_url' : STATIC_URL + 'grin_app/images/peanutbase_logo.png',
+    'site_heading' : 'PeanutBase',
     'site_subheading' : 'Germplasm Map',
-    'site_abbrev' : 'LIS',
+    'site_abbrev' : 'PB',
 }
 
