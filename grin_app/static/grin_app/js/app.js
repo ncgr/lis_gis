@@ -89,8 +89,8 @@ app.run( function($state) {
   $state.transitionTo('search');
 });
 
-var tourId = 'lis-germplasm-mapper-tour';
-    
+var tourId = BRANDING.site_abbrev + '-germplasm-mapper-tour';
+
 app.run(function(geoJsonService, $timeout, $rootScope) {
   /* after the ui and search results have finished loading, start the
    * hopscotch tour. the tour needs to bind to dom elements by id, so
