@@ -21,11 +21,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = '----change me ----'
+SECRET_KEY = open(os.path.join(os.path.dirname(__file__),
+                               'django_secret_key.txt')).read()
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
-if socket.gethostname()[0:4] == 'lis-':
+if 'peanutbase-' in socket.gethostname():
     ALLOWED_HOSTS = [socket.gethostname(), 'localhost']
 else:
     ALLOWED_HOSTS = [socket.gethostname(), 'peanutbase.org', 'peanutbase.com',
