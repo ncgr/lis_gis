@@ -14,26 +14,43 @@ var taxonChroma = {};
   var MIN_LIGHTNESS = 0.3;
   var moreBrewerColors = chroma.brewer.Set2; 
   
-  this.defaultColor = '#d3d3d3';
-
-  // define a set of default colors for legumes by genera. many of
-  // these were originally defined by the LIS phylotree module.
+  this.defaultColor = 'lightgrey';
+ 
+  // define a set of default colors for Arachis species. These are the
+  // most common taxon strings in the grin accessions, mapped to
+  // Brewer nominal category colors (from chroma.js sets 1-3)
   this.colorMap = {
-    apios :        moreBrewerColors[0],
-    arachis :      '#bcbd22',
-    cajanus :      '#ffbb78',
-    chamaecrista : moreBrewerColors[5],
-    cicer :        '#2ca02c',
-    glycine :      '#1f77b4',
-    lens :         '#98df8a',
-    lotus :        '#17becf',
-    lupinus :      '#ff9896',
-    medicago :     '#8c564b',
-    phaseolus :    '#e377c2',
-    pisum :        '#f7b6d2',
-    trifolium :    moreBrewerColors[2],
-    vicia :        moreBrewerColors[4],
-    vigna :        '#d62728',
+    'arachis hypogaea' :                   '#e41a1c',
+    'arachis hypogaea var. fastigiata':    '#377eb8',
+    'arachis hypogaea var. hypogaea':      '#4daf4a',
+    'arachis hypogaea subsp. fastigiata':  '#984ea3',
+    'arachis hybr.':                       '#ff7f00',
+    'arachis spp.':                        '#ffff33',
+    'arachis hypogaea subsp. hypogaea':    '#a65628',
+    'arachis hypogaea var. vulgaris':      '#f781bf',
+    'arachis glabrata':                    '#999999',
+    'arachis glabrata var. glabrata':      '#66c2a5',
+    'arachis hypogaea var. aequatoriana':  '#fc8d62',
+    'arachis burchellii':                  '#8da0cb',
+    'arachis duranensis':                  '#e78ac3',
+    'arachis pintoi':                      '#a6d854',
+    'arachis sylvestris':                  '#ffd92f',
+    'arachis hypogaea var. hirsuta':       '#e5c494',
+    'arachis kuhlmannii':                  '#b3b3b3',
+    'arachis glabrata var. hagenbeckii':   '#8dd3c7',
+    'arachis dardanoi':                    '#ffffb3',
+    'arachis matiensis':                   '#bebada',
+    'arachis stenosperma':                 '#fb8072',
+    'arachis prostrata':                   '#80b1d3',
+    'arachis hypogaea var. peruviana':     '#fdb462',
+    'arachis major':                       '#b3de69',
+    'arachis villosa':                     '#fccde5',
+    'arachis pusilla':                     '#d9d9d9',
+    'arachis villosulicarpa':              '#bc80bd',
+    'arachis cardenasii':                  '#ccebc5',
+    'arachis paraguariensis':              '#ffed6f',
+    'arachis magna':                       'cyan',
+    'arachis batizocoi':                   'goldenrod',
   };
 
   this.clearCache = function() {
