@@ -10,14 +10,14 @@ function($scope, $state, $timeout, $location, geoJsonService) {
                         Cookies.get('baseMap') ||
                         'ESRI - NatGeo (default, reference map)';
 
-  /* note: this is the default height used by leafletjs. if another
-   * default size is set, it will result in the map size being
-   * invlidated and causing an initieal reload of the search (which we
-   * dont want to happen )*/
+  /* 350px is the default height used by leafletjs. if another default
+   * size is set, it will result in the map size being invlidated and
+   * causing an initieal reload of the search (which we dont want to
+   * happen )
+   */
   var DEFAULT_MAP_HEIGHT = 350;
   
   $scope.model = {
-    //legumeGenera : taxonChroma.legumeGenera, // for development only
     geoJson : geoJsonService,
     $location : $location,
     map : null,  // the leaflet map
