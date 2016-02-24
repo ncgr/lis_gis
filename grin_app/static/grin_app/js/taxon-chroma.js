@@ -20,37 +20,35 @@ var taxonChroma = {};
   // most common taxon strings in the grin accessions, mapped to
   // Brewer nominal category colors (from chroma.js sets 1-3)
   this.colorMap = {
-    'arachis hypogaea' :                   '#e41a1c',
-    'arachis hypogaea var. fastigiata':    '#377eb8',
-    'arachis hypogaea var. hypogaea':      '#4daf4a',
-    'arachis hypogaea subsp. fastigiata':  '#984ea3',
-    'arachis hybr.':                       '#ff7f00',
-    'arachis spp.':                        '#ffff33',
-    'arachis hypogaea subsp. hypogaea':    '#a65628',
-    'arachis hypogaea var. vulgaris':      '#f781bf',
-    'arachis glabrata':                    '#999999',
-    'arachis glabrata var. glabrata':      '#66c2a5',
-    'arachis hypogaea var. aequatoriana':  '#fc8d62',
-    'arachis burchellii':                  '#8da0cb',
-    'arachis duranensis':                  '#e78ac3',
-    'arachis pintoi':                      '#a6d854',
-    'arachis sylvestris':                  '#ffd92f',
-    'arachis hypogaea var. hirsuta':       '#e5c494',
-    'arachis kuhlmannii':                  '#b3b3b3',
-    'arachis glabrata var. hagenbeckii':   '#8dd3c7',
-    'arachis dardanoi':                    '#ffffb3',
-    'arachis matiensis':                   '#bebada',
-    'arachis stenosperma':                 '#fb8072',
-    'arachis prostrata':                   '#80b1d3',
-    'arachis hypogaea var. peruviana':     '#fdb462',
-    'arachis major':                       '#b3de69',
-    'arachis villosa':                     '#fccde5',
-    'arachis pusilla':                     '#d9d9d9',
-    'arachis villosulicarpa':              '#bc80bd',
+    'arachis batizocoi':                   '#e5c494',
+    'arachis benthamii':                   '#377eb8',
+    'arachis burchellii':                  '#e41a1c',
+    'arachis burkartii':                   '#fdb462',
     'arachis cardenasii':                  '#ccebc5',
+    'arachis correntina':                  '#8dd3c7',
+    'arachis cryptopotamica':              '#984ea3',
+    'arachis dardanoi':                    '#ffffb3',
+    'arachis diogoi':                      '#fc8d62',
+    'arachis duranensis':                  '#e78ac3',
+    'arachis glabrata':                    '#999999',
+    'arachis helodes':                     '#8da0cb',
+    'arachis hybr.':                       '#ff7f00',
+    'arachis hypogaea' :                   '#a65628',
+    'arachis kuhlmannii':                  '#b3b3b3',
+    'arachis lutescens':                   '#66c2a5',
+    'arachis macedoi':                     '#f781bf',
+    'arachis magna':                       '#4daf4a',
+    'arachis major':                       '#b3de69',
+    'arachis matiensis':                   '#bebada',
     'arachis paraguariensis':              '#ffed6f',
-    'arachis magna':                       'cyan',
-    'arachis batizocoi':                   'goldenrod',
+    'arachis pintoi':                      '#a6d854',
+    'arachis prostrata':                   '#80b1d3',
+    'arachis pusilla':                     '#d9d9d9',
+    'arachis spp.':                        '#ffff33',
+    'arachis stenosperma':                 '#fb8072',
+    'arachis sylvestris':                  '#ffd92f',
+    'arachis villosa':                     '#fccde5',
+    'arachis villosulicarpa':              '#bc80bd',
   };
 
   this.clearCache = function() {
@@ -76,21 +74,28 @@ var taxonChroma = {};
       colorCache[t] = color;
       return color;
     }
-    if (options.lightnessFactor === undefined) {
-      options.lightnessFactor = LIGHTNESS_FACTOR;
-    }
     // handle edge case where t is actually just the genus
     if(t in this.colorMap) {
-      color = this.colorMap[t]      
+      color = this.colorMap[t];
       colorCache[t] = color;
       return color;
     }
-    // create new mapping of lower(taxon) -> unique color+hue
     var parts = t.split(' ');
     var genus = parts[0];
     var species = parts[1];
+    // handle edge case where species was followed by var. or subst, etc.
+    if(genus + ' ' + species in this.colorMap) {
+      var tmp = genus + ' ' + species;
+      color = this.colorMap[tmp];
+      colorCache[t] = color; // map original taxon string to the color
+      return color;
+    }
+    // create new mapping of lower(taxon) -> unique color+hue
     if(genus in this.colorMap) {
       // colorize using genus for hue, and species for lightness
+      if (options.lightnessFactor === undefined) {
+	options.lightnessFactor = LIGHTNESS_FACTOR;
+      }
       var genusColor = this.colorMap[genus];
       var hue = chroma(genusColor).hsl()[0];
       var lightness = MIN_LIGHTNESS +
