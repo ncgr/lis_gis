@@ -12,7 +12,9 @@ from django.http import HttpResponseServerError
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.core.serializers.json import DjangoJSONEncoder
 
-SRID = 4326  # this needs to match the SRID on the location field in psql.
+SRID = 4326  # SRID 4326 is WGS 84 long lat unit=degrees, also the
+             # specification of the geoometric_coord field in the
+             # grin_accessions table.
 DEFAULT_LIMIT = 200
 TWO_PLACES = Decimal('0.01')
 ACCESSION_TAB = 'lis_germplasm.grin_accession'
@@ -32,7 +34,7 @@ NOMINAL_THRESHOLD = 10
 DEFAULT_COLOR = 'lightgrey'
 ORDER_BY_FRAG = '''
  ORDER BY ST_Distance(
-  geographic_coord::geometry,
+  geographic_coord::geography,
   ST_Centroid(
    ST_MakeEnvelope(%(minx)s, %(miny)s, %(maxx)s, %(maxy)s, %(srid)s)
   )
@@ -479,7 +481,6 @@ def search(req):
         else:
             # simple replace with these results
             rows = rows_with_requested_accessions
-    
     return _acc_search_response(rows)
    
 
