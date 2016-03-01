@@ -12,7 +12,9 @@ from django.http import HttpResponseServerError
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.core.serializers.json import DjangoJSONEncoder
 
-SRID = 4326  # this needs to match the SRID on the location field in psql.
+SRID = 4326  # SRID 4326 is WGS 84 long lat unit=degrees, also the
+             # specification of the geoometric_coord field in the
+             # grin_accessions table.
 DEFAULT_LIMIT = 200
 TWO_PLACES = Decimal('0.01')
 ACCESSION_TAB = 'lis_germplasm.grin_accession'
@@ -32,7 +34,7 @@ NOMINAL_THRESHOLD = 10
 DEFAULT_COLOR = 'lightgrey'
 ORDER_BY_FRAG = '''
  ORDER BY ST_Distance(
-  geographic_coord::geometry,
+  geographic_coord::geography,
   ST_Centroid(
    ST_MakeEnvelope(%(minx)s, %(miny)s, %(maxx)s, %(maxy)s, %(srid)s)
   )
@@ -45,39 +47,25 @@ TAXON_FTS_BOOLEAN_REGEX = re.compile(r'^(\w+\s*[\||\&]\s*\w+)+$')
 logger = logging.getLogger(__name__)
 
 
-def _include_geo_bounds(p):
-    if p.get('q', None):
-        if p.get('limit_geo_bounds', None) == 'true':
-            return True
-        else:
-            return False
-    if p.get('country', None):
-        return False
-    return True
-
 GRIN_ACC_WHERE_FRAGS = {
     'fts' : {
-        'include' : lambda p: TAXON_FTS_BOOLEAN_REGEX.match(p.get('q', '')),
-        'sql' : "taxon_fts @@ to_tsquery('english', %(q)s)",
+        'include' : lambda p: TAXON_FTS_BOOLEAN_REGEX.match(p.get('taxon_query', '')),
+        'sql' : "taxon_fts @@ to_tsquery('english', %(taxon_query)s)",
     },
     'fts_simple' : {
-        'include' : lambda p: p.get('q', None) and not GRIN_ACC_WHERE_FRAGS['fts']['include'](p),
-        'sql' : "taxon_fts @@ plainto_tsquery('english', %(q)s)",
+        'include' : lambda p: p.get('taxon_query', None) and not GRIN_ACC_WHERE_FRAGS['fts']['include'](p),
+        'sql' : "taxon_fts @@ plainto_tsquery('english', %(taxon_query)s)",
     },
     'country' : {
         'include' : lambda p: p.get('country', None),
         'sql' : 'origcty = %(country)s',
     },
     'geocoded_only' : {
-        'include' : lambda p: p.get('limit_geo_bounds', None) == 'true' or p.get('geocoded_only', None) == 'true',
+        'include' : lambda p: p.get('limit_geo_bounds', None) in (True, 'true') or p.get('geocoded_only', None) in (True, 'true'),
         'sql' : 'latdec <> 0 AND longdec <> 0',
     },
-    'accession_ids' : {
-        'include' : lambda p: p.get('accession_ids', None),
-        'sql' : 'accenumb = ANY( %(accession_ids)s )',
-    },
     'limit_geo_bounds' : {
-        'include' : lambda p: p.get('limit_geo_bounds', None) == 'true',
+        'include' : lambda p: p.get('limit_geo_bounds', None) in (True, 'true'),
         'sql' : '''
            latdec <> 0 AND longdec <> 0 AND
            ST_Contains(
@@ -125,11 +113,11 @@ def evaluation_descr_names(req):
     params = req.GET.dict()
     assert 'taxon' in params, 'missing taxon param'
     assert params['taxon'], 'empty taxon param'
-    params['q'] = params['taxon']
-    where_clauses = []
-    for key, val in GRIN_ACC_WHERE_FRAGS.items():
-        if val['include'](params):
-            where_clauses.append(val['sql'])
+    params['taxon_query'] = params['taxon']
+    where_clauses = [
+        val['sql'] for key, val in GRIN_ACC_WHERE_FRAGS.items()
+        if val['include'](params)
+    ]
     if len(where_clauses) == 0:
         where_sql = ''
     else:
@@ -142,7 +130,7 @@ def evaluation_descr_names(req):
     %s
     ORDER BY descriptor_name
     ''' % where_sql
-    sql_params = {'q' : params['taxon']}
+    sql_params = {'taxon_query' : params['taxon']}
     cursor = connection.cursor()
     # logger.info(cursor.mogrify(sql, sql_params))
     cursor.execute(sql, sql_params)
@@ -223,14 +211,15 @@ def evaluation_metadata(req):
     cursor = connection.cursor()
     # full text search on the taxon field in accessions table, also
     # joining on taxon to get relevant evaluation metadata.
-    where_clauses = []
     sql_params = {
-        'q' : params['taxon'],
+        'taxon_query' : params['taxon'],
         'descriptor_name' : params['descriptor_name']
     }
-    for key, val in GRIN_ACC_WHERE_FRAGS.items()+GRIN_EVAL_WHERE_FRAGS.items():
-        if val['include'](sql_params):
-            where_clauses.append(val['sql'])
+    where_clauses = [
+        val['sql'] for
+        key, val in GRIN_ACC_WHERE_FRAGS.items() + GRIN_EVAL_WHERE_FRAGS.items()
+        if val['include'](sql_params)
+    ]
     if len(where_clauses) == 0:
         where_sql = ''
     else:
@@ -350,10 +339,10 @@ def evaluation_detail(req):
         'acc_num' : acc_num,
         'suffix' : suffix,
     }
-    where_clauses = []
-    for key, val in GRIN_EVAL_WHERE_FRAGS.items():
-        if val['include'](sql_params):
-            where_clauses.append(val['sql'])
+    where_clauses = [
+        val['sql'] for key, val in GRIN_EVAL_WHERE_FRAGS.items()
+        if val['include'](sql_params)
+    ]
     where_sql = ' AND '.join(where_clauses)
     sql = '''
     SELECT accession_prefix,
@@ -425,50 +414,73 @@ def countries(req):
 @ensure_csrf_cookie
 def search(req):
     '''Search by map bounds and return GeoJSON results.'''
-    assert req.method == 'GET', 'GET request method required'
-    params = req.GET.dict()
+    assert req.method == 'POST', 'POST request method required'
+    params = json.loads(req.body)
+    # logger.info(params)
     if 'limit' not in params:
         params['limit'] = DEFAULT_LIMIT
-    where_clauses = []
-    for key, val in GRIN_ACC_WHERE_FRAGS.items():
-        if val['include'](params):
-            where_clauses.append(val['sql'])
+    else:
+        params['limit'] = int(params['limit'])
+    where_clauses = [
+        val['sql'] for key, val in GRIN_ACC_WHERE_FRAGS.items()
+        if val['include'](params)
+    ]
     if len(where_clauses) == 0:
         where_sql = ''
     else:
-        where_sql = 'WHERE %s' % ' AND '.join(where_clauses)
+        where_sql = 'WHERE (%s)' % ' AND '.join(where_clauses)
     cols_sql = ' , '.join(ACC_SELECT_COLS)
-    
-    params['limit'] = int(params['limit'])
-    if int(params['limit']) == 0:
-        params['limit'] = 'ALL'  # LIMIT ALL -- no limit
-        
     sql = '''SELECT %s FROM %s %s %s %s''' % (
         cols_sql,
         ACCESSION_TAB,
         where_sql,
         ORDER_BY_FRAG,
-        LIMIT_FRAG,
+        LIMIT_FRAG
     )
     cursor = connection.cursor()
     sql_params = {
-        'q' : params.get('q', None),
+        'taxon_query' : params.get('taxon_query', None),
         'country' : params.get('country', None),
         'minx' : float(params.get('sw_lng', 0)),
         'miny' : float(params.get('sw_lat', 0)),
         'maxx' : float(params.get('ne_lng', 0)),
         'maxy' : float(params.get('ne_lat', 0)),
-        'limit': int(params['limit']),
+        'limit': params['limit'],
         'srid' : SRID,
     }
-    if(params.get('accession_ids', None)):
-        if ',' in params['accession_ids']:
-            sql_params['accession_ids'] = params['accession_ids'].split(',')
-        else:
-            sql_params['accession_ids'] = [params['accession_ids']];
     # logger.info(cursor.mogrify(sql, sql_params))
     cursor.execute(sql, sql_params)
     rows = _dictfetchall(cursor)
+
+    # when searching for a set of accessionIds, the result needs to
+    # either get merged in addition to the SQL LIMIT results, or just
+    # returned instead
+    if(params.get('accession_ids', None)):
+        if ',' in params['accession_ids']:
+            sql_params = {'accession_ids': params['accession_ids'].split(',')}
+        else:
+            sql_params = {'accession_ids' : [params['accession_ids']]}
+        where_sql = 'WHERE accenumb = ANY( %(accession_ids)s )'
+        sql = 'SELECT %s FROM %s %s' % (
+            cols_sql,
+            ACCESSION_TAB,
+            where_sql
+        )
+        cursor.execute(sql, sql_params)
+        rows_with_requested_accessions = _dictfetchall(cursor)
+        if params.get('accession_ids_inclusive', None):
+            # merge results with previous set
+            uniq = set()
+            def is_unique(r):
+                key = r.get('accenumb', None)
+                if key in uniq: return False
+                uniq.add(key)
+                return True
+            rows = [ row for row in rows_with_requested_accessions + rows
+                     if is_unique(row) ]
+        else:
+            # simple replace with these results
+            rows = rows_with_requested_accessions
     return _acc_search_response(rows)
    
 

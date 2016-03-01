@@ -1,26 +1,9 @@
-/* use the chroma.js library to colorize taxons consistently and
- * predictably. Requires chroma.js https://github.com/gka/chroma.js/
- *
- * usage example: (always returns same hue for Arachis, but scaled
- * lightness depending on the Species -- completely abitrarily, but
- * consistently)
- *
- * taxonChroma.get(taxon, options);
- *
- * // examples: 
- * taxonChroma.get('Arachis hypogaea');
- * taxonChroma.get('Arachis burkartii');
- *
- * // make 20% lighter overall
- * taxonChroma.get(someTaxon, { lightnessFactor: 1.2 } );
- * // override some taxon
- * taxonChroma.get(acc.properties.taxon, {
- * 'lightnessFactor' : 1.2,
- *   'overrides' : {
- *   'phaseolus lunatus' : 'green',
- *  }
- * });
+/* colorize accessions by taxon name, with a set of defaults and
+ * overrides. If the genera matches the colorMap, the species will be
+ * used to darken/lighten for more unique color values. Requires
+ * chroma.js https://github.com/gka/chroma.js/
  */
+"use strict";
 
 var taxonChroma = {};
 
@@ -31,11 +14,11 @@ var taxonChroma = {};
   var MIN_LIGHTNESS = 0.3;
   var moreBrewerColors = chroma.brewer.Set2; 
   
-  this.defaultColor = '#d3d3d3'; // used for non-legume genera
+  this.defaultColor = '#d3d3d3';
 
-  // these colors are all Brewer category colors. Some are carried
-  // over to match what was originally on the LIS site.
-  this.legumeGenera = {
+  // define a set of default colors for legumes by genera. many of
+  // these were originally defined by the LIS phylotree module.
+  this.colorMap = {
     apios :        moreBrewerColors[0],
     arachis :      '#bcbd22',
     cajanus :      '#ffbb78',
@@ -53,40 +36,55 @@ var taxonChroma = {};
     vigna :        '#d62728',
   };
 
+  this.clearCache = function() {
+    colorCache = {};
+  };
+  
   this.get = function(taxon, options) {
-    taxon = taxon.toLowerCase();
-    
-    // options is an object w/ keys lightnessFactor, overrides
+    // options is an object w/ properties lightnessFactor, overrides
+    var color = null;
+    var t = taxon.toLowerCase();
     if (! options) {
       options = {};
+    }
+    // try cache first
+    if(t in colorCache) {
+      color = colorCache[t]
+      return color;
+    }
+    // try caller's overrides-- this is only useful if caller doesn't
+    // want to check it's own list first.
+    if (options.overrides && (t in options.overrides)) {
+      color = options.overrides[t];
+      colorCache[t] = color;
+      return color;
     }
     if (options.lightnessFactor === undefined) {
       options.lightnessFactor = LIGHTNESS_FACTOR;
     }
-    if (options.overrides === undefined) {
-      options.overrides = {};
+    // handle edge case where t is actually just the genus
+    if(t in this.colorMap) {
+      color = this.colorMap[t]      
+      colorCache[t] = color;
+      return color;
     }
-    if(options.overrides[taxon] !== undefined) {
-      return options.overrides[taxon];
-    }
-    if(colorCache[taxon] !== undefined) {
-      return colorCache[taxon];
-    }
-    var color = null;
-    var parts = taxon.split(' ');
+    // create new mapping of lower(taxon) -> unique color+hue
+    var parts = t.split(' ');
     var genus = parts[0];
     var species = parts[1];
-    var genusColor = _.get(this.legumeGenera, genus, null);
-    if(genusColor) {
+    if(genus in this.colorMap) {
+      // colorize using genus for hue, and species for lightness
+      var genusColor = this.colorMap[genus];
       var hue = chroma(genusColor).hsl()[0];
       var lightness = MIN_LIGHTNESS +
 	             (fnv32a(species, 1000) / 1000) * (1 - 2 *MIN_LIGHTNESS);
       color = chroma(hue, 1, lightness * options.lightnessFactor, 'hsl').hex();
     }
     else {
+      // fallback to default color
       color = this.defaultColor;
     }
-    colorCache[taxon] = color;
+    colorCache[t] = color;
     return color;
   };
   

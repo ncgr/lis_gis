@@ -4,9 +4,7 @@
 "use strict";
 
 app.controller('filterController',
-function($scope, $state, $http, $location, geoJsonService) {
-
-  var searchParams = $location.search();
+function($scope, $state, $http, $location, $uibModal, geoJsonService) {
 
   $scope.model = {
     geoJson: geoJsonService,
@@ -15,17 +13,20 @@ function($scope, $state, $http, $location, geoJsonService) {
     autofocusField : null,
     alert : null,
     $location : $location,
-    limitToMapExtent : parseBool(searchParams.limitToMapExtent),
-    maxRecs : searchParams.maxRecs,
-    country : searchParams.country,
-    taxonQuery : searchParams.taxonQuery,
-    accessionIds : searchParams.accessionIds,
-    traitOverlay : searchParams.traitOverlay,
-    traitScale : searchParams.traitScale,
-    traitExcludeUnchar : parseBool(searchParams.traitExcludeUnchar),
+    limitToMapExtent : parseBool(geoJsonService.params.limitToMapExtent),
+    maxRecs : geoJsonService.params.maxRecs,
+    country : geoJsonService.params.country,
+    taxonQuery : geoJsonService.params.taxonQuery,
+    accessionIds : geoJsonService.params.accessionIds,
+    accessionIdsColor : geoJsonService.params.accessionIdsColor,
+    accessionIdsInclusive : parseBool(geoJsonService.params.accessionIdsInclusive),
+    traitOverlay : geoJsonService.params.traitOverlay,
+    traitScale : geoJsonService.params.traitScale,
+    traitExcludeUnchar : parseBool(geoJsonService.params.traitExcludeUnchar),
   };
   
   $scope.init = function() {
+
     $http.get(API_PATH + '/countries').then(function(resp) {
       // success callback
       $scope.model.countries = resp.data;
@@ -33,16 +34,16 @@ function($scope, $state, $http, $location, geoJsonService) {
       // error callback
       console.log(resp);
     });
+    // fetch the list of traits for this taxon query
     if($scope.model.taxonQuery) {
       $scope.onTaxonQuery($scope.model.taxonQuery);
     }
   };
 
   $scope.onOK = function() {
-    // user hit OK in the search parameters panel
-    // force all of our model into geoJson and trigger search.  this
-    // may be redundant but catches some edge cases where user input
-    // events are not caught and they close out with OK button.
+    // user hit OK in the search parameters panel, or search is being
+    // updated programmatically: update geojson service with all
+    // search params, then do search.
     $scope.model.autofocusField = null;
     $scope.model.alert = null;
     $scope.model.searchOptions = false;
@@ -52,6 +53,8 @@ function($scope, $state, $http, $location, geoJsonService) {
     geoJsonService.setTaxonQuery($scope.model.taxonQuery, false);
     geoJsonService.setCountry($scope.model.country, false);
     geoJsonService.setAccessionIds($scope.model.accessionIds, false);
+    geoJsonService.setAccessionIdsColor($scope.model.accessionIdsColor, false);
+    geoJsonService.setAccessionIdsInclusive($scope.model.accessionIdsInclusive, false);
     geoJsonService.setTraitOverlay($scope.model.traitOverlay, false);
     geoJsonService.setTraitScale($scope.model.traitScale, false);
     geoJsonService.setTraitExcludeUnchar($scope.model.traitExcludeUnchar, false);
@@ -106,8 +109,19 @@ function($scope, $state, $http, $location, geoJsonService) {
     $scope.model.limitToMapExtent = false;
     $scope.model.country = null;
     $scope.model.taxonQuery = null;
-    $scope.model.accessionIds = 'PI 257413,W6 36352,PI 257412,PI 257416,\
-      PI 661801,PI 642123,W6 17477,W6 36350';
+    $scope.model.accessionIds = null;
+    $scope.model.traitOverlay = null;
+
+    var url = STATIC_PATH + '/grin_app/js/example-accession-ids.json';
+    $http.get(url).then(function(resp) {
+      // success callback
+      var ids = resp.data;
+      $scope.model.accessionIds = ids.join(',');
+    }, function(resp){
+      // error callback
+      console.log(resp);
+    });
+
   };
 
   $scope.onTraitOverlayExample = function() {
@@ -118,6 +132,69 @@ function($scope, $state, $http, $location, geoJsonService) {
     $scope.model.taxonQuery = 'Phaseolus vulgaris';
     $scope.model.traitScale = 'local';
     $scope.onTaxonQuery($scope.model.taxonQuery);
+  };
+
+  $scope.onTraitOverlayOptions = function() {
+    var modal = $uibModal.open({
+      animation: true,
+      templateUrl: 'trait-overlay-options.html',
+      controller: 'traitOverlayOptionsController',
+      size: 'lg',
+      resolve: {
+	model : function() {
+	  return  {
+	    traitOverlay : $scope.model.traitOverlay,
+	    traitScale : $scope.model.traitScale,
+	    traitExcludeUnchar : $scope.model.traitExcludeUnchar,
+	}},
+      }
+    });
+    modal.result.then(function (result) {
+      if(! result) { return; } /* cancelled */
+      $scope.model.traitScale = result.traitScale;
+      $scope.model.traitExcludeUnchar = result.traitExcludeUnchar;
+    }, function () {
+      // modal otherwise dismissed callback (ignore result) e.g. backdrop click
+    });
+  };
+
+  // get a short label for displaying in the current-search-filters area
+  $scope.accessionIdsDescr = function() {
+    var idsStr = geoJsonService.params.accessionIds;
+    if(! idsStr) { return null; }
+    var ids = idsStr.split(',');
+    if(ids.length > 5) {
+      return '(' + ids.length + ' accession IDs)';
+    }
+    return idsStr;
+  };
+  
+  $scope.onAccessionIdOptions = function() {
+    var modal = $uibModal.open({
+      animation: true,
+      templateUrl: 'accession-search-options.html',
+      controller: 'accessionSearchOptionsController',
+      size: 'lg',
+      resolve: {
+	model : function() {
+	  return  {
+	    accessionIds : $scope.model.accessionIds,
+	    accessionIdsColor : $scope.model.accessionIdsColor,
+	    accessionIdsInclusive : $scope.model.accessionIdsInclusive,
+	    brewerColors : chroma.brewer.Set1.concat(
+	      chroma.brewer.Set2,
+	      chroma.brewer.Set3),
+	}},
+      }
+    });
+    modal.result.then(function (result) {
+      if(! result) { return; } /* cancelled */
+      $scope.model.accessionIds = result.accessionIds;
+      $scope.model.accessionIdsColor = result.accessionIdsColor;
+      $scope.model.accessionIdsInclusive = result.accessionIdsInclusive;
+    }, function () {
+      // modal otherwise dismissed callback (ignore result) e.g. backdrop click
+    });
   };
 
   $scope.onExampleTaxonQuery = function() {

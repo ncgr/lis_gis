@@ -21,7 +21,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = '... set this when deploying ...'
+SECRET_KEY = open(os.path.join(os.path.dirname(__file__),
+                               'django_secret_key.txt')).read()
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -139,7 +140,7 @@ LOGGING = {
 
 BRANDING = {
     'home_url' : '/',
-    'logo_url' : 'http://legumeinfo.org/sites/all/themes/legumeinfo_theme/images/legumeinfo_logo.png',
+    'logo_url' : STATIC_URL + 'grin_app/images/legumeinfo_logo.png',
     'site_heading' : 'Legume Information System',
     'site_subheading' : 'Germplasm Map',
     'site_abbrev' : 'LIS',

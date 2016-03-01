@@ -3,6 +3,7 @@
 
 var app = angular.module('grin',
 			 ['ngSanitize',
+			  'ngStorage',
 			  'mp.autoFocus',
 			  'ui.bootstrap',
 			  'ui.router']);
@@ -111,9 +112,9 @@ app.tour = function () {
     steps: [
       {
         title: 'Welcome',
-        content: 'This is a short tour of the LIS Germplasm map viewer. This \
-         web app allows you to search and locate germplasm accessions for \
-         legume genera.',
+        content: 'This is a short tour of the ' + BRANDING.site_heading +
+	 ' Germplasm map viewer. This web app offers searching and \
+          visualization of germplasm accessions and trait observations.',
         target: 'tour-start',
         placement: 'top',
       },

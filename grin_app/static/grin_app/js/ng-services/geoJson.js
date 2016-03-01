@@ -1,5 +1,5 @@
 app.service('geoJsonService',
-function($http, $rootScope, $location, $timeout, $q) {
+function($http, $rootScope, $location, $timeout, $q, $localStorage) {
   
   var DEFAULT_CENTER = { 'lat' : 35.87, 'lng' : -109.47 };
   var MAX_RECS = 200;
@@ -21,40 +21,48 @@ function($http, $rootScope, $location, $timeout, $q) {
   
   // array of event names we are publishing
   s.events = ['updated', 'willUpdate', 'selectedAccessionUpdated'];
+
   
   s.init = function() {
+    
     // set default search values on $location service
-    var params = $location.search();
-
-    if(! ('limitToMapExtent' in params) &&
-       ! ('accessionIds' in params)) {
-      $location.search('limitToMapExtent', true);
-    }
-    if(! ('zoom' in params)) {
+    s.params = s.getSearchParams();
+  
+    if(! ('zoom' in s.params)) {
       $location.search('zoom', DEFAULT_ZOOM);
     }
-    if(! ('maxRecs' in params)) {
+    if(! ('maxRecs' in s.params)) {
       $location.search('maxRecs', MAX_RECS);
     }
-    if(! ('taxonQuery' in params)) {
+    if(! ('taxonQuery' in s.params)) {
       $location.search('taxonQuery', '');
     }
-    if(! ('traitOverlay' in params)) {
+    if(! ('traitOverlay' in s.params)) {
       $location.search('traitOverlay', '');
     }
-    if(! ('traitScale' in params)) {
+    if(! ('traitScale' in s.params)) {
       $location.search('traitScale', 'global');
     }
-    if(! ('country' in params)) {
+    if(! ('country' in s.params)) {
       $location.search('country', '');
     }
-    if(! ('geocodedOnly' in params)) {
+    if(! ('geocodedOnly' in s.params)) {
       $location.search('geocodedOnly', false);
     }
-    if (! ('lng' in params)) {
+    if(! ('traitExcludeUnchar' in s.params)) {
+      $location.search('traitExcludeUnchar', false);
+    }
+    if(! ('limitToMapExtent' in s.params) &&
+       ! ('accessionIds' in s.params)) {
+      $location.search('limitToMapExtent', true);
+    }
+    if (! ('lng' in s.params)) {
       $location.search('lat', DEFAULT_CENTER.lat);
       $location.search('lng', DEFAULT_CENTER.lng);
     }
+    // store updated search params in property of service, for ease of
+    // use by controllers and views.
+    s.params = s.getSearchParams();
   };
 
   s.showAllNearbySameTaxon = function() {
@@ -87,7 +95,7 @@ function($http, $rootScope, $location, $timeout, $q) {
   };
 
   function postProcessSearch() {
-    s.checkForGeocodedAccessionIds();
+    s.params = s.getSearchParams();
     s.updateBounds();
     s.updateColors();
     s.updating = false;
@@ -102,43 +110,43 @@ function($http, $rootScope, $location, $timeout, $q) {
     s.data = [];
     s.traitData = [];
     s.traitHash = {};
-    var params = $location.search();
+    s.params = s.getSearchParams();
     
     $http({
       url : API_PATH + '/search',
-      method : 'GET',
-      params : {
-        q : params.taxonQuery,
+      method : 'POST',
+      data : {
+        taxon_query : s.params.taxonQuery,
         ne_lat : s.bounds._northEast.lat,
         ne_lng : s.bounds._northEast.lng,
         sw_lat : s.bounds._southWest.lat,
         sw_lng : s.bounds._southWest.lng,
-        limit_geo_bounds : parseBool(params.limitToMapExtent),
-	geocoded_only : params.geocodedOnly,
-        country : params.country,
-        accession_ids : params.accessionIds,
-	trait_overlay : params.traitOverlay,
-        limit: params.maxRecs,
+        limit_geo_bounds : parseBool(s.params.limitToMapExtent),
+	geocoded_only : s.params.geocodedOnly,
+        country : s.params.country,
+        accession_ids : s.params.accessionIds,
+	accession_ids_inclusive : parseBool(s.params.accessionIdsInclusive),
+	trait_overlay : s.params.traitOverlay,
+        limit: s.params.maxRecs,
       }
     }).then(
       function(resp) {
         // success handler;
         s.data = resp.data;
-	if(s.data.length === 0 && params.geocodedOnly) {
+	if(s.data.length === 0 && s.params.geocodedOnly) {
 	  // retry search with geocodedOnly off (to support edge case
 	  // e.g. when searching by some countries which only have
 	  // non-geographic accessions.)
-	  params.geocodedOnly = false;
-	  $timeout(s.search, 0);
+	  s.setGeocodedAccessionsOnly(false, true);
 	  return;
 	}
-	if(params.taxonQuery && params.traitOverlay && s.data.length > 0) {
+	if(s.params.taxonQuery && s.params.traitOverlay && s.data.length > 0) {
 	  var promise1 = $http({
 	    url : API_PATH + '/evaluation_search',
 	    method : 'POST',
 	    data : {
               accession_ids : getAccessionIds(),
-	      descriptor_name : params.traitOverlay,
+	      descriptor_name : s.params.traitOverlay,
 	    }
 	  }).then(
 	    function(resp) {
@@ -154,10 +162,10 @@ function($http, $rootScope, $location, $timeout, $q) {
 	    url : API_PATH + '/evaluation_metadata',
 	    method : 'POST',
 	    data : {
-              taxon : params.taxonQuery,
-	      descriptor_name : params.traitOverlay,
-	      accession_ids : params.traitScale === 'local' ? getAccessionIds() : [],
-	      trait_scale : params.traitScale,
+              taxon : s.params.taxonQuery,
+	      descriptor_name : s.params.traitOverlay,
+	      accession_ids : s.params.traitScale === 'local' ? getAccessionIds() : [],
+	      trait_scale : s.params.traitScale,
 	    }
 	  }).then(
 	    function(resp) {
@@ -188,22 +196,44 @@ function($http, $rootScope, $location, $timeout, $q) {
       return d.properties.accenumb;
     });
   }
-  
-  s.checkForGeocodedAccessionIds = function() {
+
+  s.getSearchParams = function() {
+    // return a shallow copy of $location.search() object, merging in
+    // properties for any local storage params, e.g. accessionIds
+    // which have overflowed the limit for URL param.
     var params = $location.search();
-    var geocodedAcc = s.getAnyGeocodedAccession();
-    if(! geocodedAcc && ! params.limitToMapExtent) {
-      if(params.accessionIds) {
-	$rootScope.warnings = ['None of the requested accession ids (' +
-	       params.accessionIds + ') have geographic \
-               coordinates, so they will not appear on the map.'];
-      }
-      else if(params.country) {
-	$rootScope.warnings = ['None of the matching accessions have \
-          geographic coordinates, so they will not appear on the map.'];
-      }
+    // url query string overrides anything in localStorage
+    if(params.accessionIds) {
+      delete $localStorage.accessionIds;
     }
-  };
+    var merged = {};
+    angular.extend(merged, params);
+    if($localStorage.accessionIds) {
+      merged.accessionIds = $localStorage.accessionIds;
+    }
+    // force some parameters to be booleans ($location.search() has
+    // the unfortunate feature of being untyped; depending on how data
+    // was set
+    if('limitToMapExtent' in merged) {
+      merged.limitToMapExtent = parseBool(merged.limitToMapExtent);
+    }
+    if('geocodedOnly' in merged) {
+      merged.geocodedOnly = parseBool(merged.geocodedOnly);
+    }
+    if('traitExcludeUnchar' in merged) {
+      merged.traitExcludeUnchar = parseBool(merged.traitExcludeUnchar);
+    }
+    if('zoom' in merged) {
+      merged.zoom = parseInt(merged.zoom);
+    }
+    if('maxRecs' in merged) {
+      merged.maxRecs = parseInt(merged.maxRecs);
+    }    
+    if('mapHeight' in merged) {
+      merged.mapHeight = parseInt(merged.mapHeight);
+    }    
+    return merged;
+  }
 
   s.setSelectedAccession = function(accId) {
     var accession = _.find(s.data, function(d) {
@@ -265,8 +295,33 @@ function($http, $rootScope, $location, $timeout, $q) {
   };
 
   s.setAccessionIds = function(accessionIds, search) {
-    $location.search('accessionIds', accessionIds);
+    // if there 'too many' accessionIds, it *will* overflow the
+    // allowed URL length with search parameters, so use localstorage.
+    delete $localStorage.accessionIds;
+    $location.search('accessionIds', null);
+    
+    if(accessionIds) {
+      var ids = accessionIds.split(',');
+      if(ids.length <= 10) {
+	// use url query parameter
+	$location.search('accessionIds', accessionIds);
+      }
+      else {
+	// use local storage api
+	$localStorage.accessionIds = accessionIds;
+      }
+    }
     s.initialBoundsUpdated = false;
+    if(search) { s.search(); }
+  };
+
+  s.setAccessionIdsColor = function(color, search) {
+    $location.search('accessionIdsColor', color);
+    if(search) { s.search(); }
+  };
+  
+  s.setAccessionIdsInclusive = function(bool, search) {
+    $location.search('accessionIdsInclusive', bool);
     if(search) { s.search(); }
   };
 
@@ -294,7 +349,6 @@ function($http, $rootScope, $location, $timeout, $q) {
     // use a custom color scheme with a range of the selected trait
     // iterate the trait results once, to build a lookup table
     _.each(s.traitData, function(d) {
-      //console.log(d);
       if(s.traitHash[d.accenumb]) {
 	s.traitHash[d.accenumb].push(d.observation_value);
       }
@@ -378,11 +432,10 @@ function($http, $rootScope, $location, $timeout, $q) {
   }
 
   s.updateColors = function() {
-
     s.traitHash = {};
     s.traitLegend = {};
 
-    if($location.search().traitOverlay) {
+    if(s.params.traitOverlay) {
       if(s.traitMetadata.trait_type === 'numeric') {
 	colorStrategyNumericTrait();
       }
@@ -394,6 +447,16 @@ function($http, $rootScope, $location, $timeout, $q) {
       // use default color scheme from taxonChroma
       _.each(s.data, function(acc) {
 	acc.properties.color = taxonChroma.get(acc.properties.taxon);
+      });
+    }
+
+    // override all over coloring schems, with accessionIds coloring, if any
+    if(s.params.accessionIds && s.params.accessionIdsColor) {
+      var accIds = s.params.accessionIds.split(',');
+      _.each(s.data, function(acc) {
+	if(accIds.indexOf(acc.properties.accenumb) !== -1) {
+	  acc.properties.color = s.params.accessionIdsColor;
+	}
       });
     }
   };
@@ -410,8 +473,7 @@ function($http, $rootScope, $location, $timeout, $q) {
      * bounds before sending updated event to listeners
      * (e.g. mapController) Use Leafletjs to perform all the bounds
      * calculations and extent fitting. */
-    var params = $location.search();
-    var accessionIds = _.get(params, 'accessionIds');
+    var accessionIds = _.get(s.params, 'accessionIds');
     if( ! accessionIds) { return; }
     if(s.initialBoundsUpdated || s.data.length == 0) { return; }
     var geocodedAcc = s.getAnyGeocodedAccession();
