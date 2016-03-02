@@ -4,6 +4,7 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
   var DEFAULT_CENTER = { 'lat' : 35.87, 'lng' : -109.47 };
   var MAX_RECS = 200;
   var DEFAULT_ZOOM = 6;
+  var MARKER_RADIUS = 8;
   
   var s = {}; // service/singleton we will construct & return
   
@@ -98,6 +99,7 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
     s.params = s.getSearchParams();
     s.updateBounds();
     s.updateColors();
+    s.updateMarkerStrategy();
     s.updating = false;
     s.setSelectedAccession(s.selectedAccession);
     s.notify('updated');
@@ -461,6 +463,72 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
     }
   };
 
+  /*
+   * updateMarkerStrategy() Use Leaflet's circleMarker by default. If we
+   * are displaying categorical trait data, then draw a pie-chart
+   * marker with all the nominal values.
+   */
+  s.updateMarkerStrategy = function() {
+    if(s.params.traitOverlay &&
+       s.traitMetadata.trait_type === 'nominal') {
+      s.markerCallback = getPieChartMarker;
+    }
+    else {
+      s.markerCallback = getCircleMarker;
+    }
+  };
+
+  function getCircleMarker(feature, latlng) {
+    // get a circle marker and tag it with the accession #.
+    var mouseOverLabel = feature.properties.accenumb +
+	' (' + feature.properties.taxon + ')';
+    var marker = L.circleMarker(latlng, {
+      id : feature.accenumb,
+      radius: MARKER_RADIUS,
+      fillColor: feature.properties.color,
+      color: "#000",
+      weight: 1,
+      opacity: 1,
+      fillOpacity: 1,
+    });
+    marker.bindLabel(mouseOverLabel);
+    return marker;
+  }
+
+  function getPieChartMarker(feature, latlng) {
+    // get a circle marker colored as pie chart, with all of
+    var mouseOverLabel = feature.properties.accenumb +
+	' (' + feature.properties.taxon + ')';
+    var data = s.traitHash[feature.properties.accenumb];
+    if(! data) {
+      // this accession is uncharacterized, so fall back to circle marker
+      return getCircleMarker(feature, latlng);
+    }
+    // construct data dictionary and chartOptions for leaflet-dvf piechart
+    data = _.uniq(data);
+    var dataDict = _.keyBy(data, function(d) { return d; });
+    var degreesPerCategory = 360 / data.length;
+    dataDict = _.mapValues(dataDict, function(d) { return degreesPerCategory;});
+    var chartOptionsDict = _.keyBy(data, function(d) { return d; });
+    chartOptionsDict = _.mapValues(chartOptionsDict, function(d) {
+      return {
+	fillColor : s.traitMetadata.colors[d],
+	displayText : function(value) {
+	  return feature.properties.accenumb;
+	},
+      }
+    });
+    var options = {
+      data: dataDict,
+      chartOptions: chartOptionsDict,
+      radius : MARKER_RADIUS,
+      opacity : 1.0,
+      fillOpacity : 1.0,
+      gradient : false,
+    };
+    var marker = new L.PieChartMarker(latlng, options);
+    return marker;
+  }
   s.getAnyGeocodedAccession = function() {
     return _.find(s.data, function(geoJson) {
       if(_.has(geoJson, 'geometry.coordinates.length')) { return true; }
