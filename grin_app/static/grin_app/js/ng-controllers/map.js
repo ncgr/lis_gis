@@ -81,17 +81,8 @@ function($scope, $state, $timeout, $location, geoJsonService) {
     $scope.model.baseMapLayer = $scope.model.baseMaps[DEFAULT_BASEMAP]();
     $scope.model.baseMapLayer.addTo($scope.model.map);
     $scope.model.geoJsonLayer = L.geoJson($scope.model.geoJsonService.data, {
-      pointToLayer: function (feature, latlng) {
-	// create circle marker and tag it with the accession #.
-        return L.circleMarker(latlng, {
-	  id : feature.accenumb,
-	  radius: 8,
-	  fillColor: feature.properties.color,
-	  color: "#000",
-	  weight: 1,
-	  opacity: 1,
-	  fillOpacity: 1,
-	}).bindLabel(getMouseOverLabel(feature));
+      pointToLayer: function(feature, layer) {
+	return geoJsonService.markerCallback(feature, layer);
       },
       onEachFeature: function (feature, layer) {
 	// bind a popup to each feature
@@ -308,18 +299,16 @@ function($scope, $state, $timeout, $location, geoJsonService) {
     var species = feature.properties.taxon.split(' ')[1];
     return species.substring(0,2);
   }
-  
-  function getMouseOverLabel(feature) {
-    return feature.properties.accenumb + ' (' + feature.properties.taxon + ')';
-  }
-    
+ 
   function fixMarkerZOrder() {
     // attempt to handle some cases where certain markers need to
     // bubble to top
     if(geoJsonService.params.traitOverlay) {
       $scope.model.map.eachLayer(function(l) {
 	if(_.has(l, 'feature.properties.haveTrait')) {
-	  l.bringToFront();
+	  if('bringToFront' in l) {
+	    l.bringToFront();
+	  }
 	}
       });
     }
