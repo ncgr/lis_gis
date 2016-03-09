@@ -10,8 +10,7 @@ var taxonChroma = {};
 (function() {
 
   var colorCache = {};
-  var LIGHTNESS_FACTOR = 1; // default lightness factor (1= don't post-adjust)
-  var MIN_LIGHTNESS = 0.3;
+
   var moreBrewerColors = chroma.brewer.Set2; 
   
   this.defaultColor = '#d3d3d3';
@@ -59,9 +58,6 @@ var taxonChroma = {};
       colorCache[t] = color;
       return color;
     }
-    if (options.lightnessFactor === undefined) {
-      options.lightnessFactor = LIGHTNESS_FACTOR;
-    }
     // handle edge case where t is actually just the genus
     if(t in this.colorMap) {
       color = this.colorMap[t]      
@@ -75,10 +71,14 @@ var taxonChroma = {};
     if(genus in this.colorMap) {
       // colorize using genus for hue, and species for lightness
       var genusColor = this.colorMap[genus];
-      var hue = chroma(genusColor).hsl()[0];
-      var lightness = MIN_LIGHTNESS +
-	             (fnv32a(species, 1000) / 1000) * (1 - 2 *MIN_LIGHTNESS);
-      color = chroma(hue, 1, lightness * options.lightnessFactor, 'hsl').hex();
+      var hcl = chroma(genusColor).hcl();
+      // start with saturated color out of the hue found in hcl color space.
+      // end with less saturated by equal valued (lighness) color from the hcl.
+      // interpolate by adjusting the L (lightness) in HCL space.
+      var hclHi = chroma.hcl(hcl[0], 90, 100);
+      var hclLow = chroma.hcl(hcl[0], 90, 30);
+      var lightness = fnv32a(species, 1000) / 1000;
+      color = chroma.interpolate(hclHi, hclLow, lightness, 'hcl').hex();
     }
     else {
       // fallback to default color
