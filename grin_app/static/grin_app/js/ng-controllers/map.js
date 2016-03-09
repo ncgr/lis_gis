@@ -10,13 +10,24 @@ function($scope, $state, $timeout, $location, geoJsonService) {
                         Cookies.get('baseMap') ||
                         'ESRI - NatGeo (default, reference map)';
 
-  /* 350px is the default height used by leafletjs. if another default
+  /* 350px is the default height used by leafletjs. If another default
    * size is set, it will result in the map size being invlidated and
-   * causing an initieal reload of the search (which we dont want to
-   * happen )
+   * causing an initial reload of the search which is bad UX.
    */
-  var DEFAULT_MAP_HEIGHT = 350;
-  
+  var DEFAULT_MAP_HEIGHT = function() {
+    var dpr = window.devicePixelRatio || 1.0;
+    var devIndHeight = window.innerHeight / dpr;
+    if(devIndHeight > 700) {
+      // this is preferred; use the leafletjs default height, and take
+      // up no more than 1/2 of the window height with the map,
+      // leaving room for search results.
+      return 350;
+    }
+    // use 1/2 of the remaining device independent pixels. this would
+    // be used for example on a phone with very high dpi
+    return devIndHeight * 0.5;
+  }();
+
   $scope.model = {
     geoJson : geoJsonService,
     $location : $location,
