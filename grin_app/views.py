@@ -177,7 +177,7 @@ def evaluation_search(req):
 
 def _string2num(s):
     '''
-    Convert a strint to int or float if possible
+    Convert a string to int or float if possible
     '''
     intval = None
     floatval = None
@@ -295,32 +295,6 @@ def evaluation_metadata(req):
     response = HttpResponse(json.dumps(result, use_decimal=True),
                             content_type='application/json')
     return response
-
-
-def _generate_numeric_trait_metadata(descriptor_name, obs_min, obs_max):
-    ''' Return JSON describing numeric trait including the data set min/max.'''
-   
-    return result
-
-
-def _generate_category_trait_metadata(descriptor_name, obs_vals):
-    '''Return JSON describing nominal categories, including pre-selected
-    colors for all values in the data.
-    '''
-    uniq = sorted(list(set(rows)))
-    colors = {}
-    num_preset_colors = len(NOMINAL_COLORS)
-    for i, val in enumerate(uniq):
-        if i < num_preset_colors:
-            colors[val] = NOMINAL_COLORS[i]
-        else:
-            colors[val] = DEFAULT_COLOR
-    result = {
-        'descriptor_name' : params['descriptor_name'],
-        'trait_type' : 'nominal',
-        'colors' : colors,
-    }
-    return result
 
 
 @ensure_csrf_cookie
