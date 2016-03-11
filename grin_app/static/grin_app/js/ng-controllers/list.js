@@ -18,8 +18,8 @@ function($scope,
     geoJson: geoJsonService,
     $location : $location,
     searchHilite: null,
-    showAssistiveButton : false,
-    showAssistiveText : null,
+    showNearbySearchButtons : false,
+    showNearbySearchText : null,
     STATIC_PATH : STATIC_PATH,
   };
 
@@ -27,7 +27,7 @@ function($scope,
     // callback for geoJsonService updated search results
     geoJsonService.subscribe($scope, 'updated', function() {
       updateQueryHiliting();
-      updateAssistiveButton();
+      updateNearbySearchButtons();
       /* if there is a single accessionId and have a search parameter,
 	 showAccessionDetail, show the accession detail modal dlg. */
       if(geoJsonService.data.length === 1 &&
@@ -138,15 +138,6 @@ function($scope,
     geoJsonService.showAllNearbySameTaxon();
   };
   
-  function updateAssistiveButton() {
-    if(! ('accessionIds' in geoJsonService.params)) { return; }
-    if(geoJsonService.data.length !== 1) { return; }
-    if(! geoJsonService.getAnyGeocodedAccession()) { return; };
-    var acc = geoJsonService.data[0];
-    $scope.model.showAssistiveButton = true;
-    $scope.model.showAssistiveText = acc.properties.taxon;
-  }
- 
   function onGoExternalLISTaxon(accDetail)  {
     var url = '/organism/' +
 	encodeURIComponent(accDetail.properties.genus) + '/' +
@@ -173,6 +164,17 @@ function($scope,
     $scope.model.searchHilite = query.trim();
   }
   
+  function updateNearbySearchButtons() {
+    $scope.model.showNearbySearchButtons = false;
+    $scope.model.showNearbySearchText = null;
+    if(! ('accessionIds' in geoJsonService.params)) { return; }
+    if(geoJsonService.data.length !== 1) { return; }
+    if(! geoJsonService.getAnyGeocodedAccession()) { return; };
+    var acc = geoJsonService.data[0];
+    $scope.model.showNearbySearchButtons = true;
+    $scope.model.showNearbySearchText = acc.properties.taxon;
+  }
+ 
   $scope.init();
   
 });
