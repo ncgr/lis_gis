@@ -148,7 +148,7 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
 	    url : API_PATH + '/evaluation_search',
 	    method : 'POST',
 	    data : {
-              accession_ids : getAccessionIds(),
+              accession_ids : s.getAccessionIds(),
 	      descriptor_name : s.params.traitOverlay,
 	    }
 	  }).then(
@@ -167,7 +167,7 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
 	    data : {
               taxon : s.params.taxonQuery,
 	      descriptor_name : s.params.traitOverlay,
-	      accession_ids : s.params.traitScale === 'local' ? getAccessionIds() : [],
+	      accession_ids : s.params.traitScale === 'local' ? s.getAccessionIds() : [],
 	      trait_scale : s.params.traitScale,
 	    }
 	  }).then(
@@ -193,13 +193,12 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
       });
   };
 
-  function getAccessionIds() {
-    // return array an of accession ids in the current geojson data set
+  /* return array an of accession ids in the current geojson data set. */
+  s.getAccessionIds = function() {
     return _.map(s.data, function(d) {
       return d.properties.accenumb;
     });
   }
-
 
   /* return a shallow copy of $location.search() object, merging in
      properties for any local storage params, e.g. accessionIds which

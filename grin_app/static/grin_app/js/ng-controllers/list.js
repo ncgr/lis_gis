@@ -24,13 +24,19 @@ function($scope,
   };
 
   $scope.init = function() {
-    
+    // callback for geoJsonService updated search results
     geoJsonService.subscribe($scope, 'updated', function() {
-      // callback for geoJsonService updated search results
       updateQueryHiliting();
       updateAssistiveButton();
+      /* if there is a single accessionId and have a search parameter,
+	 showAccessionDetail, show the accession detail modal dlg. */
+      if(geoJsonService.data.length === 1 &&
+	 'showAccessionDetail' in $location.search()) {
+	var accIds = geoJsonService.getAccessionIds();
+	$location.search('showAccessionDetail', null);
+	$scope.onAccessionDetail(accIds[0]);
+      }
     });
-
     geoJsonService.subscribe($scope, 'selectedAccessionUpdated', function() {
       // scroll to top of results list, because the selected accession
       // will be hilited there
