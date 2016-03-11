@@ -17,7 +17,8 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
   s.traitLegend = {}; // all the info for map.js to build a legend
 
   s.map = null; // the leaflet map, Note: this belongs to
-                // mapController! don't update within in this service.
+                // mapController! don't update the map within in this
+                // service.
   s.bounds = L.latLngBounds(L.latLng(0,0), L.latLng(0,0));
   
   // array of event names we are publishing
@@ -136,9 +137,9 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
         // success handler;
         s.data = resp.data;
 	if(s.data.length === 0 && s.params.geocodedOnly) {
-	  // retry search with geocodedOnly off (to support edge case
-	  // e.g. when searching by some countries which only have
-	  // non-geographic accessions.)
+	  /* retry search with geocodedOnly off (to support edge case
+	     e.g. when searching by some countries which only have
+	     non-geographic accessions. */
 	  s.setGeocodedAccessionsOnly(false, true);
 	  return;
 	}
@@ -199,10 +200,11 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
     });
   }
 
+
+  /* return a shallow copy of $location.search() object, merging in
+     properties for any local storage params, e.g. accessionIds which
+     have overflowed the limit for URL param. */
   s.getSearchParams = function() {
-    // return a shallow copy of $location.search() object, merging in
-    // properties for any local storage params, e.g. accessionIds
-    // which have overflowed the limit for URL param.
     var params = $location.search();
     // url query string overrides anything in localStorage
     if(params.accessionIds) {
@@ -237,13 +239,13 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
     return merged;
   }
 
+  /* set one selected accession to hilight in the UI */
   s.setSelectedAccession = function(accId) {
     var accession = _.find(s.data, function(d) {
       return (d.properties.accenumb === accId);
     });
     if( ! accession) {
-      // the accession id is not in the current result set, so clear
-      // the selection
+      // the accession id is not in the current result set, so clear it.
       accId = null;
       changed = true;
     }
@@ -262,7 +264,8 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
       s.notify('selectedAccessionUpdated');
     }
   }
-  
+
+  /* set the bounds of map extent, and save to search parameters */
   s.setBounds = function(bounds, doSearch) {
     if(s.bounds.equals(bounds) && s.data.length > 0) {
       // early out if the bounds is already set to same, and we have results
@@ -275,27 +278,32 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
     $location.search('sw_lng', s.bounds._southWest.lng);
     if(doSearch) { s.search(); }
   };
-  
+
+  /* set a country filter for the search. */
   s.setCountry = function(cty, search) {
     $location.search('country', cty);
     if(search) { s.search(); }
   };
-  
+
+  /* set the max number of records in search results limit. */
   s.setMaxRecs = function(max, search) {
     $location.search('maxRecs', max);
     if(search) { s.search(); }
   };
-  
+
+  /* set whether to limit the search to the current geographic extent. */
   s.setLimitToMapExtent = function(bool, search) {
     $location.search('limitToMapExtent', bool);
     if(search) { s.search(); }
   };
 
+  /* set a taxon query string for full-text search by genus or species. */
   s.setTaxonQuery = function(q, search) {
     $location.search('taxonQuery', q);
     if(search) { s.search(); }
   };
 
+  /* set a list of specific accession ids */
   s.setAccessionIds = function(accessionIds, search) {
     // if there 'too many' accessionIds, it *will* overflow the
     // allowed URL length with search parameters, so use localstorage.
@@ -317,39 +325,48 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
     if(search) { s.search(); }
   };
 
+  /* set a custom color for the user's list of accessionIds */
   s.setAccessionIdsColor = function(color, search) {
     $location.search('accessionIdsColor', color);
     if(search) { s.search(); }
   };
-  
+
+  /* set whether to merge other search results in (true), or display 
+     results exclusively for this set of accession ids. */
   s.setAccessionIdsInclusive = function(bool, search) {
     $location.search('accessionIdsInclusive', bool);
     if(search) { s.search(); }
   };
 
+  /* set a trait descriptor_name to display for the taxon query. */
   s.setTraitOverlay = function(trait, search) {
     $location.search('traitOverlay', trait);
     if(search) { s.search(); }
   };
 
+  /* set whether to exclude descriptor_name uncharacterized accessions 
+     from the map display. */
   s.setTraitExcludeUnchar = function(bool, search) {
     $location.search('traitExcludeUnchar', bool);
     if(search) { s.search(); }
   };
 
+  /* set either local or global trait scale, which effects display of 
+     min/max values for numeric traits. */
   s.setTraitScale = function(scale, search) {
     $location.search('traitScale', scale);
     if(search) { s.search(); }
   };
-	      
+
+  /* set whether to limit search results to those having geographic coords. */
   s.setGeocodedAccessionsOnly = function(bool, search) {
     $location.search('geocodedOnly', bool);
     if(search) { s.search(); }
   };
 
+  /* use a custom color scheme with a range of the selected trait
+     iterate the trait results once, to build a lookup table */
   function colorStrategyNumericTrait() {
-    // use a custom color scheme with a range of the selected trait
-    // iterate the trait results once, to build a lookup table
     _.each(s.traitData, function(d) {
       if(s.traitHash[d.accenumb]) {
 	s.traitHash[d.accenumb].push(d.observation_value);
