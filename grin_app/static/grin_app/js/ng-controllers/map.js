@@ -367,6 +367,7 @@ function($scope, $state, $timeout, $location, geoJsonService) {
     return ct;
   }
 
+  /* show an alert if no accessions are visible on the map extent */
   $scope.showHiddenAccHelp = function() {
     if($scope.model.geoJson.updating) {
       return false;
@@ -377,10 +378,33 @@ function($scope, $state, $timeout, $location, geoJsonService) {
     if(geoJsonService.params.traitExcludeUnchar) {
       return false;
     }
-    if($scope.getVisibleMarkerCount() === 0) {
-      return true;
+    if(! geoJsonService.getAnyGeocodedAccession()) {
+      return false;
     }
-    return false;
+    if($scope.getVisibleMarkerCount() > 0) {
+      return false;
+    }
+    return true;
+  }
+
+   /* show an alert if no accessions have geographic coords. */
+  $scope.showHiddenAccHelp2 = function() {
+     if($scope.model.geoJson.updating) {
+      return false;
+    }
+    if(! geoJsonService.data.length) {
+      return false;
+    }
+    if(geoJsonService.params.traitExcludeUnchar) {
+      return false;
+    }
+    if($scope.getVisibleMarkerCount() > 0) {
+      return false;
+    }
+    if(geoJsonService.getAnyGeocodedAccession()) {
+      return false;
+    }
+    return true;
   }
 
   function filterNonGeocoded(featureData, layer) {

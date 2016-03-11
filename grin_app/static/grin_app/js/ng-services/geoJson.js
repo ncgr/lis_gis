@@ -545,6 +545,7 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
     var marker = new L.PieChartMarker(latlng, options);
     return marker;
   }
+  
   s.getAnyGeocodedAccession = function() {
     return _.find(s.data, function(geoJson) {
       if(_.has(geoJson, 'geometry.coordinates.length')) { return true; }
@@ -552,6 +553,7 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
   };
 
   s.initialBoundsUpdated = false;
+  
   s.updateBounds = function() {
     /* in case we are searching by accessionIds, we need to derive new
      * bounds before sending updated event to listeners

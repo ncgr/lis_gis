@@ -187,12 +187,23 @@
    <strong>Please note:</strong>
 
    {{model.geoJsonService.data.length}} results are in your query, but
-   are not visible on the map.
-   
+   none are visible on the map.
    <button type="button"
 	   class="btn btn-sm btn-primary"
 	   ng-click="onZoomToAccessions()">
      Zoom map to view these accessions
    </button>
+</div>
+
+<div class="alert alert-warning"
+     style="margin-top: 0.5rem"
+     ng-if="showHiddenAccHelp2()">
+
+   <button type="button" class="close" data-dismiss="alert">
+    <span aria-hidden="true">&times;</span>
+   </button>
    
+   <strong>Please note:</strong>
+   None of the search results have geographic coordinates, so they will
+   not appear on the map above.
 </div>
