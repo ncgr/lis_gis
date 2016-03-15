@@ -33,7 +33,7 @@ function($scope, $state, $timeout, $location, geoJsonService) {
     $location : $location,
     map : null,  // the leaflet map
     geoJsonLayer : null,
-    geoJsonService : geoJsonService,  // array of geoJson objects
+    geoJsonService : geoJsonService,
     center : {
       lat : geoJsonService.params.lat,
       lng : geoJsonService.params.lng,
@@ -91,7 +91,7 @@ function($scope, $state, $timeout, $location, geoJsonService) {
     // add the default basemap
     $scope.model.baseMapLayer = $scope.model.baseMaps[DEFAULT_BASEMAP]();
     $scope.model.baseMapLayer.addTo($scope.model.map);
-    $scope.model.geoJsonLayer = L.geoJson($scope.model.geoJsonService.data, {
+    $scope.model.geoJsonLayer = L.geoJson(geoJsonService.getData(), {
       pointToLayer: function(feature, layer) {
 	return geoJsonService.markerCallback(feature, layer);
       },
@@ -162,11 +162,11 @@ function($scope, $state, $timeout, $location, geoJsonService) {
       // remove previous map markers, and then update with the new geojson
       $scope.model.geoJsonLayer.clearLayers();
       
-      var filteredGeoJson = $scope.model.geoJsonService.data;
+      var filteredGeoJson = geoJsonService.getData();
       if(geoJsonService.params.traitExcludeUnchar &&
 	 geoJsonService.params.traitOverlay) {
 	// exclude uncharacterized accessions for this trait
-	filteredGeoJson = _.filter($scope.model.geoJsonService.data,
+	filteredGeoJson = _.filter(geoJsonService.getData(),
          function(d) {
 	   var accId = d.properties.accenumb;
 	   return accId in $scope.model.geoJsonService.traitHash;
@@ -337,7 +337,7 @@ function($scope, $state, $timeout, $location, geoJsonService) {
     if($scope.maxResultsCircle) {
       $scope.model.map.removeLayer($scope.maxResultsCircle);
     }
-    if(geoJsonService.data.length !== geoJsonService.params.maxRecs) {
+    if(geoJsonService.getData().length !== geoJsonService.params.maxRecs) {
       return;
     }
     var bounds = geoJsonService.getBoundsOfGeoJSONPoints();
@@ -372,7 +372,7 @@ function($scope, $state, $timeout, $location, geoJsonService) {
     if($scope.model.geoJson.updating) {
       return false;
     }
-    if(! geoJsonService.data.length) {
+    if(! geoJsonService.getData().length) {
       return false;
     }
     if(geoJsonService.params.traitExcludeUnchar) {
@@ -392,7 +392,7 @@ function($scope, $state, $timeout, $location, geoJsonService) {
      if($scope.model.geoJson.updating) {
       return false;
     }
-    if(! geoJsonService.data.length) {
+    if(! geoJsonService.getData().length) {
       return false;
     }
     if(geoJsonService.params.traitExcludeUnchar) {

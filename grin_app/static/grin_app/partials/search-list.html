@@ -1,11 +1,11 @@
-<span ng-if="model.geoJson.updating">
+<span ng-if="model.geoJsonService.updating">
   <img ng-src="{{model.STATIC_PATH}}grin_app/images/ajax-loader.gif"></img>
   Loading...
 </span>
 
 <div class="alert alert-warning"
      style="margin-top: 0.5rem"
-     ng-if="! model.geoJson.updating && ! model.geoJson.data.length">
+     ng-if="! model.geoJsonService.updating && ! model.geoJsonService.getData().length">
 
    <button type="button" class="close" data-dismiss="alert">
     <span aria-hidden="true">&times;</span>
@@ -16,13 +16,13 @@
 </div>
 
 <div class="alert alert-warning" style="margin-top: 0.5rem"
-     ng-if="! model.geoJson.updating && model.geoJson.data.length == model.geoJson.params.maxRecs">
+     ng-if="! model.geoJsonService.updating && model.geoJsonService.getData().length == model.geoJsonService.params.maxRecs">
   
   <button type="button" class="close" data-dismiss="alert">
     <span aria-hidden="true">&times;</span>
   </button>
   
-  <strong>Results: {{model.geoJson.data.length}}</strong>
+  <strong>Results: {{model.geoJsonService.getData().length}}</strong>
   Your max # of results are listed below, but may appear to be
   clustered at the center of the map. Try zooming the map in,
   change search parameters, or increase the max # of results.
@@ -30,19 +30,19 @@
 </div>
 
 <div style="margin-top: 0.5rem"
-     ng-if="! model.geoJson.updating && model.geoJson.data.length !== model.geoJson.params.maxRecs">
+     ng-if="! model.geoJsonService.updating && model.geoJsonService.getData().length !== model.geoJsonService.params.maxRecs">
   <strong>Results:
-    {{model.geoJson.data.length}}
+    {{model.geoJsonService.getData().length}}
   </strong>
 </div>
 
 <div style="margin-top: 0.5rem"
-     ng-if="! model.geoJson.updating && model.geoJson.data.length">
+     ng-if="! model.geoJsonService.updating && model.geoJsonService.getData().length">
   <table class="table table-striped" id="results-list">
     <tr>
       <th id="tour-accession-btn">accession</th>
-      <th id="tour-trait-btn" ng-if="model.geoJson.traitHash">
-	{{ model.geoJson.params.traitOverlay}}
+      <th id="tour-trait-btn" ng-if="model.geoJsonService.traitHash">
+	{{ model.geoJsonService.params.traitOverlay}}
       </th>
       <th>taxon</th>
       <th class="nowrap">crop name</th>
@@ -54,20 +54,20 @@
       <th>acq date</th>
       <th>elev&nbsp;(m.)</th>
     </tr>
-    <tr ng-repeat="rec in model.geoJson.data"
-	ng-class="{'hilite-row' : model.geoJson.selectedAccession == rec.properties.accenumb}">
+    <tr ng-repeat="rec in model.geoJsonService.getData()"
+	ng-class="{'hilite-row' : model.geoJsonService.selectedAccession == rec.properties.accenumb}">
       <td class="nowrap">
 	<button class="btn btn-xs btn-default accdetail-button"
 		ng-click="onAccessionDetail(rec.properties.accenumb)"
 		ng-bind-html="rec.properties.accenumb | highlight: model.searchHilite">
 	</button>
       </td>
-      <td ng-if="model.geoJson.traitHash">
-	<span ng-if="model.geoJson.traitHash[rec.properties.accenumb].length ===1">
-	  {{model.geoJson.traitHash[rec.properties.accenumb][0]}}
+      <td ng-if="model.geoJsonService.traitHash">
+	<span ng-if="model.geoJsonService.traitHash[rec.properties.accenumb].length ===1">
+	  {{model.geoJsonService.traitHash[rec.properties.accenumb][0]}}
 	</span>
-	<span ng-if="model.geoJson.traitHash[rec.properties.accenumb].length > 1">
-	  {{model.geoJson.traitHash[rec.properties.accenumb].join(', ')}}
+	<span ng-if="model.geoJsonService.traitHash[rec.properties.accenumb].length > 1">
+	  {{model.geoJsonService.traitHash[rec.properties.accenumb].join(', ')}}
 	</span>
       </td>
       <td class="nowrap">

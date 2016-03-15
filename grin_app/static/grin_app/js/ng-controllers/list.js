@@ -15,7 +15,7 @@ function($scope,
 	 geoJsonService) {
   
   $scope.model = {
-    geoJson: geoJsonService,
+    geoJsonService : geoJsonService,
     $location : $location,
     searchHilite: null,
     showNearbySearchButtons : false,
@@ -30,7 +30,7 @@ function($scope,
       updateNearbySearchButtons();
       /* if there is a single accessionId and have a search parameter,
 	 showAccessionDetail, show the accession detail modal dlg. */
-      if(geoJsonService.data.length === 1 &&
+      if(geoJsonService.getData().length === 1 &&
 	 'showAccessionDetail' in $location.search()) {
 	var accIds = geoJsonService.getAccessionIds();
 	$location.search('showAccessionDetail', null);
@@ -168,9 +168,9 @@ function($scope,
     $scope.model.showNearbySearchButtons = false;
     $scope.model.showNearbySearchText = null;
     if(! ('accessionIds' in geoJsonService.params)) { return; }
-    if(geoJsonService.data.length !== 1) { return; }
+    if(geoJsonService.getData().length !== 1) { return; }
     if(! geoJsonService.getAnyGeocodedAccession()) { return; };
-    var acc = geoJsonService.data[0];
+    var acc = geoJsonService.getData()[0];
     $scope.model.showNearbySearchButtons = true;
     $scope.model.showNearbySearchText = acc.properties.taxon;
   }

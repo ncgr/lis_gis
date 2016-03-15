@@ -115,8 +115,8 @@ function($scope, $state, $http, $location, $uibModal, geoJsonService) {
     var url = STATIC_PATH + '/grin_app/js/example-accession-ids.json';
     $http.get(url).then(function(resp) {
       // success callback
-      var ids = resp.data;
-      $scope.model.accessionIds = ids.join(',');
+      var exampleAccessionIds = resp.data;
+      $scope.model.accessionIds = exampleAccessionIds.join(',');
     }, function(resp){
       // error callback
       console.log(resp);
