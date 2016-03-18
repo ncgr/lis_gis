@@ -143,7 +143,7 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
         limit_geo_bounds : parseBool(that.params.limitToMapExtent),
 	geocoded_only : that.params.geocodedOnly,
         country : that.params.country,
-        accession_ids : that.params.accessionIds,
+        accession_ids : that.params.accessionIds, /* csv text */
 	accession_ids_inclusive : parseBool(that.params.accessionIdsInclusive),
 	trait_overlay : that.params.traitOverlay,
         limit: that.params.maxRecs,
@@ -164,7 +164,7 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
 	    url : API_PATH + '/evaluation_search',
 	    method : 'POST',
 	    data : {
-              accession_ids : that.getAccessionIds(),
+              accession_ids : that.getAccessionIds(), /* array, not csv */
 	      descriptor_name : that.params.traitOverlay,
 	    }
 	  }).then(
@@ -183,7 +183,8 @@ function($http, $rootScope, $location, $timeout, $q, $localStorage) {
 	    data : {
               taxon : that.params.taxonQuery,
 	      descriptor_name : that.params.traitOverlay,
-	      accession_ids : that.params.traitScale === 'local' ? that.getAccessionIds() : [],
+	      accession_ids : that.params.traitScale === 'local' ?
+		            that.getAccessionIds() : [], /* array, not ncsv */
 	      trait_scale : that.params.traitScale,
 	    }
 	  }).then(

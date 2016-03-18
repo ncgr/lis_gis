@@ -43,7 +43,7 @@ ORDER_BY_FRAG = '''
 LIMIT_FRAG = 'LIMIT %(limit)s'
 COUNTRY_REGEX = re.compile(r'[a-z]{3,3}', re.I)
 TAXON_FTS_BOOLEAN_REGEX = re.compile(r'^(\w+\s*[\||\&]\s*\w+)+$')
-
+CSV_REGEX = re.compile(r'\s*,\s*')
 logger = logging.getLogger(__name__)
 
 
@@ -429,17 +429,20 @@ def search(req):
     # when searching for a set of accessionIds, the result needs to
     # either get merged in addition to the SQL LIMIT results, or just
     # returned instead
-    if(params.get('accession_ids', None)):
-        if ',' in params['accession_ids']:
-            sql_params = {'accession_ids': params['accession_ids'].split(',')}
+    acc_ids_csv = params.get('accession_ids', None)
+    if(acc_ids_csv):
+        if ',' in acc_ids_csv:
+            clean_accession_ids = CSV_REGEX.sub(',', acc_ids_csv).split(',')
+            sql_params = { 'accession_ids': clean_accession_ids }
         else:
-            sql_params = {'accession_ids' : [params['accession_ids']]}
+            sql_params = {'accession_ids' : [acc_ids_csv] }
         where_sql = 'WHERE accenumb = ANY( %(accession_ids)s )'
         sql = 'SELECT %s FROM %s %s' % (
             cols_sql,
             ACCESSION_TAB,
             where_sql
         )
+        # logger.info(cursor.mogrify(sql, sql_params))
         cursor.execute(sql, sql_params)
         rows_with_requested_accessions = _dictfetchall(cursor)
         if params.get('accession_ids_inclusive', None):
@@ -456,7 +459,7 @@ def search(req):
             # simple replace with these results
             rows = rows_with_requested_accessions
     return _acc_search_response(rows)
-   
+
 
 def _acc_search_response(rows):
     geo_json = []
