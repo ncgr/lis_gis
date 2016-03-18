@@ -1,7 +1,9 @@
-/*
- * mapController
- */
 "use strict";
+/*
+  mapController
+  setup the leaflet map, and handle events from the menu buttons at
+  top of app page.
+ */
 
 app.controller('mapController',
 function($scope, $state, $timeout, $location, geoJsonService) {
@@ -29,6 +31,7 @@ function($scope, $state, $timeout, $location, geoJsonService) {
   }();
 
   $scope.model = {
+    showMenu : false,
     geoJson : geoJsonService,
     $location : $location,
     map : null,  // the leaflet map

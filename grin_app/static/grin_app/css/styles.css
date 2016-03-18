@@ -82,3 +82,12 @@ h3 a {
     color: #31160B; /* dark peanut skin color */
 }
 
+h3 {
+    display: inline;
+}
+
+.menu-btn-div {
+    position: absolute;
+    top: 0;
+    right: 0;
+}

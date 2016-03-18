@@ -1,57 +1,63 @@
-<!-- this div for development/testing only  -->
-<div ng-repeat="(k,v) in model.legumeGenera">
-  <span style="display: inline-block"
-	ng-style="{'background-color': v}">
-    {{v}}
-  </span>
-  {{k}}
+<div class="menu-btn-div">
+  <button id="menu-btn"
+	  class="btn btn-sm btn-default"
+	  style="margin-top: 2px; margin-right: 16px;"
+	  ng-click="model.showMenu = ! model.showMenu">
+    <span class="glyphicon glyphicon-menu-hamburger"></span>
+    Menu
+  </button>
 </div>
 
-<button id="reframe-btn"
-	type="submit" class="btn btn-xs btn-default"
-	ng-click="onZoomToAccessions()">
-  <span class="glyphicon glyphicon-eye-open"
-	aria-hidden="true"></span>
-  Reframe map to accessions
-</button>
+<div id="menu"
+     ng-if="model.showMenu">
 
-<button id="change-base-map-btn"
-	class="btn btn-xs btn-default"
-	ng-click="model.baseMapSelect = true; model.geoCoordsSelect = false; model.mapHeightSelect = false;">
-  <span class="glyphicon glyphicon-picture"></span>
-  Change base map
-</button>
+  <button id="reframe-btn"
+	  type="submit" class="btn btn-xs btn-default"
+	  ng-click="onZoomToAccessions()">
+    <span class="glyphicon glyphicon-eye-open"
+	  aria-hidden="true"></span>
+    Reframe map to accessions
+  </button>
 
-<button class="btn btn-xs btn-default"
-	id="enter-coords-btn"
-	ng-click="model.geoCoordsSelect = true; model.baseMapSelect = false; model.mapHeightSelect = false;">
-  <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>    
-  Go to geographic coordinates
-</button>
+  <button id="change-base-map-btn"
+	  class="btn btn-xs btn-default"
+	  ng-click="model.baseMapSelect = true; model.geoCoordsSelect = false; model.mapHeightSelect = false;">
+    <span class="glyphicon glyphicon-picture"></span>
+    Change base map
+  </button>
 
-<button id="geolocate-btn"
-	type="submit" class="btn btn-xs btn-default"
-	ng-click="onGeoLocate()">
-  <span class="glyphicon glyphicon-map-marker"
-	aria-hidden="true"></span>
-  Go to my location
-</button>
+  <button class="btn btn-xs btn-default"
+	  id="enter-coords-btn"
+	  ng-click="model.geoCoordsSelect = true; model.baseMapSelect = false; model.mapHeightSelect = false;">
+    <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>    
+    Go to geographic coordinates
+  </button>
 
-<button id="map-height-btn"
-	type="submit" class="btn btn-xs btn-default"
-	ng-click="model.mapHeightSelect = true; model.baseMapSelect = false; model.geoCoordsSelect = false;">
-  <span class="glyphicon glyphicon-resize-vertical"
-	aria-hidden="true"></span>
-  Map height
-</button>
+  <button id="geolocate-btn"
+	  type="submit" class="btn btn-xs btn-default"
+	  ng-click="onGeoLocate()">
+    <span class="glyphicon glyphicon-map-marker"
+	  aria-hidden="true"></span>
+    Go to my location
+  </button>
 
-<button id="tour-btn"
-	type="submit" class="btn btn-xs btn-default"
-	ng-click="onTour()">
-  <span class="glyphicon glyphicon-question-sign"
-	aria-hidden="true"></span>
-  View Tour/Help
-</button>
+  <button id="map-height-btn"
+	  type="submit" class="btn btn-xs btn-default"
+	  ng-click="model.mapHeightSelect = true; model.baseMapSelect = false; model.geoCoordsSelect = false;">
+    <span class="glyphicon glyphicon-resize-vertical"
+	  aria-hidden="true"></span>
+    Map height
+  </button>
+
+  <button id="tour-btn"
+	  type="submit" class="btn btn-xs btn-default"
+	  ng-click="onTour()">
+    <span class="glyphicon glyphicon-question-sign"
+	  aria-hidden="true"></span>
+    View Tour/Help
+  </button>
+
+</div>
 
 <div class="panel panel-info"
      ng-if="model.mapHeightSelect"  style="margin-top: 0.5rem;">
