@@ -3,8 +3,7 @@
   Loading...
 </span>
 
-<div class="alert alert-warning"
-     style="margin-top: 0.5rem"
+<div class="alert alert-warning section-spc"
      ng-if="! model.geoJsonService.updating && ! model.geoJsonService.getData().length">
 
    <button type="button" class="close" data-dismiss="alert">
@@ -15,7 +14,7 @@
    
 </div>
 
-<div class="alert alert-warning" style="margin-top: 0.5rem"
+<div class="alert alert-warning section-spc"
      ng-if="! model.geoJsonService.updating && model.geoJsonService.getData().length == model.geoJsonService.params.maxRecs">
   
   <button type="button" class="close" data-dismiss="alert">
@@ -29,15 +28,15 @@
 
 </div>
 
-<div style="margin-top: 0.5rem"
-     ng-if="! model.geoJsonService.updating && model.geoJsonService.getData().length !== model.geoJsonService.params.maxRecs">
+<div ng-if="! model.geoJsonService.updating && model.geoJsonService.getData().length !== model.geoJsonService.params.maxRecs"
+     class="section-spc">
   <strong>Results:
     {{model.geoJsonService.getData().length}}
   </strong>
 </div>
 
-<div style="margin-top: 0.5rem"
-     ng-if="! model.geoJsonService.updating && model.geoJsonService.getData().length">
+<div ng-if="! model.geoJsonService.updating && model.geoJsonService.getData().length"
+     class="section-spc">
   <table class="table table-striped" id="results-list">
     <tr>
       <th id="tour-accession-btn">accession</th>
@@ -164,9 +163,8 @@
            {{model.acc.properties.species}} at {{model.BRANDING.site_abbrev}}
     </button>
 
-    <table class="table table-striped"
-	   ng-if="model.acc"
-	   style="margin-top: 0.5rem;">
+    <table class="table table-striped section-spc"
+	   ng-if="model.acc">
       <caption>Accession Details</caption>
       <tr ng-if="model.acc.properties.taxon">
 	<td>taxon</td>
@@ -284,9 +282,8 @@
 
     <a name="evaluation-detail"></a>
     
-    <table class="table table-striped"
-	   ng-if="model.evaluation.length"
-	   style="margin-top: 0.5rem;">
+    <table class="table table-striped section-spc"
+	   ng-if="model.evaluation.length">
       <caption>Trait/Evaluation Data for
 	<span>
 	    {{model.evaluation[0].accession_prefix}}
