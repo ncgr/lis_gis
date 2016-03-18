@@ -1,5 +1,5 @@
-<div id="tour-start" style="margin-top: 0.5rem;"></div>
-
+<div id="tour-start" class="section-spc"></div>
+  
 <button id="search-btn"
 	type="button"
 	class="btn btn-sm btn-default"
@@ -65,8 +65,7 @@
 </span>
 </div>
 
-<div class="panel panel-info"
-     style="margin-top: 0.5rem;"
+<div class="panel panel-info section-spc" 
      ng-if="model.searchOptions">
   <div class="panel-heading">
 
@@ -83,7 +82,7 @@
       {{model.alert}}
     </div>
 
-    <table class="table" style="margin-top: 0.5rem;">
+    <table class="table section-spc">
       <tr>
 	<td>
 	  <span ng-if="model.taxonQuery"
@@ -126,7 +125,7 @@
       </tr>
       
       <tr>
-	<td style="white-space: nowrap;">
+	<td class="nowrap">
 	  <span ng-if="model.traitOverlay"
 		class="glyphicon glyphicon-asterisk" aria-hidden="true"></span>
 	  Overlay Characterization and Evaluation

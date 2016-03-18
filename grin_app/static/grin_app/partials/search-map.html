@@ -7,24 +7,30 @@
   </button>
 </div>
 
-<div id="menu" ng-if="model.showMenu">
+<div id="menu" ng-if="model.showMenu" class="menu-spc">
   
   <button id="reframe-btn"
-	  type="submit" class="btn btn-xs btn-default"
+	  type="submit" class="btn btn-sm btn-default"
 	  ng-click="onZoomToAccessions()">
     <span class="glyphicon glyphicon-eye-open"
 	  aria-hidden="true"></span>
     Reframe map to accessions
   </button>
 
+  <button id="change-base-map-btn" class="btn btn-sm btn-default"
+	  ng-click="">
+    <span class="glyphicon glyphicon-level-up"></span>
+    Add my data
+  </button>
+  
   <button id="change-base-map-btn"
-	  class="btn btn-xs btn-default"
+	  class="btn btn-sm btn-default"
 	  ng-click="model.baseMapSelect = true; model.geoCoordsSelect = false; model.mapHeightSelect = false;">
     <span class="glyphicon glyphicon-picture"></span>
-    Change base map
+     Base map
   </button>
 
-  <button class="btn btn-xs btn-default"
+  <button class="btn btn-sm btn-default"
 	  id="enter-coords-btn"
 	  ng-click="model.geoCoordsSelect = true; model.baseMapSelect = false; model.mapHeightSelect = false;">
     <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>    
@@ -32,7 +38,7 @@
   </button>
 
   <button id="geolocate-btn"
-	  type="submit" class="btn btn-xs btn-default"
+	  type="submit" class="btn btn-sm btn-default"
 	  ng-click="onGeoLocate()">
     <span class="glyphicon glyphicon-map-marker"
 	  aria-hidden="true"></span>
@@ -40,7 +46,7 @@
   </button>
 
   <button id="map-height-btn"
-	  type="submit" class="btn btn-xs btn-default"
+	  type="submit" class="btn btn-sm btn-default"
 	  ng-click="model.mapHeightSelect = true; model.baseMapSelect = false; model.geoCoordsSelect = false;">
     <span class="glyphicon glyphicon-resize-vertical"
 	  aria-hidden="true"></span>
@@ -48,7 +54,7 @@
   </button>
 
   <button id="tour-btn"
-	  type="submit" class="btn btn-xs btn-default"
+	  type="submit" class="btn btn-sm btn-default"
 	  ng-click="onTour()">
     <span class="glyphicon glyphicon-question-sign"
 	  aria-hidden="true"></span>
