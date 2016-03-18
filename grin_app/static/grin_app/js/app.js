@@ -33,33 +33,51 @@ app.config(function($httpProvider, $stateProvider, $sceProvider) {
       }
     });
   
+  var LOST_CONX = 'Lost connection to web app. Please check your network \
+                   connection, or try again later.';
+  
   function httpErrorInterceptor($q, $rootScope) {
+
+    $rootScope.errors = [];
+    
     function requestError(rejection) {
+      // callback for request error
       console.log('requestError:');
       console.log(rejection);
-      return($q.reject(rejection));  // pass-through the rejection.
+      return($q.reject(rejection)); // pass-through the rejection.
     }
+
     function responseError(response) {
+      // callback for response error
       console.log('responseError:')
       console.log(response);
-      if(! $rootScope.errors) {
-	$rootScope.errors = [];
+      
+      var msg = null;
+      switch(response.status) {
+      case 0:
+	msg = LOST_CONX;
+	break;
+      case -1:
+	msg = LOST_CONX;
+	break;
+      case 404:
+	// allow 404s in the case of an organism/ link out; we check
+	// to see if the link exists in LIS before enabling the
+	// organism button.
+	var url = response.config.url;
+	if(url.indexOf('organism/') === -1) {
+	  msg = response.status + ' '+ response.statusText + ' : '+
+	    response.config.url;
+	}
+	break;
+      default:
+	msg = response.status + ' '+ response.statusText + ' : '+
+	  response.config.url;
+	break;
       }
-      if(response.status === 0 || response.status === -1) {
-	var msg = 'Lost connection to web app. Please check your network \
-           connection, or try again later.';
+      if(msg !== null) {
 	$rootScope.errors.push(msg);
-	console.log(msg);
       }
-      else if(response.status === 500) {
-	var msg = [response.status + ' '+
-		   response.statusText + ' '+
-		   response.config.url + ' ',
-		   response.data];
-	$rootScope.errors.push(msg);
-	console.log(msg);
-      }
-      console.log($rootScope.errors);
       return($q.reject(response)); // pass-through the response
     }
     return({
