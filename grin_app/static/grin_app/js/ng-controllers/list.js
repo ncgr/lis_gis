@@ -49,9 +49,10 @@ function($scope,
   };
 
   $scope.onAccessionDetail = function(accId) {
+    var template = STATIC_PATH +'grin_app/partials/accession-detail-modal.html';
     var modalInstance = $uibModal.open({
       animation: true,
-      templateUrl: 'accession-modal-content.html',
+      templateUrl: template,
       controller: 'accessionDetailController',
       size: 'lg',
       resolve: {

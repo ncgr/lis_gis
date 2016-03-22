@@ -6,7 +6,7 @@
  */
 
 app.controller('mapController',
-function($scope, $state, $timeout, $location, geoJsonService) {
+function($scope, $state, $timeout, $location, $uibModal, geoJsonService) {
   
   var DEFAULT_BASEMAP = geoJsonService.params.baseMap ||
                         Cookies.get('baseMap') ||
@@ -309,6 +309,27 @@ function($scope, $state, $timeout, $location, geoJsonService) {
     app.tour();
   };
 
+  $scope.onUserData = function() {
+    var modal = $uibModal.open({
+      animation: true,
+      templateUrl: STATIC_PATH + 'grin_app/partials/user-data-modal.html',
+      controller: 'userDataController',
+      size: 'lg',
+      resolve: {
+	model : {}
+      }
+    });
+    modal.result.then(function (result) {
+      console.log(result);
+      if(! result) { return; } /* cancelled */
+      // $scope.model.accessionIds = result.accessionIds;
+      // $scope.model.accessionIdsColor = result.accessionIdsColor;
+      // $scope.model.accessionIdsInclusive = result.accessionIdsInclusive;
+    }, function () {
+      // modal otherwise dismissed callback (ignore result) e.g. backdrop click
+    });
+  }
+  
   function get2CharAbbrev(feature) {
     var species = feature.properties.taxon.split(' ')[1];
     return species.substring(0,2);
@@ -434,7 +455,8 @@ function($scope, $state, $timeout, $location, geoJsonService) {
       });
     }
   }
-
-  $scope.init();
   
+  $scope.init();
+
+  // $scope.onUserData();
 });

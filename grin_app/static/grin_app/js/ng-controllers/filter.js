@@ -135,9 +135,11 @@ function($scope, $state, $http, $location, $uibModal, geoJsonService) {
   };
 
   $scope.onTraitOverlayOptions = function() {
+    var template = STATIC_PATH +
+	'grin_app/partials/trait-overlay-options-modal.html';
     var modal = $uibModal.open({
       animation: true,
-      templateUrl: 'trait-overlay-options.html',
+      templateUrl: template,
       controller: 'traitOverlayOptionsController',
       size: 'lg',
       resolve: {
@@ -170,9 +172,11 @@ function($scope, $state, $http, $location, $uibModal, geoJsonService) {
   };
   
   $scope.onAccessionIdOptions = function() {
+    var template = STATIC_PATH +
+	'grin_app/partials/accession-search-options-modal.html';
     var modal = $uibModal.open({
       animation: true,
-      templateUrl: 'accession-search-options.html',
+      templateUrl: template,
       controller: 'accessionSearchOptionsController',
       size: 'lg',
       resolve: {

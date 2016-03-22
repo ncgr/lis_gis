@@ -3,7 +3,7 @@
 app.service('geoJsonService',
 function($http, $rootScope, $location, $timeout, $q, $localStorage) {
   
-  var that = this; /* http://javascript.crockford.com/private.html */
+  var that = this;
 
   /* constants */
   var DEFAULT_CENTER = { 'lat' : 35.87, 'lng' : -109.47 };
