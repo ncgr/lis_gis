@@ -122,7 +122,7 @@ def test_evaluation_metadata():
 
 def test_string2num():
     from grin_app.views import _string2num as _fn
-    assert isinstance(_fn('3.14'), 3.14)
-    assert isinstance(_fn(10), 10)
-    assert isinstance(_fn('foo'), 'foo')
+    assert isinstance(_fn('3.14'), type(3.14))
+    assert isinstance(_fn(10), type(10))
+    assert isinstance(_fn('foo'), type('foo'))
     pass
