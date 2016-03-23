@@ -26,7 +26,7 @@ SECRET_KEY = open(os.path.join(os.path.dirname(__file__),
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
-if socket.gethostname()[0:4] == 'lis-':
+if 'lis-' in socket.gethostname():
     ALLOWED_HOSTS = [socket.gethostname(), 'localhost']
 else:
     ALLOWED_HOSTS = [socket.gethostname(), 'legumeinfo.org', 'legumeinfo.com',
@@ -139,10 +139,10 @@ LOGGING = {
 }
 
 BRANDING = {
-    'home_url' : '/',
-    'logo_url' : STATIC_URL + 'grin_app/images/legumeinfo_logo.png',
-    'site_heading' : 'Legume Information System',
-    'site_subheading' : 'Germplasm Map',
-    'site_abbrev' : 'LIS',
+    'home_url': '/',
+    'logo_url': STATIC_URL + 'grin_app/images/legumeinfo_logo.png',
+    'site_heading': 'Legume Information System',
+    'site_subheading': 'Germplasm Map',
+    'site_abbrev': 'LIS',
 }
 

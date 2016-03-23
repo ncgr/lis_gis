@@ -1,14 +1,12 @@
-'''Create the database schema so view_tests.py can perform some actual
+"""
+Create the database schema so view_tests.py can perform some actual
 queries. This bypasses completely the Django ORM... because for the
 most part the ORM was not used for this app.
+"""
 
-'''
-
-import logging
-import nose
+# import logging
 import subprocess
 
-from django_nose.tools import assert_ok
 from django_nose.runner import settings
 
 SCHEMA = 'scripts/schema.sql'
@@ -24,7 +22,7 @@ def setup():
 
 
 def teardown():
-    '''Nose will drop the test db on it's own.'''
+    # Nose will drop the test db on it's own.
     pass
 
 
@@ -50,6 +48,7 @@ def _load_test_data():
         '-f', DATA
     ]
     subprocess.check_call(args)
+
 
 def _create_postgis():
     for cmd in ('CREATE EXTENSION postgis',

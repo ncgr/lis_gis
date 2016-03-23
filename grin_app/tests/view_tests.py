@@ -1,20 +1,19 @@
 import logging
-import nose
 import simplejson as json
 
 from lis_germplasm import settings
 from django_nose.tools import assert_ok
-from django.test import TestCase
 from django.test import Client
 
 logger = logging.getLogger(__name__)
 
 c = Client()
 
+
 def test_index():
-    '''Fetch the index.html and make sure the Django templating is working
+    """Fetch the index.html and make sure the Django templating is working
     (see branding section of settings.py)
-    '''
+    """
     res = c.get('/')
     assert_ok(res)
     assert len(res.content) > 0
@@ -55,7 +54,7 @@ def test_countries():
 def test_accession_detail():
     # this accession number exists in test.sql (or should)
     accession = 'Ames 22714'
-    res = c.get('/accession_detail', { 'accenumb' : accession })
+    res = c.get('/accession_detail', {'accenumb': accession})
     assert_ok(res)
     assert len(res.content) > 0
     results = json.loads(res.content)
@@ -65,10 +64,10 @@ def test_accession_detail():
 
 
 def test_evaluation_descr_names():
-    ''' it's OK if results is empty json, because the test.sql is
+    """it's OK if results is empty json, because the test.sql is
     necesarily incomplete, and the query involves a join between
     accessions and trait observations.
-    '''
+    """
     res = c.get('/evaluation_descr_names', {'taxon' : 'Arachis'})
     assert_ok(res)
     assert len(res.content) > 0
@@ -104,13 +103,15 @@ def test_evaluation_search():
 
 
 def test_evaluation_metadata():
-    '''this trait evaluation data comes from test.sql it's OK if results
+    """this trait evaluation data comes from test.sql it's OK if results
     is empty json, because the test.sql is necesarily incomplete, and
     the query involves a join between accessions and trait
     observations.
-    '''
+    """
     query = '''
-    {"taxon":"Vigna","descriptor_name":"PODPLACE","accession_ids":[],"trait_scale":"global"}
+    {"taxon":"Vigna",
+     "descriptor_name":"PODPLACE",
+     "accession_ids":[],"trait_scale":"global"}
     '''
     res = c.post('/evaluation_metadata', 
                  content_type='application/json',
@@ -121,8 +122,7 @@ def test_evaluation_metadata():
 
 def test_string2num():
     from grin_app.views import _string2num as _fn
-    assert type(_fn('3.14')) == type(3.14)
-    assert type(_fn(10) == type(10))
-    assert type(_fn('foo') == type('foo'))
+    assert isinstance(_fn('3.14'), 3.14)
+    assert isinstance(_fn(10), 10)
+    assert isinstance(_fn('foo'), 'foo')
     pass
-

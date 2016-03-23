@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 
-'''
+"""
 Update the FTS index for the taxon field. Should be done after all
 genera are loaded/updated.
-'''
+"""
 import psycopg2
 
 PSQL_DB = 'dbname=drupal user=www'
 DATE_FMT = '%Y%m%d'
 PNT_FMT = "ST_GeographyFromText('SRID=4326;POINT(%(longdec)s %(latdec)s)')"
+
 
 def main():
     print('updating full text search index...')
@@ -22,4 +23,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

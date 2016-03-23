@@ -1,20 +1,16 @@
 import logging
 import simplejson as json
-import decimal
 import re
 from decimal import Decimal
 from django.conf import settings
 from django.db import connection
 from django.shortcuts import render
 from django.http import HttpResponse
-from django.http import HttpResponseNotFound
-from django.http import HttpResponseServerError
 from django.views.decorators.csrf import ensure_csrf_cookie
-from django.core.serializers.json import DjangoJSONEncoder
 
-SRID = 4326  # SRID 4326 is WGS 84 long lat unit=degrees, also the
-             # specification of the geoometric_coord field in the
-             # grin_accessions table.
+# SRID 4326 is WGS 84 long lat unit=degrees, also the specification of the
+# geometric_coord field in the grin_accessions table.
+SRID = 4326
 DEFAULT_LIMIT = 200
 TWO_PLACES = Decimal('0.01')
 ACCESSION_TAB = 'lis_germplasm.grin_accession'
@@ -25,9 +21,9 @@ ACC_SELECT_COLS = (
 # Brewer nominal category colors from chroma.js set1,2,3 concatenated:
 NOMINAL_COLORS = [
     "#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#ffff33",
-    "#a65628", "#f781bf", "#999999", "#66c2a5", "#fc8d62", "#8da0cb", 
-    "#e78ac3", "#a6d854", "#ffd92f", "#e5c494", "#b3b3b3", "#8dd3c7", 
-    "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69", 
+    "#a65628", "#f781bf", "#999999", "#66c2a5", "#fc8d62", "#8da0cb",
+    "#e78ac3", "#a6d854", "#ffd92f", "#e5c494", "#b3b3b3", "#8dd3c7",
+    "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69",
     "#fccde5", "#d9d9d9", "#bc80bd", "#ccebc5", "#ffed6f"
 ]
 NOMINAL_THRESHOLD = 10
@@ -48,25 +44,25 @@ logger = logging.getLogger(__name__)
 
 
 GRIN_ACC_WHERE_FRAGS = {
-    'fts' : {
-        'include' : lambda p: TAXON_FTS_BOOLEAN_REGEX.match(p.get('taxon_query', '')),
-        'sql' : "taxon_fts @@ to_tsquery('english', %(taxon_query)s)",
+    'fts': {
+        'include': lambda p: TAXON_FTS_BOOLEAN_REGEX.match(p.get('taxon_query', '')),
+        'sql': "taxon_fts @@ to_tsquery('english', %(taxon_query)s)",
     },
-    'fts_simple' : {
-        'include' : lambda p: p.get('taxon_query', None) and not GRIN_ACC_WHERE_FRAGS['fts']['include'](p),
-        'sql' : "taxon_fts @@ plainto_tsquery('english', %(taxon_query)s)",
+    'fts_simple': {
+        'include': lambda p: p.get('taxon_query', None) and not GRIN_ACC_WHERE_FRAGS['fts']['include'](p),
+        'sql': "taxon_fts @@ plainto_tsquery('english', %(taxon_query)s)",
     },
-    'country' : {
-        'include' : lambda p: p.get('country', None),
-        'sql' : 'origcty = %(country)s',
+    'country': {
+        'include': lambda p: p.get('country', None),
+        'sql': 'origcty = %(country)s',
     },
-    'geocoded_only' : {
-        'include' : lambda p: p.get('limit_geo_bounds', None) in (True, 'true') or p.get('geocoded_only', None) in (True, 'true'),
-        'sql' : 'latdec <> 0 AND longdec <> 0',
+    'geocoded_only': {
+        'include': lambda p: p.get('limit_geo_bounds', None) in (True, 'true') or p.get('geocoded_only', None) in (True, 'true'),
+        'sql': 'latdec <> 0 AND longdec <> 0',
     },
-    'limit_geo_bounds' : {
-        'include' : lambda p: p.get('limit_geo_bounds', None) in (True, 'true'),
-        'sql' : '''
+    'limit_geo_bounds': {
+        'include': lambda p: p.get('limit_geo_bounds', None) in (True, 'true'),
+        'sql': '''
            latdec <> 0 AND longdec <> 0 AND
            ST_Contains(
             ST_MakeEnvelope(%(minx)s, %(miny)s, %(maxx)s, %(maxy)s, %(srid)s),
@@ -76,39 +72,38 @@ GRIN_ACC_WHERE_FRAGS = {
 }
 
 GRIN_EVAL_WHERE_FRAGS = {
-    'descriptor_name' : {
-        'include' : lambda p: p.get('descriptor_name', None),
-        'sql' : 'descriptor_name = %(descriptor_name)s',
+    'accession prefix': {
+        'include': lambda p: p.get('prefix', None),
+        'sql': 'accession_prefix = %(prefix)s',
     },
-    'accession prefix' : {
-        'include' : lambda p: p.get('prefix', None),
-        'sql' : 'accession_prefix = %(prefix)s',
+    'descriptor_name': {
+        'include': lambda p: p.get('descriptor_name', None),
+        'sql': 'descriptor_name = %(descriptor_name)s',
     },
-    'accession number' : {
-        'include' : lambda p: p.get('acc_num', None),
-        'sql' : 'accession_number = %(acc_num)s',
+    'accession number': {
+        'include': lambda p: p.get('acc_num', None),
+        'sql': 'accession_number = %(acc_num)s',
     },
-    'accession surfix' : {
-        'include' : lambda p: p.get('suffix', None),
-        'sql' : 'accession_surfix = %(suffix)s',
+    'accession surfix': {
+        'include': lambda p: p.get('suffix', None),
+        'sql': 'accession_surfix = %(suffix)s',
     },
 }
 
 
 @ensure_csrf_cookie
 def index(req):
-    '''Render the index template, which will boot up angular-js.
-    '''
+    """Render the index template, which will boot up angular-js."""
     return render(req, 'grin_app/index.html', context=settings.BRANDING)
 
 
 @ensure_csrf_cookie
 def evaluation_descr_names(req):
-    '''Return JSON for all distinct trait descriptor names matching the
+    """Return JSON for all distinct trait descriptor names matching the
     given taxon. (the trait overlay choice is only available after a
     taxon is selected). Join on the grin_accession table to use the
     FTS index on taxon there.
-    '''
+    """
     assert req.method == 'GET', 'GET request method required'
     params = req.GET.dict()
     assert 'taxon' in params, 'missing taxon param'
@@ -130,7 +125,7 @@ def evaluation_descr_names(req):
     %s
     ORDER BY descriptor_name
     ''' % where_sql
-    sql_params = {'taxon_query' : params['taxon']}
+    sql_params = {'taxon_query': params['taxon']}
     cursor = connection.cursor()
     # logger.info(cursor.mogrify(sql, sql_params))
     cursor.execute(sql, sql_params)
@@ -142,11 +137,11 @@ def evaluation_descr_names(req):
 
 @ensure_csrf_cookie
 def evaluation_search(req):
-    '''Return JSON array of observation_value for all trait records
+    """Return JSON array of observation_value for all trait records
     matching a set of accession ids, and matching the descriptor_name
     field. Used for creating map markers or map overlays with specific
     accesions' trait data.
-    '''
+    """
     assert req.method == 'POST', 'POST request method required'
     params = json.loads(req.body)
     assert 'accession_ids' in params, 'missing accession_ids param'
@@ -158,8 +153,8 @@ def evaluation_search(req):
      AND accenumb IN %(accession_ids)s
     '''
     sql_params = {
-        'descriptor_name' : params['descriptor_name'],
-        'accession_ids' : tuple(params['accession_ids'])
+        'descriptor_name': params['descriptor_name'],
+        'accession_ids': tuple(params['accession_ids'])
     }
     cursor = connection.cursor()
     # logger.info(cursor.mogrify(sql, sql_params))
@@ -176,11 +171,7 @@ def evaluation_search(req):
 
 
 def _string2num(s):
-    '''
-    Convert a string to int or float if possible
-    '''
-    intval = None
-    floatval = None
+    """Convert a string to int or float if possible"""
     try:
         intval = int(s)
         return intval
@@ -196,11 +187,10 @@ def _string2num(s):
 
 @ensure_csrf_cookie
 def evaluation_metadata(req):
-    '''Return JSON with trait metadata for the given taxon and trait
+    """Return JSON with trait metadata for the given taxon and trait
     descriptor_name. This enables the client to display a legend, and
     colorize accessions by either numeric or category traits.
-
-    '''
+    """
     assert req.method == 'POST', 'POST request method required'
     params = json.loads(req.body)
     assert 'taxon' in params, 'missing taxon param'
@@ -208,12 +198,13 @@ def evaluation_metadata(req):
     assert 'trait_scale' in params, 'missing trait_scale param'
     assert 'accession_ids' in params, 'missing accession_ids param'
     assert params['taxon'], 'empty taxon param'
+    result = {}
     cursor = connection.cursor()
     # full text search on the taxon field in accessions table, also
     # joining on taxon to get relevant evaluation metadata.
     sql_params = {
-        'taxon_query' : params['taxon'],
-        'descriptor_name' : params['descriptor_name']
+        'taxon_query': params['taxon'],
+        'descriptor_name': params['descriptor_name']
     }
     where_clauses = [
         val['sql'] for
@@ -235,7 +226,7 @@ def evaluation_metadata(req):
     # logger.info(cursor.mogrify(sql, sql_params))
     cursor.execute(sql, sql_params)
     trait_metadata = _dictfetchall(cursor)
-    if(len(trait_metadata) == 0):
+    if len(trait_metadata) == 0:
         # early out if there were no matching metadata records
         return HttpResponse({}, content_type='application/json')
 
@@ -251,28 +242,28 @@ def evaluation_metadata(req):
             AND descriptor_name = %(descriptor_name)s
             '''
             sql_params = {
-                'descriptor_name' : params['descriptor_name'],
-                'accession_ids' : tuple(params['accession_ids'])
+                'descriptor_name': params['descriptor_name'],
+                'accession_ids': tuple(params['accession_ids'])
             }
             # logger.info(cursor.mogrify(sql, sql_params))
             cursor.execute(sql, sql_params)
-            obs_values = [ _string2num(row[0]) for row in cursor.fetchall() ]
+            obs_values = [_string2num(row[0]) for row in cursor.fetchall() ]
             result = {
-                'taxon_query' : params['taxon'],
-                'descriptor_name' : params['descriptor_name'],
-                'trait_type' : 'numeric',
-                'min' : min(obs_values) if obs_values else 0,
-                'max' : max(obs_values) if obs_values else 0,
+                'taxon_query': params['taxon'],
+                'descriptor_name': params['descriptor_name'],
+                'trait_type': 'numeric',
+                'min': min(obs_values) if obs_values else 0,
+                'max': max(obs_values) if obs_values else 0,
             }
         elif params['trait_scale'] == 'global':
             mins = [rec['obs_min'] for rec in trait_metadata]
             maxes = [rec['obs_max'] for rec in trait_metadata]
             result = {
-                'taxon_query' : params['taxon'],
-                'descriptor_name' : params['descriptor_name'],
-                'trait_type' : 'numeric',
-                'min' : reduce(lambda x, y: x + y, mins) / len(mins),
-                'max' : reduce(lambda x, y: x + y, maxes) / len(maxes),
+                'taxon_query': params['taxon'],
+                'descriptor_name': params['descriptor_name'],
+                'trait_type': 'numeric',
+                'min': reduce(lambda x, y: x + y, mins) / len(mins),
+                'max': reduce(lambda x, y: x + y, maxes) / len(maxes),
             }
     elif obs_type == 'nominal':
         vals = set()
@@ -286,11 +277,11 @@ def evaluation_metadata(req):
             else:
                 colors[val] = DEFAULT_COLOR
         result = {
-            'taxon_query' : params['taxon'],
-            'descriptor_name' : params['descriptor_name'],
-            'trait_type' : 'nominal',
-            'obs_nominal_values' : sorted(vals),
-            'colors' : colors,
+            'taxon_query': params['taxon'],
+            'descriptor_name': params['descriptor_name'],
+            'trait_type': 'nominal',
+            'obs_nominal_values': sorted(vals),
+            'colors': colors,
         }
     response = HttpResponse(json.dumps(result, use_decimal=True),
                             content_type='application/json')
@@ -299,8 +290,8 @@ def evaluation_metadata(req):
 
 @ensure_csrf_cookie
 def evaluation_detail(req):
-    '''Return JSON for all evalation/trait records matching this accession id
-    '''
+    """Return JSON for all evalation/trait records matching this accession id
+    """
     assert req.method == 'GET', 'GET request method required'
     params = req.GET.dict()
     assert 'accenumb' in params, 'missing accenumb param'
@@ -309,9 +300,9 @@ def evaluation_detail(req):
     suffix = ' '.join(rest)
     cursor = connection.cursor()
     sql_params = {
-        'prefix' : prefix,
-        'acc_num' : acc_num,
-        'suffix' : suffix,
+        'prefix': prefix,
+        'acc_num': acc_num,
+        'suffix': suffix,
     }
     where_clauses = [
         val['sql'] for key, val in GRIN_EVAL_WHERE_FRAGS.items()
@@ -349,11 +340,11 @@ def evaluation_detail(req):
     result = json.dumps(rows, use_decimal=True)
     response = HttpResponse(result, content_type='application/json')
     return response
-    
+
 
 @ensure_csrf_cookie
 def accession_detail(req):
-    '''Return JSON for all columns for a accession id.'''
+    """Return JSON for all columns for a accession id."""
     assert req.method == 'GET', 'GET request method required'
     params = req.GET.dict()
     assert 'accenumb' in params, 'missing accenumb param'
@@ -370,7 +361,7 @@ def accession_detail(req):
 
 @ensure_csrf_cookie
 def countries(req):
-    '''Return a json array of countries for search filtering ui.'''
+    """Return a json array of countries for search filtering ui."""
     cursor = connection.cursor()
     sql = '''
     SELECT DISTINCT origcty FROM lis_germplasm.grin_accession ORDER by origcty
@@ -378,16 +369,16 @@ def countries(req):
     cursor.execute(sql)
     # flatten into array, and filter out bogus records like '' or
     # 3 number codes.
-    countries = [row[0] for row in cursor.fetchall()
-                 if row[0] and COUNTRY_REGEX.match(row[0])]
-    result = json.dumps(countries)
-    response = HttpResponse(result, content_type='application/json')
+    result = [row[0] for row in cursor.fetchall()
+              if row[0] and COUNTRY_REGEX.match(row[0])]
+    response = HttpResponse(json.dumps(result),
+                            content_type='application/json')
     return response
 
 
 @ensure_csrf_cookie
 def search(req):
-    '''Search by map bounds and return GeoJSON results.'''
+    """Search by map bounds and return GeoJSON results."""
     assert req.method == 'POST', 'POST request method required'
     params = json.loads(req.body)
     # logger.info(params)
@@ -413,14 +404,14 @@ def search(req):
     )
     cursor = connection.cursor()
     sql_params = {
-        'taxon_query' : params.get('taxon_query', None),
-        'country' : params.get('country', None),
-        'minx' : float(params.get('sw_lng', 0)),
-        'miny' : float(params.get('sw_lat', 0)),
-        'maxx' : float(params.get('ne_lng', 0)),
-        'maxy' : float(params.get('ne_lat', 0)),
+        'taxon_query': params.get('taxon_query', None),
+        'country': params.get('country', None),
+        'minx': float(params.get('sw_lng', 0)),
+        'miny': float(params.get('sw_lat', 0)),
+        'maxx': float(params.get('ne_lng', 0)),
+        'maxy': float(params.get('ne_lat', 0)),
         'limit': params['limit'],
-        'srid' : SRID,
+        'srid': SRID,
     }
     # logger.info(cursor.mogrify(sql, sql_params))
     cursor.execute(sql, sql_params)
@@ -430,12 +421,12 @@ def search(req):
     # either get merged in addition to the SQL LIMIT results, or just
     # returned instead
     acc_ids_csv = params.get('accession_ids', None)
-    if(acc_ids_csv):
+    if acc_ids_csv:
         if ',' in acc_ids_csv:
             clean_accession_ids = CSV_REGEX.sub(',', acc_ids_csv).split(',')
-            sql_params = { 'accession_ids': clean_accession_ids }
+            sql_params = {'accession_ids': clean_accession_ids}
         else:
-            sql_params = {'accession_ids' : [acc_ids_csv] }
+            sql_params = {'accession_ids': [acc_ids_csv] }
         where_sql = 'WHERE accenumb = ANY( %(accession_ids)s )'
         sql = 'SELECT %s FROM %s %s' % (
             cols_sql,
@@ -448,11 +439,13 @@ def search(req):
         if params.get('accession_ids_inclusive', None):
             # merge results with previous set
             uniq = set()
+
             def is_unique(r):
                 key = r.get('accenumb', None)
                 if key in uniq: return False
                 uniq.add(key)
                 return True
+
             rows = [ row for row in rows_with_requested_accessions + rows
                      if is_unique(row) ]
         else:
@@ -486,12 +479,12 @@ def _acc_search_response(rows):
             del rec['latdec']  # have been translated into geojson coords, 
             del rec['longdec'] # so these keys are extraneous now.
         geo_json_frag = {
-            'type' : 'Feature',
-            'geometry' : {
-                'type' : 'Point',
-                'coordinates' : coords
+            'type': 'Feature',
+            'geometry': {
+                'type': 'Point',
+                'coordinates': coords
             },
-            'properties' : rec  # rec happens to be a dict of properties. yay
+            'properties': rec  # rec happens to be a dict of properties. yay
         }
         geo_json.append(geo_json_frag)
     result = json.dumps(geo_json, use_decimal=True)
@@ -500,7 +493,7 @@ def _acc_search_response(rows):
 
 
 def _dictfetchall(cursor):
-    "Return all rows from a cursor as a dict"
+    """Return all rows from a cursor as a dict"""
     columns = [col[0] for col in cursor.description]
     return [
         dict(zip(columns, row))

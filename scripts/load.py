@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-'''Load GRIN passport data for genus into postgresql genus table,
+"""
+Load GRIN passport data for genus into postgresql genus table,
 with same column names.
 
 CSV files can be downloaded from here:
@@ -11,9 +12,13 @@ Expects csv on stdin:
 
  ./load.py < Arachis.csv
 
-for g in Apios Arachis Cajanus Chamaecrista Cicer Glycine Lens Lotus Lupinus Medicago Phaseolus Pisum Trifolium Vicia Vigna; do echo $g; ./load.py < $g-passport.csv; done
+for g in Apios Arachis Cajanus Chamaecrista Cicer Glycine Lens Lotus Lupinus \
+   Medicago Phaseolus Pisum Trifolium Vicia Vigna;
+    do
+    echo $g; ./load.py < $g-passport.csv;
+    done
+"""
 
-'''
 import petl as etl
 import psycopg2
 from datetime import datetime as dt
@@ -27,7 +32,6 @@ def main():
     conn = psycopg2.connect(PSQL_DB)
     cur = conn.cursor()
     table = etl.csv.fromcsv(encoding='latin1')
-    fails = 0
     inserts = 0
     for n in etl.dicts(table):
         n['acckey'] = int(n['acckey'] or 0)
@@ -37,7 +41,7 @@ def main():
         n['collsrc'] = int(n['collsrc'] or 0)
         n['longdec'] = float(n['longdec'] or 0)
         n['latdec'] = float(n['latdec'] or 0)
-        n['accenumb'] =  n['accenumb'] or None  # don't allow empty strings
+        n['accenumb'] = n['accenumb'] or None  # don't allow empty strings
         if n['acqdate']: 
             n['acqdate'] = n['acqdate'].replace('--', '01')
             try:
@@ -88,7 +92,7 @@ def main():
 
 
 def _dictfetchall(cursor):
-    "Return all rows from a cursor as a dict"
+    """Return all rows from a cursor as a dict"""
     columns = [col[0] for col in cursor.description]
     return [
         dict(zip(columns, row))
