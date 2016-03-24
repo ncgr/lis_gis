@@ -20,7 +20,7 @@ def main():
         from lis_germplasm.legumes_grin_evaluation_data
         where descriptor_name = %(name)s
         '''
-        cur.execute(sql, {'name' : name})
+        cur.execute(sql, {'name': name})
         values = [row[0] for row in cur.fetchall()]
         print name, "\t", values
 
