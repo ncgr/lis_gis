@@ -86,7 +86,7 @@ function($scope, $state, $timeout, $location, $uibModal, geoJsonService) {
       'center' : [$scope.model.center.lat, $scope.model.center.lng],
       'zoom' : geoJsonService.params.zoom,
     });
-  
+
     $scope.model.map.attributionControl.addAttribution(
       'Data: USDA <a href="http://www.ars-grin.gov/npgs/" target="new">GRIN/NPGS</a>');
     geoJsonService.map = $scope.model.map;
@@ -316,7 +316,9 @@ function($scope, $state, $timeout, $location, $uibModal, geoJsonService) {
       controller: 'userDataController',
       size: 'lg',
       resolve: {
-	model : {}
+	model : {
+	  BRANDING : BRANDING,
+	}
       }
     });
     modal.result.then(function (result) {
@@ -458,5 +460,6 @@ function($scope, $state, $timeout, $location, $uibModal, geoJsonService) {
   
   $scope.init();
 
-  // $scope.onUserData();
+  $scope.onUserData();
+  
 });

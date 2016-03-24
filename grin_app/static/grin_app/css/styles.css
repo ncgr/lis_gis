@@ -103,3 +103,12 @@ h3 {
 .alert-spc {
     margin-top: 1rem;
 }
+.parsed-csv {
+    font-family: monospace;
+    font-size: 1rem;
+}
+.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+
