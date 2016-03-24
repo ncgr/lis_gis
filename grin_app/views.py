@@ -9,7 +9,7 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 # SRID 4326 is WGS 84 long lat unit=degrees, also the specification of the
-# geometric_coord field in the grin_accessions table.
+# geoometric_coord field in the grin_accessions table.
 SRID = 4326
 DEFAULT_LIMIT = 200
 TWO_PLACES = Decimal('0.01')
@@ -37,19 +37,20 @@ ORDER_BY_FRAG = '''
  ) ASC, taxon, gid
 '''
 LIMIT_FRAG = 'LIMIT %(limit)s'
-COUNTRY_REGEX = re.compile(r'[a-z]{3,3}', re.I)
-TAXON_FTS_BOOLEAN_REGEX = re.compile(r'^(\w+\s*[\||\&]\s*\w+)+$')
-CSV_REGEX = re.compile(r'\s*,\s*')
-logger = logging.getLogger(__name__)
+COUNTRY_REGEX = re.compile(r'[a-z]{3}', re.I)
+TAXON_FTS_BOOLEAN_REGEX = re.compile(r'^(\w+\s*[\||&]\s*\w+)+$')
 
+logger = logging.getLogger(__name__)
 
 GRIN_ACC_WHERE_FRAGS = {
     'fts': {
-        'include': lambda p: TAXON_FTS_BOOLEAN_REGEX.match(p.get('taxon_query', '')),
+        'include': lambda p: TAXON_FTS_BOOLEAN_REGEX.match(
+                                p.get('taxon_query', '')),
         'sql': "taxon_fts @@ to_tsquery('english', %(taxon_query)s)",
     },
     'fts_simple': {
-        'include': lambda p: p.get('taxon_query', None) and not GRIN_ACC_WHERE_FRAGS['fts']['include'](p),
+        'include': lambda p: p.get('taxon_query', None) and not
+                                GRIN_ACC_WHERE_FRAGS['fts']['include'](p),
         'sql': "taxon_fts @@ plainto_tsquery('english', %(taxon_query)s)",
     },
     'country': {
@@ -57,7 +58,8 @@ GRIN_ACC_WHERE_FRAGS = {
         'sql': 'origcty = %(country)s',
     },
     'geocoded_only': {
-        'include': lambda p: p.get('limit_geo_bounds', None) in (True, 'true') or p.get('geocoded_only', None) in (True, 'true'),
+        'include': lambda p: p.get('limit_geo_bounds', None) in (
+            True, 'true') or p.get('geocoded_only', None) in (True, 'true'),
         'sql': 'latdec <> 0 AND longdec <> 0',
     },
     'limit_geo_bounds': {
@@ -72,13 +74,13 @@ GRIN_ACC_WHERE_FRAGS = {
 }
 
 GRIN_EVAL_WHERE_FRAGS = {
-    'accession prefix': {
-        'include': lambda p: p.get('prefix', None),
-        'sql': 'accession_prefix = %(prefix)s',
-    },
     'descriptor_name': {
         'include': lambda p: p.get('descriptor_name', None),
         'sql': 'descriptor_name = %(descriptor_name)s',
+    },
+    'accession prefix': {
+        'include': lambda p: p.get('prefix', None),
+        'sql': 'accession_prefix = %(prefix)s',
     },
     'accession number': {
         'include': lambda p: p.get('acc_num', None),
@@ -93,7 +95,8 @@ GRIN_EVAL_WHERE_FRAGS = {
 
 @ensure_csrf_cookie
 def index(req):
-    """Render the index template, which will boot up angular-js."""
+    """Render the index template, which will boot up angular-js.
+    """
     return render(req, 'grin_app/index.html', context=settings.BRANDING)
 
 
@@ -112,7 +115,7 @@ def evaluation_descr_names(req):
     where_clauses = [
         val['sql'] for key, val in GRIN_ACC_WHERE_FRAGS.items()
         if val['include'](params)
-    ]
+        ]
     if len(where_clauses) == 0:
         where_sql = ''
     else:
@@ -171,15 +174,15 @@ def evaluation_search(req):
 
 
 def _string2num(s):
-    """Convert a string to int or float if possible"""
+    """
+    Convert a string to int or float if possible.
+    """
     try:
-        intval = int(s)
-        return intval
+        return int(s)
     except ValueError:
         pass
     try:
-        floatval = float(s)
-        return floatval
+        return float(s)
     except ValueError:
         pass
     return s
@@ -198,7 +201,7 @@ def evaluation_metadata(req):
     assert 'trait_scale' in params, 'missing trait_scale param'
     assert 'accession_ids' in params, 'missing accession_ids param'
     assert params['taxon'], 'empty taxon param'
-    result = {}
+    result = None
     cursor = connection.cursor()
     # full text search on the taxon field in accessions table, also
     # joining on taxon to get relevant evaluation metadata.
@@ -210,7 +213,7 @@ def evaluation_metadata(req):
         val['sql'] for
         key, val in GRIN_ACC_WHERE_FRAGS.items() + GRIN_EVAL_WHERE_FRAGS.items()
         if val['include'](sql_params)
-    ]
+        ]
     if len(where_clauses) == 0:
         where_sql = ''
     else:
@@ -247,7 +250,7 @@ def evaluation_metadata(req):
             }
             # logger.info(cursor.mogrify(sql, sql_params))
             cursor.execute(sql, sql_params)
-            obs_values = [_string2num(row[0]) for row in cursor.fetchall() ]
+            obs_values = [_string2num(row[0]) for row in cursor.fetchall()]
             result = {
                 'taxon_query': params['taxon'],
                 'descriptor_name': params['descriptor_name'],
@@ -290,7 +293,7 @@ def evaluation_metadata(req):
 
 @ensure_csrf_cookie
 def evaluation_detail(req):
-    """Return JSON for all evalation/trait records matching this accession id
+    """Return JSON for all evalation/trait records matching this accession id.
     """
     assert req.method == 'GET', 'GET request method required'
     params = req.GET.dict()
@@ -307,7 +310,7 @@ def evaluation_detail(req):
     where_clauses = [
         val['sql'] for key, val in GRIN_EVAL_WHERE_FRAGS.items()
         if val['include'](sql_params)
-    ]
+        ]
     where_sql = ' AND '.join(where_clauses)
     sql = '''
     SELECT accession_prefix,
@@ -349,7 +352,7 @@ def accession_detail(req):
     params = req.GET.dict()
     assert 'accenumb' in params, 'missing accenumb param'
     # fix me: name the columns dont select *!
-    sql= '''
+    sql = '''
     SELECT * FROM lis_germplasm.grin_accession WHERE accenumb = %(accenumb)s
     '''
     cursor = connection.cursor()
@@ -361,19 +364,17 @@ def accession_detail(req):
 
 @ensure_csrf_cookie
 def countries(req):
-    """Return a json array of countries for search filtering ui."""
+    """Return a json array of countries for search filtering ui.
+    """
     cursor = connection.cursor()
     sql = '''
     SELECT DISTINCT origcty FROM lis_germplasm.grin_accession ORDER by origcty
     '''
     cursor.execute(sql)
-    # flatten into array, and filter out bogus records like '' or
-    # 3 number codes.
-    result = [row[0] for row in cursor.fetchall()
-              if row[0] and COUNTRY_REGEX.match(row[0])]
-    response = HttpResponse(json.dumps(result),
-                            content_type='application/json')
-    return response
+    # flatten into array, filter out bogus records like '' or 3 number codes
+    results = [row[0] for row in cursor.fetchall()
+               if row[0] and COUNTRY_REGEX.match(row[0])]
+    return HttpResponse(json.dumps(results), content_type='application/json')
 
 
 @ensure_csrf_cookie
@@ -389,7 +390,7 @@ def search(req):
     where_clauses = [
         val['sql'] for key, val in GRIN_ACC_WHERE_FRAGS.items()
         if val['include'](params)
-    ]
+        ]
     if len(where_clauses) == 0:
         where_sql = ''
     else:
@@ -420,20 +421,17 @@ def search(req):
     # when searching for a set of accessionIds, the result needs to
     # either get merged in addition to the SQL LIMIT results, or just
     # returned instead
-    acc_ids_csv = params.get('accession_ids', None)
-    if acc_ids_csv:
-        if ',' in acc_ids_csv:
-            clean_accession_ids = CSV_REGEX.sub(',', acc_ids_csv).split(',')
-            sql_params = {'accession_ids': clean_accession_ids}
+    if params.get('accession_ids', None):
+        if ',' in params['accession_ids']:
+            sql_params = {'accession_ids': params['accession_ids'].split(',')}
         else:
-            sql_params = {'accession_ids': [acc_ids_csv] }
+            sql_params = {'accession_ids': [params['accession_ids']]}
         where_sql = 'WHERE accenumb = ANY( %(accession_ids)s )'
         sql = 'SELECT %s FROM %s %s' % (
             cols_sql,
             ACCESSION_TAB,
             where_sql
         )
-        # logger.info(cursor.mogrify(sql, sql_params))
         cursor.execute(sql, sql_params)
         rows_with_requested_accessions = _dictfetchall(cursor)
         if params.get('accession_ids_inclusive', None):
@@ -441,13 +439,14 @@ def search(req):
             uniq = set()
 
             def is_unique(r):
-                key = r.get('accenumb', None)
-                if key in uniq: return False
-                uniq.add(key)
+                k = r.get('accenumb', None)
+                if k in uniq:
+                    return False
+                uniq.add(k)
                 return True
 
-            rows = [ row for row in rows_with_requested_accessions + rows
-                     if is_unique(row) ]
+            rows = [row for row in rows_with_requested_accessions + rows
+                    if is_unique(row)]
         else:
             # simple replace with these results
             rows = rows_with_requested_accessions
@@ -477,7 +476,7 @@ def _acc_search_response(rows):
             lng = Decimal(rec['longdec']).quantize(TWO_PLACES)
             coords = [lng, lat]
             del rec['latdec']  # have been translated into geojson coords, 
-            del rec['longdec'] # so these keys are extraneous now.
+            del rec['longdec']  # so these keys are extraneous now.
         geo_json_frag = {
             'type': 'Feature',
             'geometry': {
@@ -498,4 +497,4 @@ def _dictfetchall(cursor):
     return [
         dict(zip(columns, row))
         for row in cursor.fetchall()
-    ]
+        ]

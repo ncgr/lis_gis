@@ -4,6 +4,7 @@
 Update the FTS index for the taxon field. Should be done after all
 genera are loaded/updated.
 """
+
 import psycopg2
 
 PSQL_DB = 'dbname=drupal user=www'

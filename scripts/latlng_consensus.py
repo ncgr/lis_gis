@@ -13,11 +13,10 @@ PSQL_DB = 'dbname=drupal user=www'
 DATE_FMT = '%Y%m%d'
 PNT_FMT = "ST_GeographyFromText('SRID=4326;POINT(%(longdec)s %(latdec)s)')"
 
-
 if not hasattr(math, 'isclose'):
     # monkey patch for python2
     def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
-        return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+        return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
     math.isclose = isclose
 
 
@@ -38,7 +37,7 @@ def main():
                 'pos_count': 0,
                 'neg_count': 0,
             },
-            'longdec':{
+            'longdec': {
                 'pos_count': 0,
                 'neg_count': 0,
             },
@@ -101,7 +100,8 @@ def main():
                 print('****** warning-- no consensus! *******')
                 continue
 
-            neg_sign = (cons['longdec']['pos_count'] < cons['longdec']['neg_count'])
+            neg_sign = (
+                cons['longdec']['pos_count'] < cons['longdec']['neg_count'])
             if neg_sign:  # consensus is negative signed latitude
                 sql = '''
                 UPDATE lis_germplasm.grin_accession
@@ -135,7 +135,7 @@ def _dictfetchall(cursor):
     return [
         dict(zip(columns, row))
         for row in cursor.fetchall()
-    ]
+        ]
 
 
 if __name__ == '__main__':

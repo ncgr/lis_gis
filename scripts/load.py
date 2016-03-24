@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 """
+
 Load GRIN passport data for genus into postgresql genus table,
 with same column names.
 
@@ -13,10 +14,11 @@ Expects csv on stdin:
  ./load.py < Arachis.csv
 
 for g in Apios Arachis Cajanus Chamaecrista Cicer Glycine Lens Lotus Lupinus \
-   Medicago Phaseolus Pisum Trifolium Vicia Vigna;
-    do
-    echo $g; ./load.py < $g-passport.csv;
-    done
+     Medicago Phaseolus Pisum Trifolium Vicia Vigna;
+      do
+      echo $g; ./load.py < $g-passport.csv;
+      done
+
 """
 
 import petl as etl
@@ -49,7 +51,8 @@ def main():
                 n['acqdate'] = date
             except ValueError:
                 n['acqdate'] = None
-        else: n['acqdate'] = None
+        else:
+            n['acqdate'] = None
         if n['colldate']:
             n['colldate'] = n['colldate'].replace('--', '01') 
             try: 
@@ -57,7 +60,8 @@ def main():
                 n['colldate'] = date
             except ValueError:
                 n['colldate'] = None
-        else: n['colldate'] = None
+        else:
+            n['colldate'] = None
         if n['longdec'] and n['latdec']:
             geographic_coord = PNT_FMT
         else:
@@ -76,7 +80,7 @@ def main():
         %(origcty)s,%(collsite)s,%(latitude)s,%(longitude)s,%(elevation)s,
         %(colldate)s,%(bredcode)s,%(sampstat)s,%(ancest)s,%(collsrc)s,
         %(donorcode)s,%(donornumb)s,%(othernumb)s,%(duplsite)s,%(storage)s,
-        %(latdec)s,%(longdec)s,""" + geographic_coord +  """,
+        %(latdec)s,%(longdec)s,""" + geographic_coord + """,
         %(remarks)s,%(history)s,%(released)s, true);"""
         # print(cur.mogrify(sql, n))
         try:

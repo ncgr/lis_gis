@@ -5,7 +5,6 @@ Update the evaluation metadata in
 lis_germplasm.grin_evaluation_metadata. Should be done after all
 genera evaluation data are loaded/updated.
 """
-
 import psycopg2
 
 PSQL_DB = 'dbname=drupal user=www'
@@ -84,13 +83,11 @@ def _string2num(s):
     Convert a string to int or float, if possible.
     """
     try:
-        intval = int(s)
-        return intval
+        return int(s)
     except ValueError:
         pass
     try:
-        floatval = float(s)
-        return floatval
+        return float(s)
     except ValueError:
         pass
     return s
@@ -106,7 +103,7 @@ def _detect_numeric_trait(rows):
     strings = [val for val in rows if isinstance(val, basestring)]
     if len(strings) > 0:
         return False  # have at least one string, must not be numeric.
-    ints = [ val for val in rows if isinstance(val, int) ]
+    ints = [val for val in rows if isinstance(val, int)]
     if len(ints) == len(rows):
         uniq = sorted(list(set(ints)))
         if len(uniq) <= NOMINAL_THRESHOLD:
@@ -119,4 +116,3 @@ def _detect_numeric_trait(rows):
 
 if __name__ == '__main__':
     main()
-
