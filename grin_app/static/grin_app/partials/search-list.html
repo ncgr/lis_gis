@@ -4,7 +4,7 @@
 </span>
 
 <div class="alert alert-warning section-spc"
-     ng-if="! model.geoJsonService.updating && ! model.geoJsonService.getData().length">
+     ng-if="! model.geoJsonService.updating && ! model.geoJsonService.data">
 
    <button type="button" class="close" data-dismiss="alert">
     <span aria-hidden="true">&times;</span>
@@ -15,27 +15,27 @@
 </div>
 
 <div class="alert alert-warning section-spc"
-     ng-if="! model.geoJsonService.updating && model.geoJsonService.getData().length == model.geoJsonService.params.maxRecs">
+     ng-if="! model.geoJsonService.updating && model.geoJsonService.data.length == model.geoJsonService.params.maxRecs">
   
   <button type="button" class="close" data-dismiss="alert">
     <span aria-hidden="true">&times;</span>
   </button>
   
-  <strong>Results: {{model.geoJsonService.getData().length}}</strong>
+  <strong>Results: {{model.geoJsonService.data.length}}</strong>
   Your max # of results are listed below, but may appear to be
   clustered at the center of the map. Try zooming the map in,
   change search parameters, or increase the max # of results.
 
 </div>
 
-<div ng-if="! model.geoJsonService.updating && model.geoJsonService.getData().length !== model.geoJsonService.params.maxRecs"
+<div ng-if="! model.geoJsonService.updating && model.geoJsonService.data.length !== model.geoJsonService.params.maxRecs"
      class="section-spc">
   <strong>Results:
-    {{model.geoJsonService.getData().length}}
+    {{model.geoJsonService.data.length}}
   </strong>
 </div>
 
-<div ng-if="! model.geoJsonService.updating && model.geoJsonService.getData().length"
+<div ng-if="! model.geoJsonService.updating && model.geoJsonService.data.length"
      class="section-spc">
   <table class="table table-striped" id="results-list">
     <tr>
@@ -53,7 +53,7 @@
       <th>acq date</th>
       <th>elev&nbsp;(m.)</th>
     </tr>
-    <tr ng-repeat="rec in model.geoJsonService.getData()"
+    <tr ng-repeat="rec in model.geoJsonService.data"
 	ng-class="{'hilite-row' : model.geoJsonService.selectedAccession == rec.properties.accenumb}">
       <td class="nowrap">
 	<button class="btn btn-xs btn-default accdetail-button"

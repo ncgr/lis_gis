@@ -4,7 +4,7 @@
  */
 
 app.controller('mapController',
-    function ($scope, $state, $timeout, $location, geoJsonService) {
+    function ($scope, $state, $timeout, $location, $uibModal, geoJsonService) {
 
         var DEFAULT_BASEMAP = geoJsonService.params.baseMap ||
             Cookies.get('baseMap') ||
@@ -28,12 +28,13 @@ app.controller('mapController',
             return devIndHeight * 0.5;
         }();
 
+        var mapLayer;
+
         $scope.model = {
-            geoJson: geoJsonService,
+            geoJsonService: geoJsonService,
             $location: $location,
             map: null,  // the leaflet map
             geoJsonLayer: null,
-            geoJsonService: geoJsonService,  // array of geoJson objects
             center: {
                 lat: geoJsonService.params.lat,
                 lng: geoJsonService.params.lng
@@ -91,7 +92,7 @@ app.controller('mapController',
             // add the default basemap
             $scope.model.baseMapLayer = $scope.model.baseMaps[DEFAULT_BASEMAP]();
             $scope.model.baseMapLayer.addTo($scope.model.map);
-            $scope.model.geoJsonLayer = L.geoJson($scope.model.geoJsonService.data, {
+            mapLayer = L.geoJson(geoJsonService.data, {
                 pointToLayer: function (feature, layer) {
                     return geoJsonService.markerCallback(feature, layer);
                 },
@@ -126,7 +127,7 @@ app.controller('mapController',
             };
             north.addTo($scope.model.map);
 
-            $scope.model.geoJsonLayer.addTo($scope.model.map);
+            mapLayer.addTo($scope.model.map);
             Cookies.set('baseMap', DEFAULT_BASEMAP);
             $location.search('baseMap', DEFAULT_BASEMAP);
 
@@ -160,19 +161,19 @@ app.controller('mapController',
                 $location.search('zoom', $scope.model.map.getZoom());
 
                 // remove previous map markers, and then update with the new geojson
-                $scope.model.geoJsonLayer.clearLayers();
+                mapLayer.clearLayers();
 
-                var filteredGeoJson = $scope.model.geoJsonService.data;
+                var filteredGeoJson = geoJsonService.data;
                 if (geoJsonService.params.traitExcludeUnchar &&
                     geoJsonService.params.traitOverlay) {
                     // exclude uncharacterized accessions for this trait
-                    filteredGeoJson = _.filter($scope.model.geoJsonService.data,
+                    filteredGeoJson = _.filter(geoJsonService.data,
                         function (d) {
                             var accId = d.properties.accenumb;
-                            return accId in $scope.model.geoJsonService.traitHash;
+                            return accId in geoJsonService.traitHash;
                         });
                 }
-                $scope.model.geoJsonLayer.addData(filteredGeoJson);
+                mapLayer.addData(filteredGeoJson);
 
                 if ($scope.model.map.getSize().y != $scope.model.mapHeight) {
                     $scope.model.map.invalidateSize();
@@ -306,6 +307,28 @@ app.controller('mapController',
             app.tour();
         };
 
+        $scope.onUserData = function () {
+            var modal = $uibModal.open({
+                animation: true,
+                templateUrl: STATIC_PATH + 'grin_app/partials/user-data-modal.html',
+                controller: 'userDataController',
+                size: 'lg',
+                resolve: {
+                    model: {
+                        BRANDING: BRANDING,
+                        STATIC_PATH: STATIC_PATH
+                    }
+                }
+            });
+            modal.result.then(function () {
+                // the postProcessSearch() will merge in the user provided data.
+                geoJsonService.search();
+            }, function () {
+                // modal otherwise dismissed callback (ignore result) e.g.
+                // backdrop click
+            });
+        };
+
         function get2CharAbbrev(feature) {
             var species = feature.properties.taxon.split(' ')[1];
             return species.substring(0, 2);
@@ -359,7 +382,7 @@ app.controller('mapController',
         $scope.getVisibleMarkerCount = function () {
             var bounds = $scope.model.map.getBounds();
             var ct = 0;
-            $scope.model.geoJsonLayer.eachLayer(function (marker) {
+            mapLayer.eachLayer(function (marker) {
                 if (bounds.contains(marker.getLatLng())) {
                     ct++;
                 }
@@ -369,7 +392,7 @@ app.controller('mapController',
 
         /* show an alert if no accessions are visible on the map extent */
         $scope.showHiddenAccHelp = function () {
-            if ($scope.model.geoJson.updating) {
+            if (geoJsonService.updating) {
                 return false;
             }
             if (!geoJsonService.data.length) {
@@ -386,7 +409,7 @@ app.controller('mapController',
 
         /* show an alert if no accessions have geographic coords. */
         $scope.showHiddenAccHelp2 = function () {
-            if ($scope.model.geoJson.updating) {
+            if (geoJsonService.updating) {
                 return false;
             }
             if (!geoJsonService.data.length) {
@@ -398,7 +421,7 @@ app.controller('mapController',
             if ($scope.getVisibleMarkerCount() > 0) {
                 return false;
             }
-            return (! geoJsonService.getAnyGeocodedAccession());
+            return (!geoJsonService.getAnyGeocodedAccession());
         };
 
         function filterNonGeocoded(featureData, layer) {
@@ -419,7 +442,7 @@ app.controller('mapController',
                 }
             }
             if (geoJsonService.selectedAccession !== null && !currentPopup) {
-                $scope.model.geoJsonLayer.eachLayer(function (layer) {
+                mapLayer.eachLayer(function (layer) {
                     if (layer._popup.accId == geoJsonService.selectedAccession) {
                         layer.openPopup();
                     }
@@ -428,5 +451,5 @@ app.controller('mapController',
         }
 
         $scope.init();
-
+        $scope.onUserData();
     });

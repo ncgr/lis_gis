@@ -15,7 +15,7 @@ app.controller('listController',
               geoJsonService) {
 
         $scope.model = {
-            geoJson: geoJsonService,
+            geoJsonService: geoJsonService,
             $location: $location,
             searchHilite: null,
             showNearbySearchButtons: false,

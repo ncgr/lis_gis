@@ -9,7 +9,7 @@ app.controller('filterController',
         $scope.init = function () {
             var params = geoJsonService.getSearchParams();
             $scope.model = {
-                geoJson: geoJsonService,
+                geoJsonService: geoJsonService,
                 countries: [],
                 searchOptions: false,
                 autofocusField: null,

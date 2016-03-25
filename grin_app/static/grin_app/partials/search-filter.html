@@ -21,23 +21,23 @@
      </button>
   </span>
   
-  <span ng-if="model.geoJson.params.taxonQuery" class="badge">
-    {{ model.geoJson.params.taxonQuery }}
+  <span ng-if="model.geoJsonService.params.taxonQuery" class="badge">
+    {{ model.geoJsonService.params.taxonQuery }}
     <button type="button" class="btn btn-xs btn-default"
 	    ng-click="model.taxonQuery = ''; model.traitOverlay = ''; onOK();">
       <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
     </button>
   </span>
   
-  <span ng-if="model.geoJson.params.traitOverlay" class="badge">
-    {{ model.geoJson.params.traitOverlay }}
+  <span ng-if="model.geoJsonService.params.traitOverlay" class="badge">
+    {{ model.geoJsonService.params.traitOverlay }}
     <button type="button" class="btn btn-xs btn-default"
 	    ng-click="model.traitOverlay = ''; model.traitExcludeUnchar = false; onOK();">
       <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
     </button>
   </span>
 
-  <span ng-if="model.geoJson.params.limitToMapExtent"
+  <span ng-if="model.geoJsonService.params.limitToMapExtent"
 	class="badge">
     limit search to current map extent
     <button type="button"
@@ -47,16 +47,16 @@
     </button>
   </span>
   
-  <span ng-if="model.geoJson.params.maxRecs" class="badge">
-    max results: {{ model.geoJson.params.maxRecs | number }}
+  <span ng-if="model.geoJsonService.params.maxRecs" class="badge">
+    max results: {{ model.geoJsonService.params.maxRecs | number }}
     <button class="btn btn-xs btn-default"
 	    ng-click="onRemoveMaxResults()">
       <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
     </button>
   </span>
   
-  <span ng-if="model.geoJson.params.country" class="badge">
-    country: {{ model.geoJson.params.country }}
+  <span ng-if="model.geoJsonService.params.country" class="badge">
+    country: {{ model.geoJsonService.params.country }}
     <button class="btn btn-xs btn-default"
 	    ng-click="model.country = null; onOK();">
       <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>

@@ -1,3 +1,5 @@
+"use strict";
+
 app.service('geoJsonService',
     function ($http, $rootScope, $location, $timeout, $q, $localStorage) {
 
@@ -10,6 +12,7 @@ app.service('geoJsonService',
         s.updating = false;
         s.data = []; // an array of geoJson features
         s.selectedAccession = null; // single accession object currently select.
+
         s.traitData = []; // an array of json with observation_values
         s.traitHash = {}; // lookup hash for accenumb to array of obs. values
         s.traitMetadata = {};
@@ -94,6 +97,9 @@ app.service('geoJsonService',
 
         function postProcessSearch() {
             s.params = s.getSearchParams();
+            mergeUserGeoJson();
+            mergeUserTraitJson();
+
             s.updateBounds();
             s.updateColors();
             s.updateMarkerStrategy();
@@ -382,6 +388,27 @@ app.service('geoJsonService',
             }
         };
 
+        /* make a dict of all accession ids in search results check & merge
+           properties if user geojson is overriding any of the accessions. */
+        function mergeUserGeoJson() {
+            if(! $localStorage.userGeoJson) { return; }
+
+            var userAccessions = {};
+            _.each(s.data, function(d) {
+                userAccessions[d.properties.accenumb] = d;
+            });
+            s.data = _.map(s.data, function(d) {
+
+            });
+
+
+        }
+
+        function mergeUserTraitJson() {
+            if(! $localStorage.userTraitJson) { return; }
+            // todo
+        }
+        
         /* use a custom color scheme with a range of the selected trait
          iterate the trait results once, to build a lookup table */
         function colorStrategyNumericTrait() {
@@ -465,6 +492,7 @@ app.service('geoJsonService',
                 values: legendValues
             };
         }
+
 
         s.updateColors = function () {
             s.traitHash = {};

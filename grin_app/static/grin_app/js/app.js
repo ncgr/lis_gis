@@ -89,6 +89,12 @@ app.filter('highlight', function ($sce) {
     }
 });
 
+app.filter('isEmpty', [function() {
+  return function(object) {
+    return angular.equals({}, object);
+  }
+}]);
+
 app.run(function ($state) {
     $state.transitionTo('search');
 });
