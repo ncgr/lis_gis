@@ -97,8 +97,11 @@ app.service('geoJsonService',
 
         function postProcessSearch() {
             s.params = s.getSearchParams();
-            mergeUserGeoJson();
-            mergeUserTraitJson();
+
+            if($localStorage.userGeoJson) {
+                mergeUserGeoJson();
+                mergeUserTraitJson();
+            }
 
             s.updateBounds();
             s.updateColors();
@@ -388,27 +391,50 @@ app.service('geoJsonService',
             }
         };
 
-        /* make a dict of all accession ids in search results check & merge
-           properties if user geojson is overriding any of the accessions. */
+        /* mergeUserGeoJson(): make a dict of all accession ids in search
+           results, check & merge properties if user geojson is overriding any
+           of the accessions.*/
         function mergeUserGeoJson() {
-            if(! $localStorage.userGeoJson) { return; }
-
+            var addAccessions = {};
             var userAccessions = {};
-            _.each(s.data, function(d) {
-                userAccessions[d.properties.accenumb] = d;
+            var allAccessions = {};
+
+            _.each(s.data, function (d) {
+                allAccessions[d.properties.accenumb] = d;
             });
-            s.data = _.map(s.data, function(d) {
-
+            _.each($localStorage.userGeoJson, function (d) {
+                var accId = d.properties.accenumb;
+                userAccessions[accId] = d;
+                if(allAccessions[accId]) {
+                    console.log(d);
+                    // user has provided this accession, so extend it's props.
+                    var src1 = d.properties;
+                    var src2 = allAccessions[accId].properties;
+                    var dst = {};
+                    angular.extend(dst, src1, src2);
+                    if(d.geometry.coordinates.length) {
+                        allAccessions[accId].geometry.coordinates =
+                            d.geometry.coordinates;
+                    }
+                }
+                else {
+                    // mark user's accession to add complete collection
+                    addAccessions[accId] = d;
+                }
             });
-
-
+            _.each(addAccessions, function(d, accId) {
+                console.log(d);
+                s.data.unshift(d);
+            });
         }
 
         function mergeUserTraitJson() {
-            if(! $localStorage.userTraitJson) { return; }
-            // todo
+            if (!$localStorage.userTraitJson) {
+                return;
+            }
+            // TODO: mergeUserTraitJson
         }
-        
+
         /* use a custom color scheme with a range of the selected trait
          iterate the trait results once, to build a lookup table */
         function colorStrategyNumericTrait() {

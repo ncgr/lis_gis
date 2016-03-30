@@ -51,7 +51,8 @@ app.controller('listController',
         $scope.onAccessionDetail = function (accId) {
             var modalInstance = $uibModal.open({
                 animation: true,
-                templateUrl: 'accession-modal-content.html',
+                templateUrl: STATIC_PATH +
+                    'grin_app/partials/accession-detail-modal.html',
                 controller: 'accessionDetailController',
                 size: 'lg',
                 resolve: {

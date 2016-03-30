@@ -5,7 +5,13 @@
 
 app.controller('filterController',
     function ($scope, $state, $http, $location, $uibModal, geoJsonService) {
-        
+
+        geoJsonService.subscribe($scope, 'updated', function () {
+            // the accessionIds may be updated by userData.js, update our model.
+            var params = geoJsonService.getSearchParams();
+            $scope.model.accessionIds = params.accessionIds;
+        });
+
         $scope.init = function () {
             var params = geoJsonService.getSearchParams();
             $scope.model = {
@@ -38,6 +44,7 @@ app.controller('filterController',
                 $scope.onTaxonQuery($scope.model.taxonQuery);
             }
         };
+
 
         $scope.onOK = function () {
             // user hit OK in the search parameters panel, or search is being
@@ -136,7 +143,8 @@ app.controller('filterController',
         $scope.onTraitOverlayOptions = function () {
             var modal = $uibModal.open({
                 animation: true,
-                templateUrl: 'trait-overlay-options.html',
+                templateUrl: STATIC_PATH +
+                'grin_app/partials/trait-overlay-options-modal.html',
                 controller: 'traitOverlayOptionsController',
                 size: 'lg',
                 resolve: {
@@ -177,7 +185,8 @@ app.controller('filterController',
         $scope.onAccessionIdOptions = function () {
             var modal = $uibModal.open({
                 animation: true,
-                templateUrl: 'accession-search-options.html',
+                templateUrl: STATIC_PATH +
+                'grin_app/partials/accession-search-options-modal.html',
                 controller: 'accessionSearchOptionsController',
                 size: 'lg',
                 resolve: {

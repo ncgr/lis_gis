@@ -44,7 +44,7 @@ var taxonChroma = {};
         // options is an object w/ properties lightnessFactor, overrides
         var color, parts, genus, species, genusColor, hcl, hclHi, hclLow,
             lightness;
-        var t = taxon.toLowerCase();
+        var t = (taxon) ? taxon.toLowerCase() : 'unknown';
         if (!options) {
             options = {};
         }

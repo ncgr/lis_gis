@@ -4,7 +4,8 @@
  */
 
 app.controller('mapController',
-    function ($scope, $state, $timeout, $location, $uibModal, geoJsonService) {
+    function ($scope, $state, $timeout, $location, $uibModal, $localStorage,
+              geoJsonService) {
 
         var DEFAULT_BASEMAP = geoJsonService.params.baseMap ||
             Cookies.get('baseMap') ||
@@ -219,8 +220,8 @@ app.controller('mapController',
             $scope.model.map.on('popupclose', function (e) {
                 // use timeout to enter ng async event
                 $timeout(function () {
-                    //markerPopup = null;
-                }, 0);
+                    geoJsonService.setSelectedAccession(null);
+                });
             });
 
             geoJsonService.setBounds($scope.model.map.getBounds(), true);
@@ -321,8 +322,14 @@ app.controller('mapController',
                 }
             });
             modal.result.then(function () {
-                // the postProcessSearch() will merge in the user provided data.
-                geoJsonService.search();
+                // override the list of accession Ids in the search filter.
+                // this will enable merging of user's properties e.g. lat/lng.
+                var accIds = _.map($localStorage.userGeoJson, function(d) {
+                    return d.properties.accenumb;
+                });
+                // geoJsonService.postProcessSearch() will then merge in user
+                // provided data.
+                geoJsonService.setAccessionIds(accIds.join(','), true);
             }, function () {
                 // modal otherwise dismissed callback (ignore result) e.g.
                 // backdrop click

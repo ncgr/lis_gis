@@ -1,11 +1,3 @@
-accession_id,latitude,longitude,descriptor,observation_value,is_nominal
-PI 358124,41.33333333,21.55,FLCON,10,true
-PI 358125,42.08333333,22.18333333,FLCON,10,true
-PI 358127,42.01666667,20.96666667,FLCON,10,true
-PI 358128,41.11666667,20.78333333,FLCON,10,true
-PI 358129,42.08333333,22.18333333,FLCON,10,true
-PI 358130,42.2,22.33333333,FLCON,10,true
-PI 358131,42.2,22.33333333,FLCON,10,true
-PI 358132,42.13333333,21.71666667,FLCON,10,true
-PI 358133,42.13333333,21.71666667,FLCON,10,true
-PI 358147,42.01666667,20.96666667,FLCON,10,true
+accession_id,taxon,latitude,longitude,descriptor,observation_value,is_nominal
+ALEX_1,Phaseolus lunatus,35.87,-110.41,hello,hello_value,true
+DLEG 890123,Phaseolus lunatus,35.87,-111.41,hello,hello_value,true

@@ -35,6 +35,10 @@ app.config(function ($httpProvider, $stateProvider) {
         });
 
     function httpErrorInterceptor($q, $rootScope) {
+
+        $rootScope.errors = [];
+        $rootScope.warnings = [];
+
         function requestError(rejection) {
             console.log('requestError:');
             console.log(rejection);
@@ -45,23 +49,36 @@ app.config(function ($httpProvider, $stateProvider) {
             var msg = null;
             console.log('responseError:');
             console.log(response);
-            if (!$rootScope.errors) {
-                $rootScope.errors = [];
+            switch (response.status) {
+                case 0:
+                    msg = 'Lost connection to web app. Please check your ' +
+                        'network connection, or try again later.';
+                    break;
+                case -1:
+                    msg = 'Lost connection to web app. Please check your ' +
+                        'network connection, or try again later.';
+                    break;
+                case 404:
+                    // allow 404 not found, if the accession detail controller
+                    // does an HTTP HEAD to check for validity of link-out.
+                    if (response.config.url.indexOf('organism/') === -1) {
+                        msg = response.status + ' ' +
+                            response.statusText + ' ' +
+                            response.config.url + ' ' +
+                            response.data;
+                    }
+                    break;
+                case 500:
+                    msg = response.status + ' ' +
+                        response.statusText + ' ' +
+                        response.config.url + ' ' +
+                        response.data;
+                    break;
             }
-            if (0 === response.status || -1 === response.status) {
-                msg = 'Lost connection to web app. Please check your network \
-                       connection, or try again later.';
+            if (msg) {
                 $rootScope.errors.push(msg);
-                console.log(msg);
+                console.log($rootScope.errors);
             }
-            else if (response.status === 500) {
-                msg = [response.status + ' ' +
-                response.statusText + ' ' +
-                response.config.url + ' ',
-                    response.data];
-            }
-            $rootScope.errors.push(msg);
-            console.log($rootScope.errors);
             return ($q.reject(response)); // pass-through the response
         }
 
@@ -89,10 +106,10 @@ app.filter('highlight', function ($sce) {
     }
 });
 
-app.filter('isEmpty', [function() {
-  return function(object) {
-    return angular.equals({}, object);
-  }
+app.filter('isEmpty', [function () {
+    return function (object) {
+        return angular.equals({}, object);
+    }
 }]);
 
 app.run(function ($state) {
@@ -107,7 +124,7 @@ app.run(function (geoJsonService, $timeout, $rootScope) {
      * it cannot be started before angular compiles the html */
     var handler;
 
-    if (! Cookies.get(tourId)) {
+    if (!Cookies.get(tourId)) {
         // have not seen the tour yet, so
         handler = geoJsonService.subscribe($rootScope, 'updated', function () {
             // setup a handler for when the map has data loaded

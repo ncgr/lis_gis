@@ -85,6 +85,7 @@ app.controller('userDataController',
             $scope.model.convertingGeoJSON = true;
             generateGeoJson();
             generateTraitJson();
+            $scope.model.convertingGeoJSON = false;
             $uibModalInstance.close();
         };
 
@@ -124,11 +125,11 @@ app.controller('userDataController',
         function generateTraitJson() {
             // iterate the userData collections, build one json collection.
             // The geoJsonService will look for it there
+            // TODO: generateTraitJson
         }
         function generateGeoJson() {
             // iterate the userData collections, build one geojson collection
-            // and put it in localStorage. The geoJsonService will look for it
-            // there.
+            // and put it in localStorage, where geoJsonService will find it.
             var geoJson = [];
             _.each($localStorage.userData, function(dataSet) {
                 _.each(dataSet.data, function(rec) {
@@ -140,6 +141,7 @@ app.controller('userDataController',
                                 rec.latitude
                             ]
                         },
+                        type : 'Feature',
                         properties: {
                             accenumb : rec.accession_id,
                             gid: Math.random().toString(16).substr(2,8),
@@ -174,7 +176,7 @@ app.controller('userDataController',
 
         function onParseComplete(results, file) {
             // the parsing may complete inside or outside of the angular digest
-            // cycle, always use timeout here.
+            // cycle, so always use $timeout here.
             $timeout(function() {
                 // results has data, errors, and meta properties. inspect to see
                 // if there were any errors.

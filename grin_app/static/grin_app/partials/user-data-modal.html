@@ -28,8 +28,7 @@
         <ul>
             <li><strong>accession_id</strong> is the only required column.
                 <strong>is_nominal</strong> indicates whether the trait
-                (descriptor)
-                is numeric or categorical.
+                (descriptor) is numeric or categorical.
             </li>
             <li>Geographic coordinates, if given, should reference the WGS84
                 datum (SRID 4326) for best accuracy.
@@ -127,6 +126,7 @@
                 Select a file source you wish to load.
             </p>
         </div>
+
         <div class="form-group"
              ng-if="model.fileMethod == 'local'">
             <label for="user-data-file">Local file:</label>
