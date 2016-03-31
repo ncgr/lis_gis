@@ -45,7 +45,6 @@ app.controller('filterController',
             }
         };
 
-
         $scope.onOK = function () {
             // user hit OK in the search parameters panel, or search is being
             // updated programmatically: update geojson service with all
@@ -204,14 +203,14 @@ app.controller('filterController',
             });
             modal.result.then(function (result) {
                 if (!result) {
-                    return;
+                    return; // cancelled
                 }
-                /* cancelled */
                 $scope.model.accessionIds = result.accessionIds;
                 $scope.model.accessionIdsColor = result.accessionIdsColor;
                 $scope.model.accessionIdsInclusive = result.accessionIdsInclusive;
             }, function () {
-                // modal otherwise dismissed callback (ignore result) e.g. backdrop click
+                // modal otherwise dismissed callback (ignore result)
+                // e.g. backdrop click
             });
         };
 

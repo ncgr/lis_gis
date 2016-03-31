@@ -245,21 +245,30 @@ app.service('geoJsonService',
 
         /* set one selected accession to hilight in the UI */
         s.setSelectedAccession = function (accId) {
+            // early out if accId is null (de-selection)
+            if(! accId) {
+                var changed = (s.selectedAccession !== null);
+                s.selectedAccession = null;
+                if (changed) {
+                    s.notify('selectedAccessionUpdated');
+                }
+                return;
+            }
             var accession = _.find(s.data, function (d) {
                 return (d.properties.accenumb === accId);
             });
             if (!accession) {
-                // the accession id is not in the current result set, so clear it.
+                // the accession id is not in the current result set,
+                // so forcibly clear the selection.
                 accId = null;
             }
             else {
                 // splice the record to beginning of geoJson dataset
                 var idx = _.indexOf(s.data, accession);
-                if (idx === -1) {
-                    return;
+                if (idx !== -1) {
+                    s.data.splice(idx, 1);
+                    s.data.splice(0, 0, accession);
                 }
-                s.data.splice(idx, 1);
-                s.data.splice(0, 0, accession);
             }
             var changed = (s.selectedAccession !== accId);
             s.selectedAccession = accId;
@@ -391,6 +400,10 @@ app.service('geoJsonService',
             }
         };
 
+        function customizer(objValue, srcValue) {
+
+        }
+
         /* mergeUserGeoJson(): make a dict of all accession ids in search
            results, check & merge properties if user geojson is overriding any
            of the accessions.*/
@@ -398,7 +411,10 @@ app.service('geoJsonService',
             var addAccessions = {};
             var userAccessions = {};
             var allAccessions = {};
-
+            var customizer = function(destProp, srcProp) {
+                // allow sourced properties to override destination properties.
+                return _.isUndefined(srcProp) ? destProp : destProp;
+            };
             _.each(s.data, function (d) {
                 allAccessions[d.properties.accenumb] = d;
             });
@@ -406,12 +422,10 @@ app.service('geoJsonService',
                 var accId = d.properties.accenumb;
                 userAccessions[accId] = d;
                 if(allAccessions[accId]) {
-                    console.log(d);
                     // user has provided this accession, so extend it's props.
-                    var src1 = d.properties;
-                    var src2 = allAccessions[accId].properties;
-                    var dst = {};
-                    angular.extend(dst, src1, src2);
+                    var src = d.properties;
+                    var dst = allAccessions[accId].properties;
+                    _.extendWith(dst, src, customizer);
                     if(d.geometry.coordinates.length) {
                         allAccessions[accId].geometry.coordinates =
                             d.geometry.coordinates;
@@ -423,7 +437,6 @@ app.service('geoJsonService',
                 }
             });
             _.each(addAccessions, function(d, accId) {
-                console.log(d);
                 s.data.unshift(d);
             });
         }
