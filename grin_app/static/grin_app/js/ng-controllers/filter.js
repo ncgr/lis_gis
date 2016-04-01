@@ -4,7 +4,8 @@
  */
 
 app.controller('filterController',
-    function ($scope, $state, $http, $location, $uibModal, geoJsonService) {
+    function ($scope, $state, $http, $location, $uibModal, $localStorage,
+              geoJsonService) {
 
         geoJsonService.subscribe($scope, 'updated', function () {
             // the accessionIds may be updated by userData.js, update our model.
@@ -15,6 +16,7 @@ app.controller('filterController',
         $scope.init = function () {
             var params = geoJsonService.getSearchParams();
             $scope.model = {
+                userData: $localStorage.userData,
                 geoJsonService: geoJsonService,
                 countries: [],
                 searchOptions: false,
@@ -88,26 +90,15 @@ app.controller('filterController',
                 return;
             }
             $scope.model.traitDescriptors = null;
-            var oldTrait = $scope.model.traitOverlay;
-            $http({
-                url: API_PATH + '/evaluation_descr_names',
-                method: 'GET',
-                params: {
-                    'taxon': taxon
+            var callback = function(data) {
+                $scope.model.traitDescriptors = data;
+                // reset the trait selection, if it's no longer valid for this
+                // taxon query
+                if(! $scope.model.traitOverlay in data) {
+                    $scope.model.traitOverlay = null;
                 }
-            }).then(
-                function (resp) {
-                    // success handler
-                    $scope.model.traitDescriptors = resp.data;
-                    if (oldTrait in $scope.model.traitDescriptors) {
-                        $scope.model.traitOverlay = oldTrait;
-                    }
-                },
-                function (resp) {
-                    // error handler
-                    console.log(resp);
-                }
-            );
+            };
+            geoJsonService.getTraitDescriptors(taxon, callback);
         };
 
         $scope.onExampleAccessions = function () {
@@ -221,6 +212,29 @@ app.controller('filterController',
             $scope.model.accessionIds = null;
             $scope.model.traitOverlay = null;
             $scope.onTaxonQuery($scope.model.taxonQuery);
+        };
+
+        // onUserData() this is identical to map.js's onUserData().
+        // this could possibly be refactored to be a service of some kind.
+        $scope.onUserData = function () {
+            var modal = $uibModal.open({
+                animation: true,
+                templateUrl: STATIC_PATH + 'grin_app/partials/user-data-modal.html',
+                controller: 'userDataController',
+                size: 'lg',
+                resolve: {
+                    model: {
+                        BRANDING: BRANDING,
+                        STATIC_PATH: STATIC_PATH
+                    }
+                }
+            });
+            modal.result.then(function () {
+                geoJsonService.search();
+            }, function () {
+                // modal otherwise dismissed callback (ignore result) e.g.
+                // backdrop click
+            });
         };
 
         $scope.init();

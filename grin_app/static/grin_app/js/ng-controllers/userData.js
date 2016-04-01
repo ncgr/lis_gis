@@ -39,10 +39,8 @@ app.controller('userDataController',
 
         // the user's csv->json original data
         $localStorage.userData = $localStorage.userData || {};
-        // geojson and trait json will be parsed on dismissal of this dialog.
-        $localStorage.userGeoJson = null;
-        $localStorage.userTraitJson = null;
-
+        $localStorage.userGeoJson = $localStorage.userGeoJson || [];
+        $localStorage.userTraitData = $localStorage.userTraitData || [];
 
         if (!Papa) {
             throw('PapaParse javascript library is required.');
@@ -123,16 +121,44 @@ app.controller('userDataController',
         };
 
         function generateTraitJson() {
-            // iterate the userData collections, build one json collection.
-            // The geoJsonService will look for it there
-            // TODO: generateTraitJson
+            // iterate the userData collections, build an array of
+            // {accenumb, descriptor_name, observation_value} properties.
+            var traits = [];
+            var userData = $localStorage.userData;
+            _.each(userData, function(dataSet, setName) {
+                var data = dataSet.data;
+                _.each(data, function(rec) {
+                    if(rec.observation_value) {
+                         var data = {
+                               accenumb: rec.accession_id,
+                               descriptor_name: rec.descriptor,
+                               observation_value: rec.observation_value,
+                               is_nominal: rec.is_nominal,
+                               grouping: rec.grouping,
+                               data_set: setName
+                         };
+                         traits.push(data);
+                    }
+                });
+            });
+            $localStorage.userTraitData = traits;
+            console.log('generateTraitJson: ' + traits.length);
+            console.log(traits);
         }
+
         function generateGeoJson() {
             // iterate the userData collections, build one geojson collection
             // and put it in localStorage, where geoJsonService will find it.
             var geoJson = [];
-            _.each($localStorage.userData, function(dataSet) {
-                _.each(dataSet.data, function(rec) {
+            // uniquify the geoJson by accession number, in case multiple
+            // records were provided for the purposes of traits and observations
+            var userData = $localStorage.userData;
+            _.each(userData, function(dataSet, setName) {
+                var data = dataSet.data;
+                var uniqAccessions = _.uniqBy(data, function(d) {
+                    return d.accession_id;
+                });
+                _.each(uniqAccessions, function(rec) {
                     var o = {
                         geometry: {
                             type: 'Point',
@@ -159,6 +185,7 @@ app.controller('userDataController',
                 });
             });
             $localStorage.userGeoJson = geoJson;
+            console.log('generateGeoJson: ' + geoJson.length);
         }
 
         /* uniquify the errors from papaparse, then display in errors array */

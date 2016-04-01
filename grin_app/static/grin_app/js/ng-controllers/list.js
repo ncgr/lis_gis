@@ -12,14 +12,15 @@ app.controller('listController',
               $window,
               $timeout,
               $location,
+              $localStorage,
               geoJsonService) {
 
         $scope.model = {
             geoJsonService: geoJsonService,
-            $location: $location,
             searchHilite: null,
             showNearbySearchButtons: false,
             showNearbySearchText: null,
+            localStorage: $localStorage,
             STATIC_PATH: STATIC_PATH
         };
 

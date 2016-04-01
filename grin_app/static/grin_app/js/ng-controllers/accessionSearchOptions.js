@@ -10,6 +10,8 @@
  *
  */
 
+// TODO: make more reusable for use with "Add my data"
+
 app.controller('accessionSearchOptionsController',
     function ($scope, $uibModalInstance, model) {
 

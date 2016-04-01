@@ -255,19 +255,19 @@ app.controller('mapController',
                             return;
                         }
                     }
-                    if(currentPopup && currentPopup.accId === accId) {
+                    var cp = currentPopup;
+                    if(cp && cp.accId === accId) {
                         // don't touch the existing popup if matches selection.
                         return;
                     }
-                    var fixPopup = function (layer) {
+                    mapLayer.eachLayer(function (layer) {
                         if (layer._popup.accId == accId) {
-                            if(currentPopup) {
-                                currentPopup.ignoreCloseEvt = true;
+                            if(cp) {
+                                cp.ignoreCloseEvt = true;
                             }
                             layer.openPopup(); // will close current popup.
                         }
-                    };
-                    mapLayer.eachLayer(fixPopup);
+                    });
                 });
 
             // finally, sync the bounds of the leaflet map with the geojson
@@ -370,14 +370,7 @@ app.controller('mapController',
                 }
             });
             modal.result.then(function () {
-                // override the list of accession Ids in the search filter.
-                // this will enable merging of user's properties e.g. lat/lng.
-                var accIds = _.map($localStorage.userGeoJson, function (d) {
-                    return d.properties.accenumb;
-                });
-                // geoJsonService.postProcessSearch() will then merge in user
-                // provided data.
-                geoJsonService.setAccessionIds(accIds.join(','), true);
+                geoJsonService.search();
             }, function () {
                 // modal otherwise dismissed callback (ignore result) e.g.
                 // backdrop click
@@ -486,7 +479,5 @@ app.controller('mapController',
             return (featureData.geometry.coordinates !== null);
         }
 
-
         $scope.init();
-        $scope.onUserData();
     });

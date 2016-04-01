@@ -8,6 +8,16 @@ app.service('geoJsonService',
         var DEFAULT_ZOOM = 6;
         var MARKER_RADIUS = 8;
 
+        // Brewer nominal category colors from chroma.js set1,2,3 concatenated/
+        // this code is duplicated from views.py -> evaluation_metadata()
+        var NOMINAL_COLORS = [
+            "#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#ffff33",
+            "#a65628", "#f781bf", "#999999", "#66c2a5", "#fc8d62", "#8da0cb",
+            "#e78ac3", "#a6d854", "#ffd92f", "#e5c494", "#b3b3b3", "#8dd3c7",
+            "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69",
+            "#fccde5", "#d9d9d9", "#bc80bd", "#ccebc5", "#ffed6f"
+        ];
+
         var s = {}; // service/singleton we will construct & return
         s.updating = false;
         s.data = []; // an array of geoJson features
@@ -96,13 +106,10 @@ app.service('geoJsonService',
         };
 
         function postProcessSearch() {
-            s.params = s.getSearchParams();
-
-            if($localStorage.userGeoJson) {
+            if ($localStorage.userGeoJson) {
                 mergeUserGeoJson();
                 mergeUserTraitJson();
             }
-
             s.updateBounds();
             s.updateColors();
             s.updateMarkerStrategy();
@@ -118,6 +125,9 @@ app.service('geoJsonService',
             s.data = [];
             s.traitData = [];
             s.traitHash = {};
+
+            // s.params will be used by various templates and controllers,
+            // so refresh it upon every search
             s.params = s.getSearchParams();
 
             $http({
@@ -179,6 +189,7 @@ app.service('geoJsonService',
                             function (resp) {
                                 // success handler
                                 s.traitMetadata = resp.data;
+                                console.log(s.traitMetadata);
                             },
                             function (resp) {
                                 // error handler
@@ -243,10 +254,31 @@ app.service('geoJsonService',
             return merged;
         };
 
+        /* Search for trait descriptors matching this taxon string.
+         * Merge in user trait data, if any.
+         * Callback function with array of allowed descriptors. */
+        s.getTraitDescriptors = function(taxon, callback) {
+            var postProcess = function(response) {
+                var apiDescriptors = response.data;
+                var userTraits = $localStorage.userTraitData;
+                var userDescriptors = _.map(userTraits, function(d) {
+                   return d.descriptor_name;
+                });
+                var result = _.union(apiDescriptors, _.uniq(userDescriptors));
+                result.sort();
+                callback(result);
+            };
+            $http({
+                url: API_PATH + '/evaluation_descr_names',
+                method: 'GET',
+                params: { taxon: taxon }
+            }).then(postProcess);
+        };
+        
         /* set one selected accession to hilight in the UI */
         s.setSelectedAccession = function (accId) {
             // early out if accId is null (de-selection)
-            if(! accId) {
+            if (!accId) {
                 var changed = (s.selectedAccession !== null);
                 s.selectedAccession = null;
                 if (changed) {
@@ -400,33 +432,32 @@ app.service('geoJsonService',
             }
         };
 
-        function customizer(objValue, srcValue) {
-
-        }
-
         /* mergeUserGeoJson(): make a dict of all accession ids in search
-           results, check & merge properties if user geojson is overriding any
-           of the accessions.*/
+         results, check & merge properties if user geojson is overriding any
+         of the accessions.*/
         function mergeUserGeoJson() {
             var addAccessions = {};
             var userAccessions = {};
             var allAccessions = {};
-            var customizer = function(destProp, srcProp) {
+            var customizer = function (destProp, srcProp) {
                 // allow sourced properties to override destination properties.
                 return _.isUndefined(srcProp) ? destProp : destProp;
             };
-            _.each(s.data, function (d) {
+            var data = s.data;
+            _.each(data, function (d) {
                 allAccessions[d.properties.accenumb] = d;
             });
-            _.each($localStorage.userGeoJson, function (d) {
+            var userData = $localStorage.userGeoJson;
+            _.each(userData, function (d) {
                 var accId = d.properties.accenumb;
                 userAccessions[accId] = d;
-                if(allAccessions[accId]) {
-                    // user has provided this accession, so extend it's props.
+                if (allAccessions[accId]) {
+                    // user has searched for this accession id already, so
+                    // so extend it's props.
                     var src = d.properties;
                     var dst = allAccessions[accId].properties;
                     _.extendWith(dst, src, customizer);
-                    if(d.geometry.coordinates.length) {
+                    if (d.geometry.coordinates.length) {
                         allAccessions[accId].geometry.coordinates =
                             d.geometry.coordinates;
                     }
@@ -436,16 +467,52 @@ app.service('geoJsonService',
                     addAccessions[accId] = d;
                 }
             });
-            _.each(addAccessions, function(d, accId) {
-                s.data.unshift(d);
+            _.each(addAccessions, function (d, accId) {
+                data.unshift(d);
             });
+            s.data = data;
         }
 
+        /*
+         * mergeUserTraitJson(): $localStorage.userTraitData is already in same
+         * format received from API for metadata (same as s.traitData). Filter
+         * the user trait data to match what is selected in the Search
+         * interface, then concat the userTrait data, and then update the trait
+         * metadata.
+         */
         function mergeUserTraitJson() {
-            if (!$localStorage.userTraitJson) {
-                return;
+            var traits = $localStorage.userTraitData;
+            var selectedTrait = s.params.traitOverlay;
+            var selectedUserTraits = _.filter(traits, function(d) {
+                return (d.descriptor_name === selectedTrait);
+            });
+            s.traitData = _.concat(s.traitData, selectedUserTraits);
+            var traitMetadata = s.traitMetadata || {};
+            var min = traitMetadata.min || Number.POSITIVE_INFINITY;
+            var max = traitMetadata.max || Number.NEGATIVE_INFINITY;
+            _.each(selectedUserTraits, function(d) {
+                traitMetadata.trait_type = d.is_nominal ? 'nominal' : 'numeric';
+                traitMetadata.taxon_query = traitMetadata.taxon_query || d.taxon;
+                traitMetadata.descriptor_name = d.descriptor_name;
+                if(! d.is_nominal) {
+                    if(d.observation_value < min) {
+                        min = d.observation_value;
+                    }
+                    else if(d.observation_value > max) {
+                        max = d.observation_value;
+                    }
+                }
+            });
+            if(traitMetadata.trait_type === 'numeric') {
+                traitMetadata.min = min;
+                traitMetadata.max = max;
+                // TODO: generate colors object
             }
-            // TODO: mergeUserTraitJson
+            else {
+
+            }
+            console.log(s.traitData);
+            console.log(s.traitMetadata);
         }
 
         /* use a custom color scheme with a range of the selected trait
@@ -493,35 +560,48 @@ app.service('geoJsonService',
         }
 
         function colorStrategyCategoryTrait() {
+            var traitData = s.traitData;
+            var traitHash = s.traitHash;
+            var traitMetadata = s.traitMetadata;
+            var data = s.data;
 
-            _.each(s.traitData, function (d) {
-                if (s.traitHash[d.accenumb]) {
-                    s.traitHash[d.accenumb].push(d.observation_value);
+            _.each(traitData, function (d) {
+                var accId = d.accenumb;
+                var value = d.observation_value;
+                if (traitHash[accId]) {
+                    traitHash[accId].push(value);
                 }
                 else {
-                    s.traitHash[d.accenumb] = [d.observation_value];
+                    traitHash[accId] = [value];
                 }
             });
 
-            _.each(s.data, function (d) {
-                var traitValues = s.traitHash[d.properties.accenumb];
+            _.each(data, function (d) {
+                var props = d.properties;
+                var traitValues = traitHash[props.accenumb];
                 if (traitValues !== undefined) {
-                    // unsure how to handle case where multiple categories were
-                    // observed, so just take the 1st
+                    // warning: unsure how to handle case where multiple
+                    // categories were observed, so just take the 1st obs.
                     var val = traitValues[0];
-                    d.properties.color = s.traitMetadata.colors[val];
-                    d.properties.haveTrait = true;
+                    if(val in traitMetadata.colors) {
+                        props.color = traitMetadata.colors[val];
+                    }
+                    else {
+                        console.log('missing color for: ' + val);
+                        props.color = taxonChroma.defaultColor;
+                    }
+                    props.haveTrait = true;
                 }
                 else {
-                    d.properties.color = taxonChroma.defaultColor;
+                    props.color = taxonChroma.defaultColor;
                 }
             });
 
-            var legendValues = _.map(s.traitMetadata.obs_nominal_values,
+            var legendValues = _.map(traitMetadata.obs_nominal_values,
                 function (n) {
                     return {
                         label: n,
-                        color: s.traitMetadata.colors[n]
+                        color: traitMetadata.colors[n]
                     }
                 });
             s.traitLegend = {

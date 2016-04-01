@@ -1,3 +1,4 @@
 accession_id,taxon,latitude,longitude,descriptor,observation_value,is_nominal
-ALEX_1,Phaseolus lunatus,35.87,-110.41,hello,hello_value,true
-DLEG 890123,Phaseolus lunatus,35.87,-111.41,hello,hello_value,true
+EXAMPLE_1,Phaseolus lunatus,35.87,-110.41,A_NOMINAL_TRAIT,val1,true
+EXAMPLE_2,Phaseolus lunatus,35.87,-111.41,A_NOMINAL_TRAIT,val2,true
+

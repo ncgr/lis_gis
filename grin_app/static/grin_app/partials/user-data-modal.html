@@ -188,7 +188,7 @@
                 <th>is_nominal</th>
             </tr>
             <tr ng-repeat="rec in model.results.data | limitTo: model.previewLimit">
-                <td class="parsed-csv">css{{rec.accession_id}}</td>
+                <td class="parsed-csv">{{rec.accession_id}}</td>
                 <td class="parsed-csv">{{rec.latitude}}</td>
                 <td class="parsed-csv">{{rec.longitude}}</td>
                 <td class="parsed-csv">{{rec.descriptor}}</td>
