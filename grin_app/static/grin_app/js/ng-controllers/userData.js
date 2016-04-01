@@ -134,7 +134,6 @@ app.controller('userDataController',
                                descriptor_name: rec.descriptor,
                                observation_value: rec.observation_value,
                                is_nominal: rec.is_nominal,
-                               grouping: rec.grouping,
                                data_set: setName
                          };
                          traits.push(data);
@@ -142,8 +141,6 @@ app.controller('userDataController',
                 });
             });
             $localStorage.userTraitData = traits;
-            console.log('generateTraitJson: ' + traits.length);
-            console.log(traits);
         }
 
         function generateGeoJson() {
@@ -185,7 +182,6 @@ app.controller('userDataController',
                 });
             });
             $localStorage.userGeoJson = geoJson;
-            console.log('generateGeoJson: ' + geoJson.length);
         }
 
         /* uniquify the errors from papaparse, then display in errors array */

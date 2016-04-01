@@ -89,6 +89,10 @@ app.controller('filterController',
             if (!taxon || taxon.length < 3) {
                 return;
             }
+           refreshTraitMenu(taxon);
+        };
+
+        function refreshTraitMenu(taxon) {
             $scope.model.traitDescriptors = null;
             var callback = function(data) {
                 $scope.model.traitDescriptors = data;
@@ -99,7 +103,7 @@ app.controller('filterController',
                 }
             };
             geoJsonService.getTraitDescriptors(taxon, callback);
-        };
+        }
 
         $scope.onExampleAccessions = function () {
             $scope.model.limitToMapExtent = false;
@@ -118,6 +122,10 @@ app.controller('filterController',
                 console.log(resp);
             });
 
+        };
+
+        $scope.onTraitsRefresh = function() {
+            refreshTraitMenu($scope.model.taxonQuery);
         };
 
         $scope.onTraitOverlayExample = function () {

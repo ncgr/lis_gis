@@ -1,4 +1,9 @@
 accession_id,taxon,latitude,longitude,descriptor,observation_value,is_nominal
-EXAMPLE_1,Phaseolus lunatus,35.87,-110.41,A_NOMINAL_TRAIT,val1,true
-EXAMPLE_2,Phaseolus lunatus,35.87,-111.41,A_NOMINAL_TRAIT,val2,true
-
+EXAMPLE_5,Phaseolus lunatus,35.87,-113.41,A_NOMINAL_TRAIT,val1,true
+EXAMPLE_6,Phaseolus lunatus,35.87,-114.41,A_NOMINAL_TRAIT,val2,true
+EXAMPLE_5,Phaseolus lunatus,35.87,-113.41,A_NOMINAL_TRAIT,val3,true
+EXAMPLE_6,Phaseolus lunatus,35.87,-114.41,A_NOMINAL_TRAIT,val4,true
+EXAMPLE_7,Phaseolus lunatus,35.87,-115.41,A_NUMERIC_TRAIT,75,false
+EXAMPLE_7,Phaseolus lunatus,35.87,-115.41,A_NUMERIC_TRAIT,25,false
+EXAMPLE_8,Phaseolus lunatus,35.87,-116.41,A_NUMERIC_TRAIT,66.6,false
+EXAMPLE_8,Phaseolus lunatus,35.87,-116.41,A_NUMERIC_TRAIT,33.3,false

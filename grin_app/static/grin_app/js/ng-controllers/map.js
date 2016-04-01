@@ -95,9 +95,7 @@ app.controller('mapController',
             $scope.model.baseMapLayer = $scope.model.baseMaps[DEFAULT_BASEMAP]();
             $scope.model.baseMapLayer.addTo($scope.model.map);
             mapLayer = L.geoJson(geoJsonService.data, {
-                pointToLayer: function (feature, layer) {
-                    return geoJsonService.markerCallback(feature, layer);
-                },
+                pointToLayer: geoJsonService.getFeatureMarker,
                 onEachFeature: function (feature, layer) {
                     // bind a popup to each feature
                     var accId = feature.properties.accenumb;
@@ -225,21 +223,23 @@ app.controller('mapController',
             });
 
             $scope.model.map.on('popupclose', function (e) {
+                // TODO: fix this, is currently broken, so ignore popupclose ftw.
+
                 //use timeout to enter ng event digest
                 currentPopup = null;
-                if(e.popup.ignoreCloseEvt) {
-                    delete e.popup.ignoreCloseEvt;
-                    return;
-                }
-                $timeout(function () {
-                    var accId = geoJsonService.selectedAccession;
-                    if (accId === e.popup.accId) {
-                        // the popup was closed, and it matches the selected
-                        // accession, so... user wants to dismiss selected acc.
-                        // currentPopup = null;
-                        geoJsonService.setSelectedAccession(null);
-                    }
-                });
+                // if(e.popup.ignoreCloseEvt) {
+                //     delete e.popup.ignoreCloseEvt;
+                //     return;
+                // }
+                // $timeout(function () {
+                //     var accId = geoJsonService.selectedAccession;
+                //     if (accId === e.popup.accId) {
+                //         // the popup was closed, and it matches the selected
+                //         // accession, so... user wants to dismiss selected acc.
+                //         // currentPopup = null;
+                //         geoJsonService.setSelectedAccession(null);
+                //     }
+                // });
             });
 
             geoJsonService.subscribe($scope, 'selectedAccessionUpdated',
@@ -261,7 +261,7 @@ app.controller('mapController',
                         return;
                     }
                     mapLayer.eachLayer(function (layer) {
-                        if (layer._popup.accId == accId) {
+                        if (layer._popup && layer._popup.accId == accId) {
                             if(cp) {
                                 cp.ignoreCloseEvt = true;
                             }

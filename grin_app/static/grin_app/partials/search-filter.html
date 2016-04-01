@@ -170,11 +170,19 @@
                                     {{name}}
                                 </option>
                             </select>
-                            <button type="submit" class="btn btn-sm btn-default"
+                            <button type="submit"
+                                    class="btn btn-sm btn-default"
                                     ng-disabled="! model.taxonQuery">
-		<span class="glyphicon glyphicon-search"
-              aria-hidden="true"></span>
+                                <span class="glyphicon glyphicon-search"
+                                      aria-hidden="true"></span>
                                 Go
+                            </button>
+                            <button type="button"
+                                    class="btn btn-sm btn-default"
+                                    ng-click="onTraitsRefresh()">
+                                <span class="glyphicon glyphicon-refresh"
+                                      aria-hidden="true"></span>
+                                Refresh
                             </button>
                             <button type="button"
                                     ng-click="model.traitOverlay = null; model.traitExcludeUnchar = false;"
