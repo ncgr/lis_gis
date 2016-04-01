@@ -298,8 +298,19 @@ def evaluation_detail(req):
     assert req.method == 'GET', 'GET request method required'
     params = req.GET.dict()
     assert 'accenumb' in params, 'missing accenumb param'
+    prefix = ''
+    acc_num = ''
+    suffix = ''
     parts = params['accenumb'].split()
-    prefix, acc_num, rest = parts[0], parts[1], parts[2:]  # suffix optional
+    parts_len = len(parts)
+    if parts_len > 2:
+        prefix, acc_num, rest = parts[0], parts[1], parts[2:]  # suffix optional
+    elif parts_len == 2:
+        prefix, acc_num = parts[0], parts[1]
+    elif parts_len == 1:
+        acc_num = parts[0]
+    else:
+        acc_num = params['accenumb']
     suffix = ' '.join(rest)
     cursor = connection.cursor()
     sql_params = {
