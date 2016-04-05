@@ -8,7 +8,6 @@
 </div>
 
 <div id="menu" ng-if="model.showMenu" class="menu-spc">
-
     <button id="reframe-btn"
             type="submit" class="btn btn-sm btn-default"
             ng-click="onZoomToAccessions()">
@@ -17,8 +16,8 @@
         Reframe map to accessions
     </button>
 
-    <button id="change-base-map-btn" class="btn btn-sm btn-default"
-            ng-click="onUserData()">
+    <button id="add-my-data-btn" class="btn btn-sm btn-default"
+            ng-click="model.geoJsonService.onUserData()">
         <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
         Add my data
     </button>

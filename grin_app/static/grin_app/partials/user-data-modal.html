@@ -13,7 +13,6 @@
         Add new accessions, or override existing data attributes.
     </p>
 
-
     <div class="alert alert-success" ng-if="model.showExample">
         <button type="button" class="close"
                 data-dismiss="alert" aria-label="Close">
@@ -178,22 +177,17 @@
                            class="form-control" size="3">
             of {{model.results.data.length }} total records.
         </div>
+        {{ getHeaders() }}
         <table class="table table-striped">
             <tr>
-                <th>accession_id</th>
-                <th>latitude</th>
-                <th>longitude</th>
-                <th>descriptor</th>
-                <th>observation_value</th>
-                <th>is_nominal</th>
+                <th ng-repeat="h in model.sortedHeaders">
+                    {{h}}
+                </th>
             </tr>
             <tr ng-repeat="rec in model.results.data | limitTo: model.previewLimit">
-                <td class="parsed-csv">{{rec.accession_id}}</td>
-                <td class="parsed-csv">{{rec.latitude}}</td>
-                <td class="parsed-csv">{{rec.longitude}}</td>
-                <td class="parsed-csv">{{rec.descriptor}}</td>
-                <td class="parsed-csv">{{rec.observation_value}}</td>
-                <td class="parsed-csv">{{rec.is_nominal}}</td>
+                <td class="parsed-csv" ng-repeat="h in model.sortedHeaders">
+                    {{rec[h]}}
+                </td>
             </tr>
         </table>
     </div>

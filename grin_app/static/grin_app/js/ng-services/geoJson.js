@@ -1,12 +1,14 @@
 "use strict";
 
 app.service('geoJsonService',
-    function ($http, $rootScope, $location, $timeout, $q, $localStorage) {
+    function ($http, $rootScope, $location, $timeout, $q,
+              $localStorage, $uibModal) {
 
         var DEFAULT_CENTER = {'lat': 35.87, 'lng': -109.47};
         var MAX_RECS = 200;
         var DEFAULT_ZOOM = 6;
         var MARKER_RADIUS = 8;
+        var DEFAULT_TRAIT = '(default)';
 
         // Brewer nominal category colors from chroma.js set1,2,3 concatenated/
         // this code is duplicated from views.py -> evaluation_metadata()
@@ -19,8 +21,10 @@ app.service('geoJsonService',
         ];
 
         var s = {}; // service/singleton we will construct & return
+        s.DEFAULT_TRAIT = DEFAULT_TRAIT;
         s.updating = false;
         s.data = []; // an array of geoJson features
+        s.sortedHeaders = [];
         s.selectedAccession = null; // single accession object currently select.
 
         s.traitData = []; // an array of json with observation_values
@@ -34,12 +38,17 @@ app.service('geoJsonService',
         s.bounds = L.latLngBounds(L.latLng(0, 0), L.latLng(0, 0));
 
         // array of event names we are publishing
-        s.events = ['updated', 'willUpdate', 'selectedAccessionUpdated'];
+        s.events = [
+            'updated',
+            'willUpdate',
+            'selectedAccessionUpdated',
+            'accessionIdsUpdated',
+        ];
 
         s.init = function () {
 
             // set default search values on $location service
-            s.params = s.getSearchParams();
+            s.params = getSearchParams();
 
             if (!('zoom' in s.params)) {
                 $location.search('zoom', DEFAULT_ZOOM);
@@ -74,7 +83,7 @@ app.service('geoJsonService',
             }
             // store updated search params in property of service, for ease of
             // use by controllers and views.
-            s.params = s.getSearchParams();
+            s.params = getSearchParams();
         };
 
         s.showAllNearbySameTaxon = function () {
@@ -107,15 +116,31 @@ app.service('geoJsonService',
 
         function postProcessSearch() {
             if ($localStorage.userGeoJson) {
-                mergeUserGeoJson();
-                mergeUserTraitJson();
+               mergeUserGeoJson();
+               mergeUserTraitJson();
             }
             s.updateBounds();
             s.updateColors();
             s.updating = false;
             s.setSelectedAccession(s.selectedAccession);
-            s.notify('updated');
+            notify('updated');
         }
+
+        /* onUserData() -- display the modal dialog for user provided data. */
+        s.onUserData = function() {
+          var modal = $uibModal.open({
+                animation: true,
+                templateUrl: STATIC_PATH + 'grin_app/partials/user-data-modal.html',
+                controller: 'userDataController',
+                size: 'lg',
+                resolve: {
+                    model: {
+                        BRANDING: BRANDING,
+                        STATIC_PATH: STATIC_PATH
+                    }
+                }
+            });
+        };
 
         s.search = function () {
             $rootScope.errors = [];
@@ -127,7 +152,7 @@ app.service('geoJsonService',
 
             // s.params will be used by various templates and controllers,
             // so refresh it upon every search
-            s.params = s.getSearchParams();
+            s.params = getSearchParams();
 
             $http({
                 url: API_PATH + '/search',
@@ -157,7 +182,9 @@ app.service('geoJsonService',
                         s.setGeocodedAccessionsOnly(false, true);
                         return;
                     }
-                    if (s.params.taxonQuery && s.params.traitOverlay && s.data.length > 0) {
+                    if (! _.isEmpty(s.params.taxonQuery) &&
+                        ! _.isEmpty(s.params.traitOverlay) &&
+                        ! _.isEmpty(s.data)) {
                         var promise1 = $http({
                             url: API_PATH + '/evaluation_search',
                             method: 'POST',
@@ -217,7 +244,7 @@ app.service('geoJsonService',
         /* return a shallow copy of $location.search() object, merging in
          properties for any local storage params, e.g. accessionIds which
          have overflowed the limit for URL param. */
-        s.getSearchParams = function () {
+         function getSearchParams() {
             var params = $location.search(); // get search dictionary (no params)
             // url query string overrides anything in localStorage
             if (params.accessionIds) {
@@ -252,9 +279,9 @@ app.service('geoJsonService',
             return merged;
         };
 
-        /* Search for trait descriptors matching this taxon string.
-         * Merge in user trait data, if any.
-         * Callback function with array of allowed descriptors. */
+        /* Search for trait descriptors matching this taxon string. Merge in
+         * user trait data, if any. Call the callback function with array of
+         * allowed descriptors. */
         s.getTraitDescriptors = function(taxon, callback) {
             var postProcess = function(response) {
                 var apiDescriptors = response.data;
@@ -280,7 +307,7 @@ app.service('geoJsonService',
                 var changed = (s.selectedAccession !== null);
                 s.selectedAccession = null;
                 if (changed) {
-                    s.notify('selectedAccessionUpdated');
+                    notify('selectedAccessionUpdated');
                 }
                 return;
             }
@@ -303,7 +330,7 @@ app.service('geoJsonService',
             var changed = (s.selectedAccession !== accId);
             s.selectedAccession = accId;
             if (changed) {
-                s.notify('selectedAccessionUpdated');
+                notify('selectedAccessionUpdated');
             }
         };
 
@@ -361,7 +388,6 @@ app.service('geoJsonService',
             // allowed URL length with search parameters, so use localstorage.
             delete $localStorage.accessionIds;
             $location.search('accessionIds', null);
-
             if (accessionIds) {
                 var ids = accessionIds.split(',');
                 if (ids.length <= 10) {
@@ -373,6 +399,7 @@ app.service('geoJsonService',
                     $localStorage.accessionIds = accessionIds;
                 }
             }
+            notify('accessionIdsUpdated');
             s.initialBoundsUpdated = false;
             if (search) {
                 s.search();
@@ -431,8 +458,10 @@ app.service('geoJsonService',
         };
 
         /* mergeUserGeoJson(): make a dict of all accession ids in search
-         results, check & merge properties if user geojson is overriding any
-         of the accessions.*/
+         * results, check & merge properties if user geojson is overriding any
+         * of the accessions. Some of the geoJson coming from userData.js may be
+         * invalid, for instance of they did not provide lat/long, then we
+         * should default to the lat/long provided by the GRIN accessions. */
         function mergeUserGeoJson() {
             var addAccessions = {};
             var userAccessions = {};
@@ -455,7 +484,10 @@ app.service('geoJsonService',
                     var src = d.properties;
                     var dst = allAccessions[accId].properties;
                     _.extendWith(dst, src, customizer);
-                    if (d.geometry.coordinates.length) {
+                    // make sure the lat/long are defined, otherwise default
+                    // to the GRIN accessions geographic coords.
+                    if (d.geometry.coordinates.length &&
+                        d.geometry.coordinates[0]) {
                         allAccessions[accId].geometry.coordinates =
                             d.geometry.coordinates;
                     }
@@ -525,45 +557,76 @@ app.service('geoJsonService',
                 }
                 traitMetadata.obs_nominal_values = uniqVals;
             }
+    //            console.log(traitMetadata);
             s.traitMetadata = traitMetadata;
         }
 
-        /* use a custom color scheme with a range of the selected trait
-         iterate the trait results once, to build a lookup table */
+        /* use a custom color scheme with a range of the selected trait.
+         iterate the trait results once, to build a lookup table by accession
+         id. */
         function colorStrategyNumericTrait() {
             var traitData = s.traitData;
             var traitHash = s.traitHash;
 
+            // make a dict of all the observations for each accession id
+            // multi-keyed like: accession id -> subdescriptor -> value
             _.each(traitData, function (d) {
-                if (traitHash[d.accenumb]) {
-                    traitHash[d.accenumb].push(d.observation_value);
+                var accId = d.accenumb;
+                var subDescriptor = (d.sub_descriptor_name) ?
+                    d.sub_descriptor_name : DEFAULT_TRAIT;
+                if(! traitHash[accId]) {
+                    traitHash[accId] = {};
+                }
+                if (traitHash[accId][subDescriptor]) {
+                    traitHash[accId][subDescriptor].push(d.observation_value);
                 }
                 else {
-                    traitHash[d.accenumb] = [d.observation_value];
+                    traitHash[accId][subDescriptor] = [d.observation_value];
                 }
             });
+            s.traitHash = traitHash;
+
             var min = s.traitMetadata.min;
             var max = s.traitMetadata.max;
-
             var scale = chroma.scale('Spectral').domain([max, min]);
             var data = s.data;
+
             _.each(data, function (acc) {
-                var traitValues = traitHash[acc.properties.accenumb];
-                if (traitValues !== undefined) {
+                var props = acc.properties;
+                var accId = props.accenumb;
+                var traitDescriptors = traitHash[accId];
+                if(_.isEmpty(traitDescriptors) ||
+                    DEFAULT_TRAIT in traitDescriptors) {
                     // it is not unusual to have multiple observations, so just
-                    // average them-- possible there is a better way to handle this case
-                    var avg = _.sum(traitValues, function (d) {
-                            return d;
-                        }) / traitValues.length;
-                    acc.properties.color = scale(avg).hex();
-                    acc.properties.haveTrait = true;
-                } else {
-                    acc.properties.color = taxonChroma.defaultColor;
+                    // average them. this seems to make the most sense for now.
+                    var valueLists = _.map(traitHash[accId],
+                        function (value, key) {
+                            return value;
+                        });
+                    var traitValues = _.uniq(_.flatten(valueLists));
+                    if (!_.isEmpty(traitValues)) {
+                        var avg = _.sum(traitValues, function (d) {
+                                return d;
+                            }) / traitValues.length;
+                        props.color = scale(avg).hex();
+                        props.haveTrait = true;
+                    } else {
+                        props.color = taxonChroma.defaultColor;
+                    }
+                }
+                else {
+                    // have custom sub-descriptors, e.g for population study.
+                    // the pieChartNumericMarkerMaker() will construct
+                    // the pie values
+                    props.color = null;
                 }
             });
+
+            // build a legend with min/max values and interpolated colors
             var steps = 10;
             var step = (max - min) / steps;
-            var legendValues = _.map(_.range(min, max + step, step), function (n) {
+            try {
+                var legendValues = _.map(_.range(min, max + step, step), function (n) {
                 return {
                     label: n.toFixed(2),
                     color: scale(n).hex()
@@ -575,6 +638,9 @@ app.service('geoJsonService',
                 colorScale: scale,
                 values: legendValues
             };
+            } catch(e) {
+                // horrible workaround for supporting userprovided data.
+            }
         }
 
         function colorStrategyCategoryTrait() {
@@ -586,18 +652,29 @@ app.service('geoJsonService',
             _.each(traitData, function (d) {
                 var accId = d.accenumb;
                 var value = d.observation_value;
-                if (traitHash[accId]) {
-                    traitHash[accId].push(value);
+                var subDescriptor = (d.sub_descriptor_name) ?
+                    d.sub_descriptor_name : DEFAULT_TRAIT;
+                if(! traitHash[accId]) {
+                    traitHash[accId] = {};
+                }
+                if (traitHash[accId][subDescriptor]) {
+                    traitHash[accId][subDescriptor].push(value);
                 }
                 else {
-                    traitHash[accId] = [value];
+                    traitHash[accId][subDescriptor] = [value];
                 }
             });
+             s.traitHash = traitHash;
 
             _.each(data, function (d) {
                 var props = d.properties;
-                var traitValues = traitHash[props.accenumb];
-                if (traitValues !== undefined) {
+                var test = traitHash[props.accenumb];
+                var valueLists =  _.map(traitHash[props.accenumb],
+                    function(value, key) {
+                        return value;
+                    });
+                var traitValues = _.uniq(_.flatten(valueLists));
+                if (! _.isEmpty(traitValues)) {
                     var val = traitValues[0];
                     if(val in traitMetadata.colors) {
                         props.color = traitMetadata.colors[val];
@@ -634,8 +711,9 @@ app.service('geoJsonService',
             var data = s.data;
             var params = s.params;
             var traitMetadata = s.traitMetadata;
-
             if (params.traitOverlay) {
+                // a trait descriptor is selected, so apply a coloring
+                // strategy, generate a legend, etc.
                 if (traitMetadata.trait_type === 'numeric') {
                     colorStrategyNumericTrait();
                 }
@@ -662,47 +740,29 @@ app.service('geoJsonService',
         };
 
         /*
-         * updateMarkerStrategy() Use Leaflet's circleMarker by default. If we
-         * are displaying categorical trait data, then draw a pie-chart
-         * marker with all the nominal values.
-         */
-        s.updateMarkerStrategy_defunct = function () {
-            // TODO: remove defunct-ion
-            if (s.params.traitOverlay &&
-                s.traitMetadata.trait_type === 'nominal') {
-                s.markerCallback = getPieChartMarker;
-            }
-            else {
-                s.markerCallback = getCircleMarker;
-            }
-        };
-
-          /*
-         * getFeatureMarker(): Return a circle marker by default, if there is no
+        * getFeatureMarker(): Return a circle marker by default, if there is no
         * trait overlay. If the trait is categorical, with multiple values,
         * return a pie chart marker of equal proportions. If the trait is
         * numeric, return a pie chart marker with pieces sized proportionately.
         * Otherwise, return a circle marker.
          */
         s.getFeatureMarker = function(feature, latlng) {
-            var props = feature.properties;
-            var traitMetadata = s.traitMetadata;
-            var params = s.params;
-
-            if(params.traitOverlay) {
-                var data = s.traitHash[props.accenumb];
-                if(! data || data.length == 1) {
-                    // uncharacterized accession, default to circle marker.
-                    return circleMarkerMaker(props, latlng);
-                }
-                if(s.traitMetadata.trait_type === 'nominal') {
-                    return pieChartNominalMarkerMaker(props, data, latlng);
-                }
-                else {
-                    return pieChartNumericMarkerMaker(props, data, latlng);
-                }
+            if(_.isEmpty(s.params.traitOverlay)) {
+                return circleMarkerMaker(feature.properties, latlng);
             }
-            return circleMarkerMaker(props, latlng);
+            var traitSubDescriptors = s.traitHash[feature.properties.accenumb];
+            if(s.traitMetadata.trait_type === 'nominal') {
+                return pieChartNominalMarkerMaker(
+                    feature.properties, traitSubDescriptors, latlng);
+            }
+            if(_.isEmpty(traitSubDescriptors) ||
+                DEFAULT_TRAIT in traitSubDescriptors) {
+                // either this is either an uncharacterized accession, or
+                // there is no custom sub-descriptor, but anyways, use circle.
+                return circleMarkerMaker(feature.properties, latlng);
+            }
+            return pieChartNumericMarkerMaker(
+                feature.properties, traitSubDescriptors, latlng);
         };
 
          var circleMarkerMaker = function(props, latlng) {
@@ -724,27 +784,35 @@ app.service('geoJsonService',
          var pieChartNumericMarkerMaker = function(props, data, latlng) {
             // construct data dictionary and chartOptions for leaflet-dvf
             // piechart plugin.
-            var dataDict = _.keyBy(data, function (d) {
-                return d;
-            });
+            var vals = [];
+            //var dataDict =// data; /* is keyed by sub_descriptor_name -> value */
+
+             // the geojson element may be tagged with a color already, in
+             // which case just return a circle
+             if(props.color !== null) {
+                  return circleMarkerMaker(props, latlng);
+             }
+
+             // the data dict needs to be keyed by the subdescriptor, and the
+             // observation value, for the map marker to display the info.
+            // collapse all the observed values into an array. each observed
+            // value will be sized by the numeric value.
             var legend = s.traitLegend;
-            dataDict = _.mapValues(dataDict, function (d) {
-                return d;
-            });
-            var chartOptionsDict = _.keyBy(data, function (d) {
-                return d;
-            });
-            chartOptionsDict = _.mapValues(chartOptionsDict, function (d) {
-                return {
-                    fillColor: legend.colorScale(d).hex(),
-                    displayText: function () {
-                        return props.accenumb;
+            var dataDict = {};
+            var chartOpts = {};
+            _.each(data, function(value, key) {
+                var k = key + ' = ' + value;
+                dataDict[k] = value;
+                chartOpts[k] = {
+                    fillColor: legend.colorScale(value).hex(),
+                        displayText: function () {
+                            return props.accenumb;
                     }
                 }
             });
             var options = {
                 data: dataDict,
-                chartOptions: chartOptionsDict,
+                chartOptions: chartOpts,
                 radius: MARKER_RADIUS,
                 opacity: 1.0,
                 fillOpacity: 1.0,
@@ -756,28 +824,37 @@ app.service('geoJsonService',
         var pieChartNominalMarkerMaker = function(props, data, latlng) {
             // construct data dictionary and chartOptions for leaflet-dvf
             // piechart plugin
-            var dataDict = _.keyBy(data, function (d) {
-                return d;
-            });
+            var dataDict = {};
+            var chartOpts = {};
             var traitMetadata = s.traitMetadata;
-            var degreesPerCategory = 360 / data.length;
-            dataDict = _.mapValues(dataDict, function () {
-                return degreesPerCategory;
-            });
-            var chartOptionsDict = _.keyBy(data, function (d) {
-                return d;
-            });
-            chartOptionsDict = _.mapValues(chartOptionsDict, function (d) {
-                return {
-                    fillColor: traitMetadata.colors[d],
-                    displayText: function () {
-                        return props.accenumb;
+
+            // collapse all the observed values into an array. each observed
+            // value will be an equal valued piece of pie chart.
+            var counts = {};
+            _.each(data, function(value, key) {
+                _.each(value, function(d) {
+                    var k = d;
+                    if(k in dataDict) {
+                        // multiple observations of same nominal trait.
+                        // make another pie piece for each one.
+                        counts[d]++;
+                        k = d + ' (' + counts[d] + ')';
                     }
-                }
+                    else {
+                        counts[d] = 1;
+                    }
+                    dataDict[k] = 1;
+                    chartOpts[k] = {
+                        fillColor: traitMetadata.colors[d],
+                        displayText: function () {
+                            return props.accenumb;
+                        }
+                    }
+                });
             });
             var options = {
                 data: dataDict,
-                chartOptions: chartOptionsDict,
+                chartOptions: chartOpts,
                 radius: MARKER_RADIUS,
                 opacity: 1.0,
                 fillOpacity: 1.0,
@@ -838,9 +915,9 @@ app.service('geoJsonService',
             return handler;
         };
 
-        s.notify = function (eventName) {
+        function notify(eventName) {
             $rootScope.$emit('geoJsonService_' + eventName);
-        };
+        }
 
         s.init();
 

@@ -1,9 +1,17 @@
-accession_id,taxon,latitude,longitude,descriptor,observation_value,is_nominal
-EXAMPLE_5,Phaseolus lunatus,35.87,-113.41,A_NOMINAL_TRAIT,val1,true
-EXAMPLE_6,Phaseolus lunatus,35.87,-114.41,A_NOMINAL_TRAIT,val2,true
-EXAMPLE_5,Phaseolus lunatus,35.87,-113.41,A_NOMINAL_TRAIT,val3,true
-EXAMPLE_6,Phaseolus lunatus,35.87,-114.41,A_NOMINAL_TRAIT,val4,true
-EXAMPLE_7,Phaseolus lunatus,35.87,-115.41,A_NUMERIC_TRAIT,75,false
-EXAMPLE_7,Phaseolus lunatus,35.87,-115.41,A_NUMERIC_TRAIT,25,false
-EXAMPLE_8,Phaseolus lunatus,35.87,-116.41,A_NUMERIC_TRAIT,66.6,false
-EXAMPLE_8,Phaseolus lunatus,35.87,-116.41,A_NUMERIC_TRAIT,33.3,false
+accession_id,taxon,latitude,longitude,trait_descriptor,trait_sub_descriptor,trait_observation_value,trait_is_nominal
+EXAMPLE_1,Phaseolus lunatus,35.87,-113.41,A_Population,Q1,0.25,false
+EXAMPLE_1,Phaseolus lunatus,35.87,-113.41,A_Population,Q2,0.60,false
+EXAMPLE_1,Phaseolus lunatus,35.87,-113.41,A_Population,Q3,0.10,false
+EXAMPLE_1,Phaseolus lunatus,35.87,-113.41,A_Population,Q4,0.5,false
+EXAMPLE_2,Phaseolus lunatus,37,-113.41,A_Population,Q1,0.3,false
+EXAMPLE_2,Phaseolus lunatus,37,-113.41,A_Population,Q2,0.4,false
+EXAMPLE_2,Phaseolus lunatus,37,-113.41,A_Population,Q3,0.1,false
+EXAMPLE_2,Phaseolus lunatus,37,-113.41,A_Population,Q4,0.2,false
+EXAMPLE_1,Phaseolus lunatus,35.87,-113.41,A_Num_Trait,,0.2,false
+EXAMPLE_1,Phaseolus lunatus,35.87,-113.41,A_Num_Trait,,0.123,false
+EXAMPLE_1,Phaseolus lunatus,35.87,-113.41,A_Num_Trait,,0.111,false
+EXAMPLE_1,Phaseolus lunatus,35.87,-113.41,A_Num_Trait,,0.523,false
+EXAMPLE_1,Phaseolus lunatus,35.87,-113.41,A_Nom_Trait,,foo,true
+EXAMPLE_1,Phaseolus lunatus,35.87,-113.41,A_Nom_Trait,,bar,true
+EXAMPLE_1,Phaseolus lunatus,35.87,-113.41,A_Nom_Trait,,blaz,true
+EXAMPLE_1,Phaseolus lunatus,35.87,-113.41,A_Nom_Trait,,fnord,true

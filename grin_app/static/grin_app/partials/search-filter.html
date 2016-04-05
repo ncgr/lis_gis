@@ -19,7 +19,7 @@
         {{setName}}
         <button type="button"
                 class="btn btn-xs btn-default"
-                ng-click="onUserData()">
+                ng-click="model.geoJsonService.onUserData()">
             <span class="glyphicon glyphicon-remove"
                   aria-hidden="true"></span>
         </button>
@@ -78,7 +78,8 @@
 </span>
 </div>
 
-<div class="panel panel-info section-spc"
+<div id="search-options"
+     class="panel panel-info section-spc"
      ng-if="model.searchOptions">
     <div class="panel-heading">
 
@@ -341,6 +342,7 @@
                         OK
                     </button>
                     <button type="button"
+                            id="search-cancel"
                             class="btn btn-default"
                             ng-click="model.searchOptions = false">
 	    <span class="glyphicon glyphicon-remove"

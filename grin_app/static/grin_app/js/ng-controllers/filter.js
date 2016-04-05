@@ -7,14 +7,9 @@ app.controller('filterController',
     function ($scope, $state, $http, $location, $uibModal, $localStorage,
               geoJsonService) {
 
-        geoJsonService.subscribe($scope, 'updated', function () {
-            // the accessionIds may be updated by userData.js, update our model.
-            var params = geoJsonService.getSearchParams();
-            $scope.model.accessionIds = params.accessionIds;
-        });
-
+       
         $scope.init = function () {
-            var params = geoJsonService.getSearchParams();
+            var params = geoJsonService.params;
             $scope.model = {
                 userData: $localStorage.userData,
                 geoJsonService: geoJsonService,
@@ -46,6 +41,17 @@ app.controller('filterController',
                 $scope.onTaxonQuery($scope.model.taxonQuery);
             }
         };
+
+        geoJsonService.subscribe($scope, 'accessionIdsUpdated', function () {
+            // the accessionIds may have been updated by another controller,
+            // so update our model
+            $scope.model.accessionIds = geoJsonService.params.accessionIds;
+        });
+
+        geoJsonService.subscribe($scope, 'updated', function () {
+            $scope.model.accessionIds = geoJsonService.params.accessionIds;
+            refreshTraitMenu($scope.model.taxonQuery);
+        });
 
         $scope.onOK = function () {
             // user hit OK in the search parameters panel, or search is being
@@ -94,6 +100,7 @@ app.controller('filterController',
 
         function refreshTraitMenu(taxon) {
             $scope.model.traitDescriptors = null;
+            if(_.isEmpty(taxon)) { return; }
             var callback = function(data) {
                 $scope.model.traitDescriptors = data;
                 // reset the trait selection, if it's no longer valid for this
@@ -169,7 +176,7 @@ app.controller('filterController',
 
         // get a short label for displaying in the current-search-filters area
         $scope.accessionIdsDescr = function () {
-            var idsStr = geoJsonService.getSearchParams().accessionIds;
+            var idsStr = geoJsonService.params.accessionIds;
             if (!idsStr) {
                 return null;
             }
@@ -221,29 +228,23 @@ app.controller('filterController',
             $scope.model.traitOverlay = null;
             $scope.onTaxonQuery($scope.model.taxonQuery);
         };
-
-        // onUserData() this is identical to map.js's onUserData().
-        // this could possibly be refactored to be a service of some kind.
-        $scope.onUserData = function () {
-            var modal = $uibModal.open({
-                animation: true,
-                templateUrl: STATIC_PATH + 'grin_app/partials/user-data-modal.html',
-                controller: 'userDataController',
-                size: 'lg',
-                resolve: {
-                    model: {
-                        BRANDING: BRANDING,
-                        STATIC_PATH: STATIC_PATH
-                    }
-                }
-            });
-            modal.result.then(function () {
-                geoJsonService.search();
-            }, function () {
-                // modal otherwise dismissed callback (ignore result) e.g.
-                // backdrop click
-            });
-        };
+        //
+        // // onUserData() this is identical to map.js's onUserData().
+        // // this could possibly be refactored to be a service of some kind.
+        // $scope.onUserData = function () {
+        //     var modal = $uibModal.open({
+        //         animation: true,
+        //         templateUrl: STATIC_PATH + 'grin_app/partials/user-data-modal.html',
+        //         controller: 'userDataController',
+        //         size: 'lg',
+        //         resolve: {
+        //             model: {
+        //                 BRANDING: BRANDING,
+        //                 STATIC_PATH: STATIC_PATH
+        //             }
+        //         }
+        //     });
+        // };
 
         $scope.init();
 

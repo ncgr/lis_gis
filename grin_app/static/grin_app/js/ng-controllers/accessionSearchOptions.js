@@ -10,7 +10,7 @@
  *
  */
 
-// TODO: make more reusable for use with "Add my data"
+// TODO: make more reusable for use with "Add my data" and userData.js
 
 app.controller('accessionSearchOptionsController',
     function ($scope, $uibModalInstance, model) {

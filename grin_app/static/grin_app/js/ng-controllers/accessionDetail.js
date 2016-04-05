@@ -4,6 +4,8 @@
  * details about an accession and it's trait evaluation records.
  */
 
+//TODO: fix this so it degrades gracefully with user-provided data (currently stalls out with ajax spinner!
+
 app.controller('accessionDetailController',
     function ($scope, $uibModalInstance, $http, accId) {
 

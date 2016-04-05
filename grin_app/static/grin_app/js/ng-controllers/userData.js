@@ -17,7 +17,7 @@
 
 app.controller('userDataController',
     function ($scope, $localStorage, $uibModalInstance, $http, $timeout,
-              model) {
+              model, geoJsonService) {
 
         var that = this;
         var ppConfig = {
@@ -32,6 +32,7 @@ app.controller('userDataController',
         $scope.model.showWelcome = true;
         $scope.model.fileMethod = 'local'; // 'local' or 'url'
         $scope.model.results = null; // results from parsing delimited data
+        $scope.model.sortedHeaders = [];
         $scope.model.sets = null;
         $scope.model.previewLimit = 5;
         $scope.model.savedUserData = $localStorage.userData;
@@ -84,7 +85,12 @@ app.controller('userDataController',
             generateGeoJson();
             generateTraitJson();
             $scope.model.convertingGeoJSON = false;
-            $uibModalInstance.close();
+            var userData = $localStorage.userGeoJson;
+            var accIds = _.uniq(_.map(userData, function (d) {
+                return d.properties.accenumb;
+            }));
+            geoJsonService.setAccessionIds(accIds.join(','), true);
+            $uibModalInstance.close(true);
         };
 
         $scope.onCancel = function () {
@@ -128,12 +134,13 @@ app.controller('userDataController',
             _.each(userData, function(dataSet, setName) {
                 var data = dataSet.data;
                 _.each(data, function(rec) {
-                    if(rec.observation_value) {
+                    if(rec.trait_observation_value) {
                          var data = {
                                accenumb: rec.accession_id,
-                               descriptor_name: rec.descriptor,
-                               observation_value: rec.observation_value,
-                               is_nominal: rec.is_nominal,
+                               descriptor_name: rec.trait_descriptor,
+                               sub_descriptor_name: rec.trait_sub_descriptor,
+                               observation_value: rec.trait_observation_value,
+                               is_nominal: rec.trait_is_nominal,
                                data_set: setName
                          };
                          traits.push(data);
@@ -215,11 +222,31 @@ app.controller('userDataController',
                     return;
                 }
                 $scope.model.results = results;
+                $scope.model.sortedHeaders = getHeaders();
                 if (file) {
                     $scope.model.file = file;
                     $scope.model.dataSetName = file.name;
                 }
             });
         }
+
+        /* getHeaders(): return the headers, from model.results. Sort
+         * alphabetically, with all 'trait_*' headers after. */
+        function getHeaders() {
+            if(! $scope.model.results) {
+                return;
+            }
+            var headers = $scope.model.results.meta.fields;
+            headers.sort(function(s1,s2) {
+                var s1IsTrait = (s1.indexOf('trait_') === 0);
+                var s2IsTrait = (s2.indexOf('trait_') === 0);
+                if(s1IsTrait && s2IsTrait) { return s1.localeCompare(s2); }
+                if(! s1IsTrait && ! s2IsTrait) { return s1.localeCompare(s2); }
+                if( s1IsTrait && ! s2IsTrait) { return 1; }
+                if(! s1IsTrait && s2IsTrait ) { return -1; }
+                return 0;
+            });
+            return headers;
+        };
 
     });

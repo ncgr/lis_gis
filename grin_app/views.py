@@ -305,13 +305,13 @@ def evaluation_detail(req):
     parts_len = len(parts)
     if parts_len > 2:
         prefix, acc_num, rest = parts[0], parts[1], parts[2:]  # suffix optional
+        suffix = ' '.join(rest)
     elif parts_len == 2:
         prefix, acc_num = parts[0], parts[1]
     elif parts_len == 1:
         acc_num = parts[0]
     else:
         acc_num = params['accenumb']
-    suffix = ' '.join(rest)
     cursor = connection.cursor()
     sql_params = {
         'prefix': prefix,
@@ -496,6 +496,10 @@ def _acc_search_response(rows):
             },
             'properties': rec  # rec happens to be a dict of properties. yay
         }
+        # tag this accession with something to distinguish it from
+        # user provided accession ids
+        geo_json_frag['properties']['from_api'] = True
+
         geo_json.append(geo_json_frag)
     result = json.dumps(geo_json, use_decimal=True)
     response = HttpResponse(result, content_type='application/json')

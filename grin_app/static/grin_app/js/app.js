@@ -145,7 +145,18 @@ app.tour = function () {
                 ' Germplasm map viewer. This web app offers searching and \
                      visualization of germplasm accessions and trait observations.',
                 target: 'tour-start',
-                placement: 'top'
+                placement: 'top',
+                onShow: function () {
+                    // hide both the search div, and menu div at start of tour.
+                    setTimeout(function() {
+                        if(! $('#menu').length) {
+                            angular.element('#menu-btn').trigger('click');
+                        }
+                        if($('#search-options:visible')) {
+                            angular.element('#search-cancel').trigger('click');
+                        }
+                    });
+                }
             },
             {
                 title: 'Map Frame',
@@ -202,8 +213,10 @@ app.tour = function () {
                 placement: 'top',
                 onShow: function () {
                     setTimeout(function () {
-                        angular.element('#search-btn').trigger('click');
-                    }, 0);
+                        if(! $('#search-options').length) {
+                            angular.element('#search-btn').trigger('click');
+                        }
+                    });
                 }
             },
             {
@@ -213,51 +226,77 @@ app.tour = function () {
          remove any filter. Your map view and results listing are updated \
          automatically. Try it!',
                 target: 'current-search-filters',
-                placement: 'top'
+                placement: 'top',
             },
             {
                 title: 'Reframe map',
-                content: 'If you want to zoom in on the current list of accessions, \
-          use this button.',
+                content: 'If you want to zoom in on the current list of  \
+                    accessions, use this button.',
                 target: 'reframe-btn',
+                placement: 'bottom',
+                onShow: function () {
+                    // hide both the search div, and menu div at start of tour.
+                    setTimeout(function() {
+                        if(! $('#menu').length) {
+                            angular.element('#menu-btn').trigger('click');
+                        }
+                        if($('#search-options:visible')) {
+                            angular.element('#search-cancel').trigger('click');
+                        }
+                    });
+                }
+            },
+             {
+                title: 'Add my data',
+                content: 'You can add your own CSV or delimited text data ' +
+                            'to the map viewer, using this tool.',
+                target: 'add-my-data-btn',
                 placement: 'bottom'
             },
             {
                 title: 'Change Base Map',
-                content: 'You can adjust the base map for a different appearance, if \
-         desired. This does not effect your search results!',
+                content: 'You can adjust the base map for a different \
+                appearance, if desired. This does not effect your search \
+                results!',
                 target: 'change-base-map-btn',
                 placement: 'bottom'
             },
             {
                 title: 'Geographic Coordinates',
-                content: 'Click this button to view the current center of the map in \
-         latitude and longitude. Or enter new coordinates to go there. \
-         Remember: the search results are updated automatically.',
+                content: 'Click this button to view the current center of the \
+                map in latitude and longitude. Or enter new coordinates to go\
+                 there. Remember: the search results are updated automatically.',
                 target: 'enter-coords-btn',
                 placement: 'bottom'
             },
             {
                 title: 'Geolocate',
-                content: 'Click this button to go to your current geolocation (note: \
-         you may be prompted to allow this request by your browser). \
-         Remember: the search results are updated automatically.',
+                content: 'Click this button to go to your current geolocation \
+                 (note: you may be prompted to allow this request by your \
+                 browser). Remember: the search results are updated automatically.',
                 target: 'geolocate-btn',
-                placement: 'bottom'
+                placement: 'left'
             },
             {
                 title: 'Map Height',
                 content: 'You can adjust the map vertical appearance by using \
                    this tool.',
                 target: 'map-height-btn',
-                placement: 'bottom'
-            }, {
+                placement: 'left'
+            },
+            {
                 title: 'Revisit this tour',
-                content: 'Click this button anytime to re-open this tour of the web \
-         app. Thanks!',
+                content: 'Click this button anytime to re-open this tour of \
+                the web app!',
                 target: 'tour-btn',
-                placement: 'bottom'
-            }
+                placement: 'left'
+            },
+              {
+                title: 'Menu',
+                content: 'Hide/Show the options with this button.',
+                target: 'menu-btn',
+                placement: 'left'
+            },
         ]
     };
 
