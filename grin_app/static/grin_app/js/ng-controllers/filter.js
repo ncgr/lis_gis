@@ -46,11 +46,11 @@ app.controller('filterController',
             // the accessionIds may have been updated by another controller,
             // so update our model
             $scope.model.accessionIds = geoJsonService.params.accessionIds;
+            refreshTraitMenu($scope.model.taxonQuery);
         });
 
         geoJsonService.subscribe($scope, 'updated', function () {
             $scope.model.accessionIds = geoJsonService.params.accessionIds;
-            refreshTraitMenu($scope.model.taxonQuery);
         });
 
         $scope.onOK = function () {

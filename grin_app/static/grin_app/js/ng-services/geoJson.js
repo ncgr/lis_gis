@@ -9,6 +9,11 @@ app.service('geoJsonService',
         var DEFAULT_ZOOM = 6;
         var MARKER_RADIUS = 8;
         var DEFAULT_TRAIT = '(default)';
+        var TRAIT_TYPE = {
+            NOMINAL : 'nominal',
+            NUMERIC : 'numeric',
+            HYBRID : 'hybrid',
+        };
 
         // Brewer nominal category colors from chroma.js set1,2,3 concatenated/
         // this code is duplicated from views.py -> evaluation_metadata()
@@ -149,6 +154,7 @@ app.service('geoJsonService',
             s.data = [];
             s.traitData = [];
             s.traitHash = {};
+            s.traitMetadata = {};
 
             // s.params will be used by various templates and controllers,
             // so refresh it upon every search
@@ -516,34 +522,23 @@ app.service('geoJsonService',
             var selectedUserTraits = _.filter(traits, function(d) {
                 return (d.descriptor_name === selectedTrait);
             });
+            if(_.isEmpty(selectedUserTraits)) { return; }
+
             var traitData = _.concat(s.traitData, selectedUserTraits);
             s.traitData = traitData;
-            var traitMetadata = s.traitMetadata || {
+
+            angular.extend(s.traitMetadata, {
                     colors : {},
+                    descriptor_name: selectedUserTraits[0].descriptor_name,
                     taxon_query : s.params.taxonQuery
-                };
-            var min = traitMetadata.min || Number.POSITIVE_INFINITY;
-            var max = traitMetadata.max || Number.NEGATIVE_INFINITY;
-            _.each(selectedUserTraits, function(d) {
-                traitMetadata.trait_type = d.is_nominal ? 'nominal' : 'numeric';
-                traitMetadata.descriptor_name = d.descriptor_name;
-                if(! d.is_nominal) {
-                    if(d.observation_value < min) {
-                        min = d.observation_value;
-                    }
-                    else if(d.observation_value > max) {
-                        max = d.observation_value;
-                    }
-                }
             });
 
-            if(traitMetadata.trait_type === 'numeric') {
-                traitMetadata.min = min;
-                traitMetadata.max = max;
-            }
-            else {
-                //nominal trait type
-                traitMetadata.colors = traitMetadata.colors || {};
+            var traitMetadata = s.traitMetadata;
+
+            // detect the type of trait: numeric, nominal or hybrid (e.g.
+            // population study)
+            if(selectedUserTraits[0].is_nominal) {
+                traitMetadata.trait_type = TRAIT_TYPE.NOMINAL;
                 var values = _.map(traitData, function(d) {
                     return d.observation_value;
                 });
@@ -557,7 +552,38 @@ app.service('geoJsonService',
                 }
                 traitMetadata.obs_nominal_values = uniqVals;
             }
-    //            console.log(traitMetadata);
+            else {
+                if(selectedUserTraits[0].sub_descriptor_name) {
+                    traitMetadata.trait_type = TRAIT_TYPE.HYBRID;
+                    var values = _.map(traitData, function(d) {
+                        return d.sub_descriptor_name;
+                    });
+                    var uniqVals = _.uniq(values);
+                    uniqVals.sort();
+                    var colorsLen = NOMINAL_COLORS.length;
+                    for(var i = 0; i< uniqVals.length; i++) {
+                        var val = uniqVals[i];
+                        traitMetadata.colors[val] = (i < colorsLen)  ?
+                            NOMINAL_COLORS[i] : taxonChroma.defaultColor;
+                    }
+                    traitMetadata.obs_nominal_values = uniqVals;
+                }
+                else {
+                    traitMetadata.trait_type = TRAIT_TYPE.NUMERIC;
+                     var min = traitMetadata.min || Number.POSITIVE_INFINITY;
+                    var max = traitMetadata.max || Number.NEGATIVE_INFINITY;
+                     _.each(selectedUserTraits, function(d) {
+                        if(d.observation_value < min) {
+                            min = d.observation_value;
+                        }
+                        else if(d.observation_value > max) {
+                            max = d.observation_value;
+                        }
+                    });
+                    traitMetadata.min = min;
+                    traitMetadata.max = max;
+                }
+            }
             s.traitMetadata = traitMetadata;
         }
 
@@ -643,6 +669,58 @@ app.service('geoJsonService',
             }
         }
 
+        function colorStrategyHybridTrait() {
+            var traitData = s.traitData;
+            var traitHash = s.traitHash;
+            var traitMetadata = s.traitMetadata;
+            var data = s.data;
+
+            _.each(traitData, function (d) {
+                var accId = d.accenumb;
+                var value = d.observation_value;
+                var subDescriptor = (d.sub_descriptor_name) ?
+                    d.sub_descriptor_name : DEFAULT_TRAIT;
+                if(! traitHash[accId]) {
+                    traitHash[accId] = {};
+                }
+                if(traitHash[accId][subDescriptor]) {
+                    traitHash[accId][subDescriptor].push(value);
+                }
+                else {
+                    traitHash[accId][subDescriptor] = [value];
+                }
+            });
+             s.traitHash = traitHash;
+
+            var valueLists = [];
+            var defaultColor = taxonChroma.defaultColor;
+            _.each(data, function (d) {
+                var props = d.properties;
+                valueLists.push(_.map(traitHash[props.accenumb],
+                    function (value, key) {
+                        return key;
+                    }));
+                // the map marker itself will be colored by
+                // pieChartHybridMarkerMaker so this is just a placeholder color
+                // to be used in the list view
+                props.color = defaultColor;
+            });
+            var traitValues = _.uniq(_.flatten(valueLists));
+            var legendValues = _.map(traitMetadata.obs_nominal_values,
+                function (n) {
+                    return {
+                        label: n,
+                        color: traitMetadata.colors[n]
+                    }
+                });
+            s.traitLegend = {
+                min: null,
+                max: null,
+                colorScale: null,
+                values: legendValues
+            };
+        }
+
         function colorStrategyCategoryTrait() {
             var traitData = s.traitData;
             var traitHash = s.traitHash;
@@ -665,10 +743,8 @@ app.service('geoJsonService',
                 }
             });
              s.traitHash = traitHash;
-
             _.each(data, function (d) {
                 var props = d.properties;
-                var test = traitHash[props.accenumb];
                 var valueLists =  _.map(traitHash[props.accenumb],
                     function(value, key) {
                         return value;
@@ -714,15 +790,21 @@ app.service('geoJsonService',
             if (params.traitOverlay) {
                 // a trait descriptor is selected, so apply a coloring
                 // strategy, generate a legend, etc.
-                if (traitMetadata.trait_type === 'numeric') {
-                    colorStrategyNumericTrait();
-                }
-                else {
-                    colorStrategyCategoryTrait();
+                switch(traitMetadata.trait_type)
+                {
+                    case TRAIT_TYPE.NOMINAL:
+                        colorStrategyCategoryTrait();
+                        break;
+                    case TRAIT_TYPE.NUMERIC:
+                        colorStrategyNumericTrait();
+                        break;
+                    case TRAIT_TYPE.HYBRID:
+                        colorStrategyHybridTrait();
+                        break;
                 }
             }
             else {
-                // use default color scheme from taxonChroma
+                // use color scheme from from taxonChroma
                 _.each(data, function (acc) {
                     acc.properties.color = taxonChroma.get(acc.properties.taxon);
                 });
@@ -748,21 +830,37 @@ app.service('geoJsonService',
          */
         s.getFeatureMarker = function(feature, latlng) {
             if(_.isEmpty(s.params.traitOverlay)) {
+                // default to circle marker
                 return circleMarkerMaker(feature.properties, latlng);
             }
             var traitSubDescriptors = s.traitHash[feature.properties.accenumb];
-            if(s.traitMetadata.trait_type === 'nominal') {
-                return pieChartNominalMarkerMaker(
-                    feature.properties, traitSubDescriptors, latlng);
-            }
-            if(_.isEmpty(traitSubDescriptors) ||
-                DEFAULT_TRAIT in traitSubDescriptors) {
+            if(_.isEmpty(traitSubDescriptors)) {
                 // either this is either an uncharacterized accession, or
                 // there is no custom sub-descriptor, but anyways, use circle.
                 return circleMarkerMaker(feature.properties, latlng);
             }
-            return pieChartNumericMarkerMaker(
-                feature.properties, traitSubDescriptors, latlng);
+
+            switch(s.traitMetadata.trait_type)
+            {
+                case TRAIT_TYPE.NOMINAL:
+                    return pieChartNominalMarkerMaker(
+                        feature.properties,
+                        traitSubDescriptors,
+                        latlng);
+                    break;
+                case TRAIT_TYPE.NUMERIC:
+                    return pieChartNumericMarkerMaker(
+                        feature.properties,
+                        traitSubDescriptors,
+                        latlng);
+                    break;
+                case TRAIT_TYPE.HYBRID:
+                    return pieChartHybridMarkerMaker(
+                        feature.properties,
+                        traitSubDescriptors,
+                        latlng);
+                    break;
+            }
         };
 
          var circleMarkerMaker = function(props, latlng) {
@@ -781,11 +879,42 @@ app.service('geoJsonService',
             return marker;
           };
 
+         var pieChartHybridMarkerMaker = function(props, data, latlng) {
+            // construct data dictionary and chartOptions for leaflet-dvf
+            // piechart plugin.
+
+            // the data dict needs to be keyed by the subdescriptor, and the
+            // observation value, for the map marker to display the info.
+            // collapse all the observed values into an array. each observed
+            // value will be sized by the numeric value.
+            var legend = s.traitLegend;
+            var traitMetadata = s.traitMetadata;
+            var dataDict = {};
+            var chartOpts = {};
+            _.each(data, function(value, key) {
+            var k = key + ' = ' + value;
+                dataDict[k] = value;
+                chartOpts[k] = {
+                    fillColor: traitMetadata.colors[key],
+                        displayText: function () {
+                            return props.accenumb;
+                    }
+                }
+            });
+            var options = {
+            data: dataDict,
+            chartOptions: chartOpts,
+            radius: MARKER_RADIUS,
+            opacity: 1.0,
+            fillOpacity: 1.0,
+            gradient: false
+            };
+            return new L.PieChartMarker(latlng, options);
+        };
+
          var pieChartNumericMarkerMaker = function(props, data, latlng) {
             // construct data dictionary and chartOptions for leaflet-dvf
             // piechart plugin.
-            var vals = [];
-            //var dataDict =// data; /* is keyed by sub_descriptor_name -> value */
 
              // the geojson element may be tagged with a color already, in
              // which case just return a circle
