@@ -4,8 +4,7 @@
  */
 
 app.controller('mapController',
-    function ($scope, $state, $timeout, $location, $uibModal, $localStorage,
-              geoJsonService) {
+    function ($scope, $state, $timeout, $location, $uibModal, geoJsonService) {
 
         var DEFAULT_BASEMAP = geoJsonService.params.baseMap ||
             Cookies.get('baseMap') ||

@@ -11,7 +11,7 @@ app.controller('filterController',
         $scope.init = function () {
             var params = geoJsonService.params;
             $scope.model = {
-                userData: $localStorage.userData,
+                localStorage: $localStorage,
                 geoJsonService: geoJsonService,
                 countries: [],
                 searchOptions: false,

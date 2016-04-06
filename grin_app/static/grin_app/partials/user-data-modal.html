@@ -223,7 +223,7 @@
         </form>
     </div>
 
-    <div ng-if="! (model.savedUserData | isEmpty)">
+    <div ng-if="model.localStorage.userData">
         <h4>Your Data Sets</h4>
         <table class="table table-striped">
             <tr>
@@ -231,7 +231,7 @@
                 <th>Records</th>
                 <th></th>
             </tr>
-            <tr ng-repeat="(dataSetName, results) in model.savedUserData">
+            <tr ng-repeat="(dataSetName, results) in model.localStorage.userData">
                 <td>{{dataSetName}}</td>
                 <td>{{results.data.length}}</td>
                 <td>
