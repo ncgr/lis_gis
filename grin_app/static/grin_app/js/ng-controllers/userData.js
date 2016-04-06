@@ -16,8 +16,8 @@
  */
 
 app.controller('userDataController',
-    function ($scope, $localStorage, $uibModalInstance, $http, $timeout,
-              model, geoJsonService) {
+    function ($scope, $rootScope, $localStorage, $uibModalInstance, $http,
+              $timeout, model, geoJsonService) {
 
         var that = this;
         var ppConfig = {
@@ -35,7 +35,7 @@ app.controller('userDataController',
         $scope.model.sortedHeaders = [];
         $scope.model.sets = null;
         $scope.model.previewLimit = 5;
-        $scope.model.savedUserData = $localStorage.userData;
+        $scope.model.localStorage = $localStorage;
         $scope.model.convertingGeoJSON = false;
 
         // the user's csv->json original data
@@ -119,7 +119,7 @@ app.controller('userDataController',
         $scope.onSave = function () {
             var setName = $scope.model.dataSetName;
             $localStorage.userData[setName] = $scope.model.results;
-            $scope.model.results = null;
+                        $scope.model.results = null;
             $scope.model.file = null;
             $scope.model.dataSetName = null;
             $scope.errors = [];
