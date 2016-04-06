@@ -1,0 +1,88 @@
+<div class="modal-header">
+  <button type="button" class="close"
+	  ng-click="onOK()">
+    <span aria-hidden="true">&times;</span>
+  </button>
+  <h3 class="modal-title">
+    <span class="glyphicon glyphicon-picture" aria-hidden="true"></span>
+    Display Options for Accession IDs
+  </h3>
+</div>
+<div class="modal-body">
+
+  <div class="form-group">
+    Your set of accession numbers (please enter as comma separated list):
+    <textarea class="form-control"
+	      ng-model="model.accessionIds">{{model.accessionIds}}
+    </textarea>
+  </div>
+  <div class="form-group">
+    <div class="well well-sm">
+      Display of other accession IDs:
+      <div class="radio">
+	<label>
+	  <input type="radio"
+		 ng-model="model.accessionIdsInclusive"
+		 ng-value="false">
+	  Show only these accession IDs on the map.
+	</label>
+	<br/>
+	<label>
+	  <input type="radio"
+		 ng-model="model.accessionIdsInclusive"
+		 ng-value="true">
+	  Show other search results, in addition to these accession IDs.
+	</label>
+      </div>
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="well well-sm">
+      Colorizing:
+
+      <div class="checkbox">
+	<label>
+	  <input type="checkbox"
+		 ng-model="model.useCustomColor"
+		 ng-click="onShowColorSelection(model.useCustomColor)">
+	  Display the selected accession ids with a specific color
+	  <span ng-if="! model.useCustomColor">...</span>
+	  <span ng-if="model.useCustomColor">:</span>
+	</label>
+      </div>
+      
+      <form class="form-inline"
+	    ng-show="model.useCustomColor">
+	<label>
+	  <input type="text"
+		 class="form-control"
+		 size="10"
+		 ng-model="model.accessionIdsColor"
+		 ng-style="{'background-color' : model.accessionIdsColor}"/>
+	  Enter a color code or select from below
+	</label>
+	<br/>
+	<button type="button"
+		class="btn btn-sm"
+		ng-repeat="color in model.brewerColors"
+		ng-style="{'background-color': color}"
+		ng-click="model.accessionIdsColor = color">
+	  &nbsp;
+	</button>
+      </form>
+    </div>
+  </div>
+  <button type="button"
+	  class="btn btn-success" type="button"
+	  ng-click="onOK()">
+    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+    OK
+  </button>
+  <button type="button"
+	  class="btn btn-default"
+	  ng-click="onCancel()">
+    <span class="glyphicon glyphicon-remove"
+	  aria-hidden="true"></span>
+    Cancel
+  </button>
+</div>

@@ -35,6 +35,10 @@ app.config(function ($httpProvider, $stateProvider) {
         });
 
     function httpErrorInterceptor($q, $rootScope) {
+
+        $rootScope.errors = [];
+        $rootScope.warnings = [];
+
         function requestError(rejection) {
             console.log('requestError:');
             console.log(rejection);
@@ -45,23 +49,36 @@ app.config(function ($httpProvider, $stateProvider) {
             var msg = null;
             console.log('responseError:');
             console.log(response);
-            if (!$rootScope.errors) {
-                $rootScope.errors = [];
+            switch (response.status) {
+                case 0:
+                    msg = 'Lost connection to web app. Please check your ' +
+                        'network connection, or try again later.';
+                    break;
+                case -1:
+                    msg = 'Lost connection to web app. Please check your ' +
+                        'network connection, or try again later.';
+                    break;
+                case 404:
+                    // allow 404 not found, if the accession detail controller
+                    // does an HTTP HEAD to check for validity of link-out.
+                    if (response.config.url.indexOf('organism/') === -1) {
+                        msg = response.status + ' ' +
+                            response.statusText + ' ' +
+                            response.config.url + ' ' +
+                            response.data;
+                    }
+                    break;
+                case 500:
+                    msg = response.status + ' ' +
+                        response.statusText + ' ' +
+                        response.config.url + ' ' +
+                        response.data;
+                    break;
             }
-            if (0 === response.status || -1 === response.status) {
-                msg = 'Lost connection to web app. Please check your network \
-                       connection, or try again later.';
+            if (msg) {
                 $rootScope.errors.push(msg);
-                console.log(msg);
+                console.log($rootScope.errors);
             }
-            else if (response.status === 500) {
-                msg = [response.status + ' ' +
-                response.statusText + ' ' +
-                response.config.url + ' ',
-                    response.data];
-            }
-            $rootScope.errors.push(msg);
-            console.log($rootScope.errors);
             return ($q.reject(response)); // pass-through the response
         }
 
@@ -89,6 +106,12 @@ app.filter('highlight', function ($sce) {
     }
 });
 
+app.filter('isEmpty', [function () {
+    return function (object) {
+        return angular.equals({}, object);
+    }
+}]);
+
 app.run(function ($state) {
     $state.transitionTo('search');
 });
@@ -101,7 +124,7 @@ app.run(function (geoJsonService, $timeout, $rootScope) {
      * it cannot be started before angular compiles the html */
     var handler;
 
-    if (! Cookies.get(tourId)) {
+    if (!Cookies.get(tourId)) {
         // have not seen the tour yet, so
         handler = geoJsonService.subscribe($rootScope, 'updated', function () {
             // setup a handler for when the map has data loaded
@@ -122,7 +145,18 @@ app.tour = function () {
                 ' Germplasm map viewer. This web app offers searching and \
                      visualization of germplasm accessions and trait observations.',
                 target: 'tour-start',
-                placement: 'top'
+                placement: 'top',
+                onShow: function () {
+                    // hide both the search div, and menu div at start of tour.
+                    setTimeout(function() {
+                        if(! $('#menu').length) {
+                            angular.element('#menu-btn').trigger('click');
+                        }
+                        if($('#search-options:visible')) {
+                            angular.element('#search-cancel').trigger('click');
+                        }
+                    });
+                }
             },
             {
                 title: 'Map Frame',
@@ -137,9 +171,9 @@ app.tour = function () {
             {
                 title: 'Map Markers',
                 content: 'Click on a circular map marker to select this accession and \
-         get more details. Try it! (take care to click, not drag). Map markers \
-         are colored by genus, and within each genus the hue is darker or \
-         lighter for the various species.',
+                get more details. Try it! Map markers are colored by genus, and \
+                within each genus the hue is darker or lighter for the various \
+                species.',
                 target: 'map',
                 placement: 'bottom'
             },
@@ -179,8 +213,10 @@ app.tour = function () {
                 placement: 'top',
                 onShow: function () {
                     setTimeout(function () {
-                        angular.element('#search-btn').trigger('click');
-                    }, 0);
+                        if(! $('#search-options').length) {
+                            angular.element('#search-btn').trigger('click');
+                        }
+                    });
                 }
             },
             {
@@ -190,51 +226,77 @@ app.tour = function () {
          remove any filter. Your map view and results listing are updated \
          automatically. Try it!',
                 target: 'current-search-filters',
-                placement: 'top'
+                placement: 'top',
             },
             {
                 title: 'Reframe map',
-                content: 'If you want to zoom in on the current list of accessions, \
-          use this button.',
+                content: 'If you want to zoom in on the current list of  \
+                    accessions, use this button.',
                 target: 'reframe-btn',
+                placement: 'bottom',
+                onShow: function () {
+                    // hide both the search div, and menu div at start of tour.
+                    setTimeout(function() {
+                        if(! $('#menu').length) {
+                            angular.element('#menu-btn').trigger('click');
+                        }
+                        if($('#search-options:visible')) {
+                            angular.element('#search-cancel').trigger('click');
+                        }
+                    });
+                }
+            },
+             {
+                title: 'Add my data',
+                content: 'You can add your own CSV or delimited text data ' +
+                            'to the map viewer, using this tool.',
+                target: 'add-my-data-btn',
                 placement: 'bottom'
             },
             {
                 title: 'Change Base Map',
-                content: 'You can adjust the base map for a different appearance, if \
-         desired. This does not effect your search results!',
+                content: 'You can adjust the base map for a different \
+                appearance, if desired. This does not effect your search \
+                results!',
                 target: 'change-base-map-btn',
                 placement: 'bottom'
             },
             {
                 title: 'Geographic Coordinates',
-                content: 'Click this button to view the current center of the map in \
-         latitude and longitude. Or enter new coordinates to go there. \
-         Remember: the search results are updated automatically.',
+                content: 'Click this button to view the current center of the \
+                map in latitude and longitude. Or enter new coordinates to go\
+                 there. Remember: the search results are updated automatically.',
                 target: 'enter-coords-btn',
                 placement: 'bottom'
             },
             {
                 title: 'Geolocate',
-                content: 'Click this button to go to your current geolocation (note: \
-         you may be prompted to allow this request by your browser). \
-         Remember: the search results are updated automatically.',
+                content: 'Click this button to go to your current geolocation \
+                 (note: you may be prompted to allow this request by your \
+                 browser). Remember: the search results are updated automatically.',
                 target: 'geolocate-btn',
-                placement: 'bottom'
+                placement: 'left'
             },
             {
                 title: 'Map Height',
                 content: 'You can adjust the map vertical appearance by using \
                    this tool.',
                 target: 'map-height-btn',
-                placement: 'bottom'
-            }, {
+                placement: 'left'
+            },
+            {
                 title: 'Revisit this tour',
-                content: 'Click this button anytime to re-open this tour of the web \
-         app. Thanks!',
+                content: 'Click this button anytime to re-open this tour of \
+                the web app!',
                 target: 'tour-btn',
-                placement: 'bottom'
-            }
+                placement: 'left'
+            },
+              {
+                title: 'Menu',
+                content: 'Hide/Show the options with this button.',
+                target: 'menu-btn',
+                placement: 'left'
+            },
         ]
     };
 

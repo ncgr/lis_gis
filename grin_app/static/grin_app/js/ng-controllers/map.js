@@ -4,7 +4,8 @@
  */
 
 app.controller('mapController',
-    function ($scope, $state, $timeout, $location, geoJsonService) {
+    function ($scope, $state, $timeout, $location, $uibModal, $localStorage,
+              geoJsonService) {
 
         var DEFAULT_BASEMAP = geoJsonService.params.baseMap ||
             Cookies.get('baseMap') ||
@@ -28,12 +29,14 @@ app.controller('mapController',
             return devIndHeight * 0.5;
         }();
 
+        var mapLayer;
+        var currentPopup = null;
+
         $scope.model = {
-            geoJson: geoJsonService,
-            $location: $location,
+            geoJsonService: geoJsonService,
+            //$location: $location,
             map: null,  // the leaflet map
             geoJsonLayer: null,
-            geoJsonService: geoJsonService,  // array of geoJson objects
             center: {
                 lat: geoJsonService.params.lat,
                 lng: geoJsonService.params.lng
@@ -91,10 +94,8 @@ app.controller('mapController',
             // add the default basemap
             $scope.model.baseMapLayer = $scope.model.baseMaps[DEFAULT_BASEMAP]();
             $scope.model.baseMapLayer.addTo($scope.model.map);
-            $scope.model.geoJsonLayer = L.geoJson($scope.model.geoJsonService.data, {
-                pointToLayer: function (feature, layer) {
-                    return geoJsonService.markerCallback(feature, layer);
-                },
+            mapLayer = L.geoJson(geoJsonService.data, {
+                pointToLayer: geoJsonService.getFeatureMarker,
                 onEachFeature: function (feature, layer) {
                     // bind a popup to each feature
                     var accId = feature.properties.accenumb;
@@ -104,10 +105,11 @@ app.controller('mapController',
                     popup.setContent(content);
                     layer.bindPopup(popup);
                     if (accId === geoJsonService.selectedAccession) {
-                        // for some reason openPopup won't work immediately, so delay 1 tick
+                        // for some reason openPopup won't work immediately
+                        // so delay 1 tick
                         $timeout(function () {
                             layer.openPopup();
-                        }, 0);
+                        });
                     }
                 },
                 filter: filterNonGeocoded
@@ -126,13 +128,9 @@ app.controller('mapController',
             };
             north.addTo($scope.model.map);
 
-            $scope.model.geoJsonLayer.addTo($scope.model.map);
+            mapLayer.addTo($scope.model.map);
             Cookies.set('baseMap', DEFAULT_BASEMAP);
             $location.search('baseMap', DEFAULT_BASEMAP);
-
-            geoJsonService.subscribe($scope, 'selectedAccessionUpdated', function () {
-                cleanupMarkerPopup();
-            });
 
             geoJsonService.subscribe($scope, 'updated', function () {
 
@@ -141,8 +139,8 @@ app.controller('mapController',
                 if (!$scope.model.map.getBounds().equals(geoJsonService.bounds)) {
                     $scope.model.map.fitBounds(geoJsonService.bounds);
                     if ($scope.model.map.getZoom() > 10) {
-                        // in case of single geocoded accession, fudge the zoom to something
-                        // reasonable
+                        // in case of single geocoded accession, fudge the zoom
+                        // to something reasonable
                         $scope.model.map.setZoom(10);
                     }
                 }
@@ -160,26 +158,26 @@ app.controller('mapController',
                 $location.search('zoom', $scope.model.map.getZoom());
 
                 // remove previous map markers, and then update with the new geojson
-                $scope.model.geoJsonLayer.clearLayers();
+                mapLayer.clearLayers();
 
-                var filteredGeoJson = $scope.model.geoJsonService.data;
+                var filteredGeoJson = geoJsonService.data;
                 if (geoJsonService.params.traitExcludeUnchar &&
                     geoJsonService.params.traitOverlay) {
                     // exclude uncharacterized accessions for this trait
-                    filteredGeoJson = _.filter($scope.model.geoJsonService.data,
+                    filteredGeoJson = _.filter(geoJsonService.data,
                         function (d) {
                             var accId = d.properties.accenumb;
-                            return accId in $scope.model.geoJsonService.traitHash;
+                            return accId in geoJsonService.traitHash;
                         });
                 }
-                $scope.model.geoJsonLayer.addData(filteredGeoJson);
+                mapLayer.addData(filteredGeoJson);
 
                 if ($scope.model.map.getSize().y != $scope.model.mapHeight) {
                     $scope.model.map.invalidateSize();
                 }
 
-                $timeout(addMaxResultsSymbology, 0);
-                $timeout(fixMarkerZOrder, 0);
+                $timeout(addMaxResultsSymbology);
+                $timeout(fixMarkerZOrder);
             });
 
             $scope.model.map.on('moveend', function (e) {
@@ -204,24 +202,73 @@ app.controller('mapController',
                 }, 0);
             });
 
+            /* manage leaflet popup & associate with selected accession in
+             * list view */
             $scope.model.map.on('popupopen', function (e) {
-                // use timeout to enter ng async event
-                currentPopup = e.popup;
+
+                currentPopup = e.popup; // keep track of current popup
+
+                // use timeout to enter ng event digest
                 $timeout(function () {
                     var accId = e.popup.accId;
-                    if (accId) {
+                    // handle the case where popup originates from the user
+                    // interacting with leaflet map (clicking on a marker)
+                    if (accId && accId !== geoJsonService.selectedAccession) {
                         geoJsonService.setSelectedAccession(accId);
                     }
-                }, 0);
+                });
             });
 
             $scope.model.map.on('popupclose', function (e) {
-                // use timeout to enter ng async event
-                $timeout(function () {
-                    //markerPopup = null;
-                }, 0);
+                // TODO: is it possible to fix this this, and maintain user
+                // selected accession id? is currently broken, so ignore
+                // popupclose for now.
+
+                //use timeout to enter ng event digest
+                //currentPopup = null;
+
+                // if(e.popup.ignoreCloseEvt) {
+                //     delete e.popup.ignoreCloseEvt;
+                //     return;
+                // }
+                // $timeout(function () {
+                //     var accId = geoJsonService.selectedAccession;
+                //     if (accId === e.popup.accId) {
+                //         // the popup was closed, and it matches the selected
+                //         // accession, so... user wants to dismiss selected acc.
+                //         // currentPopup = null;
+                //         geoJsonService.setSelectedAccession(null);
+                //     }
+                // });
             });
 
+            geoJsonService.subscribe($scope, 'selectedAccessionUpdated',
+                function () {
+                    // handle the case where selected accession event is
+                    // coming from elsewhere, e.g. the search filter controller.
+                    var accId = geoJsonService.selectedAccession;
+                    if(_.isEmpty(accId)) {
+                        if(currentPopup) {
+                            $scope.model.map.closePopup(currentPopup);
+                            currentPopup = null;
+                            return;
+                        }
+                    }
+                    var cp = currentPopup;
+                    if(cp && cp.accId === accId) {
+                        //  leave the existing popup if matches selection.
+                        return;
+                    }
+                    mapLayer.eachLayer(function (layer) {
+                        if(accId === layer.feature.properties.accenumb) {
+                            layer.openPopup();
+                        }
+                    });
+                    $timeout(fixMarkerZOrder);
+                });
+
+            // finally, sync the bounds of the leaflet map with the geojson
+            // service (this could trigger a search() so perform it last.
             geoJsonService.setBounds($scope.model.map.getBounds(), true);
 
         }; // init()
@@ -306,14 +353,34 @@ app.controller('mapController',
             app.tour();
         };
 
+        // $scope.onUserData = function () {
+        //     $uibModal.open({
+        //         animation: true,
+        //         templateUrl: STATIC_PATH +
+        //                     'grin_app/partials/user-data-modal.html',
+        //         controller: 'userDataController',
+        //         size: 'lg',
+        //         resolve: {
+        //             model: {
+        //                 BRANDING: BRANDING,
+        //                 STATIC_PATH: STATIC_PATH
+        //             }
+        //         }
+        //     });
+        // };
+
         function get2CharAbbrev(feature) {
             var species = feature.properties.taxon.split(' ')[1];
             return species.substring(0, 2);
         }
 
+        /* fixMarkerZOrder(): attempt to handle some cases where certain markers
+         * need to bubble to top.
+         * TODO: this may be massively innificient, should be benchmarked, maybe refactor as a custom sort routine in geoJsonService */
         function fixMarkerZOrder() {
-            // attempt to handle some cases where certain markers need to
-            // bubble to top
+
+            // if there is a trait overlay, those should appear above
+            // uncharacterized accessions.
             if (geoJsonService.params.traitOverlay) {
                 $scope.model.map.eachLayer(function (l) {
                     if (_.has(l, 'feature.properties.haveTrait')) {
@@ -323,10 +390,23 @@ app.controller('mapController',
                     }
                 });
             }
+
+            // if there is a specific set of accession ids to search for,
+            // they should bubble up.
             if (geoJsonService.params.accessionIds) {
                 var accIds = geoJsonService.params.accessionIds.split(',');
                 $scope.model.map.eachLayer(function (l) {
                     if (accIds.indexOf(_.get(l, 'feature.properties.accenumb')) !== -1) {
+                        l.bringToFront();
+                    }
+                });
+            }
+            // finally, if there is a user selected accession id, as the
+            // hilited marker, it needs to always be on top.
+            if(geoJsonService.selectedAccession) {
+                var accId = geoJsonService.selectedAccession;
+                 $scope.model.map.eachLayer(function (l) {
+                    if (accId === _.get(l, 'feature.properties.accenumb')) {
                         l.bringToFront();
                     }
                 });
@@ -359,7 +439,7 @@ app.controller('mapController',
         $scope.getVisibleMarkerCount = function () {
             var bounds = $scope.model.map.getBounds();
             var ct = 0;
-            $scope.model.geoJsonLayer.eachLayer(function (marker) {
+            mapLayer.eachLayer(function (marker) {
                 if (bounds.contains(marker.getLatLng())) {
                     ct++;
                 }
@@ -369,7 +449,7 @@ app.controller('mapController',
 
         /* show an alert if no accessions are visible on the map extent */
         $scope.showHiddenAccHelp = function () {
-            if ($scope.model.geoJson.updating) {
+            if (geoJsonService.updating) {
                 return false;
             }
             if (!geoJsonService.data.length) {
@@ -386,7 +466,7 @@ app.controller('mapController',
 
         /* show an alert if no accessions have geographic coords. */
         $scope.showHiddenAccHelp2 = function () {
-            if ($scope.model.geoJson.updating) {
+            if (geoJsonService.updating) {
                 return false;
             }
             if (!geoJsonService.data.length) {
@@ -398,7 +478,7 @@ app.controller('mapController',
             if ($scope.getVisibleMarkerCount() > 0) {
                 return false;
             }
-            return (! geoJsonService.getAnyGeocodedAccession());
+            return (!geoJsonService.getAnyGeocodedAccession());
         };
 
         function filterNonGeocoded(featureData, layer) {
@@ -408,25 +488,5 @@ app.controller('mapController',
             return (featureData.geometry.coordinates !== null);
         }
 
-        var currentPopup = null;
-
-        function cleanupMarkerPopup() {
-            if (currentPopup) {
-                if (geoJsonService.selectedAccession === null ||
-                    geoJsonService.selectedAccession !== currentPopup.accId) {
-                    $scope.model.map.closePopup(currentPopup);
-                    currentPopup = null;
-                }
-            }
-            if (geoJsonService.selectedAccession !== null && !currentPopup) {
-                $scope.model.geoJsonLayer.eachLayer(function (layer) {
-                    if (layer._popup.accId == geoJsonService.selectedAccession) {
-                        layer.openPopup();
-                    }
-                });
-            }
-        }
-
         $scope.init();
-
     });

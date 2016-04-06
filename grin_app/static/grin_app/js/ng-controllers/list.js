@@ -12,14 +12,15 @@ app.controller('listController',
               $window,
               $timeout,
               $location,
+              $localStorage,
               geoJsonService) {
 
         $scope.model = {
-            geoJson: geoJsonService,
-            $location: $location,
+            geoJsonService: geoJsonService,
             searchHilite: null,
             showNearbySearchButtons: false,
             showNearbySearchText: null,
+            localStorage: $localStorage,
             STATIC_PATH: STATIC_PATH
         };
 
@@ -51,7 +52,8 @@ app.controller('listController',
         $scope.onAccessionDetail = function (accId) {
             var modalInstance = $uibModal.open({
                 animation: true,
-                templateUrl: 'accession-modal-content.html',
+                templateUrl: STATIC_PATH +
+                    'grin_app/partials/accession-detail-modal.html',
                 controller: 'accessionDetailController',
                 size: 'lg',
                 resolve: {

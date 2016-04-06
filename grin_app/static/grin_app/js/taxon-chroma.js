@@ -44,7 +44,7 @@ var taxonChroma = {};
         // options is an object w/ properties lightnessFactor, overrides
         var color, parts, genus, species, genusColor, hcl, hclHi, hclLow,
             lightness;
-        var t = taxon.toLowerCase();
+        var t = (taxon) ? taxon.toLowerCase() : 'unknown';
         if (!options) {
             options = {};
         }
@@ -97,7 +97,8 @@ var taxonChroma = {};
          */
         var FNV1_32A_INIT = 0x811c9dc5;
         var hval = FNV1_32A_INIT;
-        for (var i = 0; i < str.length; ++i) {
+        var len = str.length
+        for (var i = 0; i < len; ++i) {
             hval ^= str.charCodeAt(i);
             hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
         }
