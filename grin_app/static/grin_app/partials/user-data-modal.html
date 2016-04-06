@@ -19,20 +19,31 @@
             <span aria-hidden="true">&times;</span>
         </button>
         An example file has been parsed, and the results are shown in the
-        section <em>Parsing Results</em> below. The original CSV text is shown
-        here.
+        section <em>Parsing Results</em> below. The format of the original
+        tab-delimited text file is show here.
 
-        <pre style="font-size: 0.9rem">{{model.exampleCSV}}</pre>
+        Data source:
+        <a href="http://dx.doi.org/10.3389/fpls.2013.00095" target="_blank">
+            Lucas et al. (2013)
+        </a>
+
+        <pre class="scroll-pre">{{model.exampleCSV}}</pre>
 
         <ul>
-            <li><strong>accession_id</strong> is the only required column.
-                <strong>trait_is_nominal</strong> indicates whether the trait
-                (descriptor) is numeric or categorical.
+            <li>
+                <strong>accession_id</strong> is the only required column. A
+                column <strong>trait_is_nominal</strong>, having 'true' or
+                'false' values, indicates whether the trait_desciptor has
+                numeric or categorical values.
             </li>
-            <li>Geographic coordinates, if given, should reference the WGS84
+            <li>
+                Geographic coordinates, if provided, should be in decimal
+                degrees in the columns <strong>latitude</strong> and
+                <strong>longitude</strong> and should reference the WGS84
                 datum (SRID 4326) for best accuracy.
             </li>
-            <li>Fields may be quoted or unquoted, and the delimiter (comma or
+            <li>
+                Fields may be quoted or unquoted, and the delimiter (comma or
                 tab) is auto-detected. To retain special characters, use UTF-8
                 encoding for your text file.
             </li>
@@ -180,7 +191,8 @@
         {{ getHeaders() }}
         <table class="table table-striped">
             <tr>
-                <th ng-repeat="h in model.sortedHeaders">
+                <th class="parsed-csv"
+                    ng-repeat="h in model.sortedHeaders">
                     {{h}}
                 </th>
             </tr>
