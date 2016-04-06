@@ -111,4 +111,13 @@ h3 {
     position: relative;
     overflow: hidden;
 }
-
+.scroll-pre {
+    font-size: 0.9rem;
+    height: auto;
+    max-height: 150px;
+    overflow: auto;
+    background-color: #eee;
+    word-break: normal !important;
+    word-wrap: normal !important;
+    white-space: pre !important;
+}

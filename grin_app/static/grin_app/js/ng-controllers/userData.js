@@ -105,7 +105,7 @@ app.controller('userDataController',
             $scope.model.showWelcome = false;
             $scope.model.showExample = true;
             $scope.model.dataSetName = 'example.csv';
-            var url = STATIC_PATH + 'grin_app/example-user-data.csv';
+            var url = STATIC_PATH + 'grin_app/example-user-data.txt';
             $http.get(url).then(function (result) {
                 $scope.model.exampleCSV = result.data;
                 Papa.parse(result.data, ppConfig);
