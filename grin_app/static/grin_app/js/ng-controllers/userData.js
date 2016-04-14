@@ -131,10 +131,31 @@ app.controller('userDataController',
         * provided data sets. Overwrite any existing accession ids. */
         function updateSearchAccessionIds() {
             var userData = $localStorage.userGeoJson;
-            var accIds = _.uniq(_.map(userData, function (d) {
-                return d.properties.accenumb;
+            var accIds = _.uniq(_.map(userData, function (o) {
+                return o.properties.accenumb;
             }));
-            geoJsonService.setAccessionIds(accIds.join(','), false);
+            accIds = _.filter(accIds, function(s) {
+                return ! _.isEmpty(s);
+            });
+            if(accIds.length === 1) {
+                geoJsonService.setAccessionIds(accIds[0], false);
+            }
+            else if(accIds.length > 1) {
+                geoJsonService.setAccessionIds(accIds.join(','), false);                
+            }
+        }
+
+        /* getUserTraitDescriptors() :  a helper fn to get the unique set of
+        * non-empty trait descriptors. */
+        function getUserTraitDescriptors() {
+            var traitData = $localStorage.userTraitData;
+            var res = _.uniq(_.map(traitData, function(o) {
+                return o.descriptor_name;
+            }));
+            res = _.filter(res, function(s) {
+               return ! _.isEmpty(s);
+            });
+            return res;
         }
 
         /* updateSearchTaxon() : assist the user by filling in the search model
@@ -142,26 +163,26 @@ app.controller('userDataController',
          * search model, then check it's validity. */
         function updateSearchTaxon() {
             var userData = $localStorage.userGeoJson;
-            var taxons = _.uniq(_.map(userData, function(d) {
-                return d.properties.taxon;
+            var taxa = _.uniq(_.map(userData, function(o) {
+                return o.properties.taxon;
             }));
-            if(_.isEmpty(taxons)) {
+            taxa = _.filter(taxa, function(s) { // filter empties
+              return ! _.isEmpty(s);
+            });
+            if(_.isEmpty(taxa)) {
                  // it's possible user specified some GRIN accession ids, but
                  // not the taxon. The geoJsonService will have to set the
                  // taxonQuery after fetching the accession Ids. Early out for
-                 // this edge case here.
-                 var traitData = $localStorage.userTraitData;
-                 var descrs = _.uniq(_.map(traitData, function(d) {
-                    return d.descriptor_name;
-                 }));
-                if(! _.isEmpty(descriptors)) {
+                 // this edge case here.                 
+                var descrs = getUserTraitDescriptors();
+                if(! _.isEmpty(descrs)) {
                     geoJsonService.bootSearchTaxonForTraitDescriptor = descrs[0];
                 }
                 return;
             }
             var params = geoJsonService.params;
-            if(! _.includes(taxons, params.taxonQuery)) {
-                geoJsonService.setTaxonQuery(taxons[0], false);
+            if(! _.includes(taxa, params.taxonQuery)) {
+                geoJsonService.setTaxonQuery(taxa[0], false);
             }
         }
 
@@ -169,18 +190,15 @@ app.controller('userDataController',
          * with a trait descriptor_name from their data sets. If the trait is
          * already in the search model, then check it's validity. */
         function updateSearchTrait() {
-            var userData = $localStorage.userTraitData;
-            var descriptors = _.uniq(_.map(userData, function(d) {
-                return d.descriptor_name;
-            }));
-            if(_.isEmpty(descriptors)) {
-                // it's possible user did not provide trait data- it's not
-                // required
+            var descrs = getUserTraitDescriptors();
+            if(_.isEmpty(descrs)) {
+                // it's possible user did not provide trait data- they are not
+                // required.
                 return;
             }
             var params = geoJsonService.params;
-            if(! _.includes(descriptors, params.traitOverlay)){
-                geoJsonService.setTraitOverlay(descriptors[0], false);
+            if(! _.includes(descrs, params.traitOverlay)){
+                geoJsonService.setTraitOverlay(descrs[0], false);
             }
         }
 
@@ -305,6 +323,5 @@ app.controller('userDataController',
                 return 0;
             });
             return headers;
-        };
-
+        }
     });

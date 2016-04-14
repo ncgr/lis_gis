@@ -125,6 +125,7 @@ app.service('geoJsonService',
         };
 
         function postProcessSearch() {
+            // merge results with user provided data, if any
             if ($localStorage.userGeoJson) {
                mergeUserGeoJson();
                mergeUserTraitJson();
@@ -133,12 +134,14 @@ app.service('geoJsonService',
                ! _.isEmpty(s.params.accessionIds) &&
                ! _.isEmpty(s.data)) {
                 // extract the taxon from the first accession in the search
-                // results (assuming that userData controller has set the list
-                // of accession ids), then search again.
+                // results (assuming that userData controller has set 
+                // the list of accession ids), then search again.
                 var acc = s.data[0];
-                console.log(acc);
+                var taxon = acc.properties.taxon;
                 s.bootSearchTaxonForTraitDescriptor = null;
-                $timeout(postProcessSearch);
+                $timeout(function() {
+                    s.setTaxonQuery(taxon, true);
+                });
                 return;
             }
             s.updateBounds();
