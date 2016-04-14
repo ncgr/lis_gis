@@ -262,13 +262,13 @@
         <p class="help-block">
             Click OK when you are finished adding/removing data sets.
         </p>
-        <p ng-if="model.convertingGeoJSON">
+        <p ng-if="model.converting">
             <img ng-src="{{model.STATIC_PATH}}grin_app/images/ajax-loader.gif"/>
-                Converting to GeoJSON...
+                Processing your data...
         </p>
         <button class="btn btn-success"
                 type="button"
-                ng-disabled="model.convertingGeoJSON"
+                ng-disabled="model.converting"
                 ng-click="onOK()">
             <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
             OK

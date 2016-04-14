@@ -36,7 +36,7 @@ app.controller('userDataController',
         $scope.model.sets = null;
         $scope.model.previewLimit = 5;
         $scope.model.localStorage = $localStorage;
-        $scope.model.convertingGeoJSON = false;
+        $scope.model.converting = false;
 
         // the user's csv->json original data
         $localStorage.userData = $localStorage.userData || {};
@@ -77,22 +77,6 @@ app.controller('userDataController',
             });
         };
 
-        $scope.onOK = function () {
-            if ($scope.model.results) {
-                $scope.onSave();
-            }
-            $scope.model.convertingGeoJSON = true;
-            generateGeoJson();
-            generateTraitJson();
-            $scope.model.convertingGeoJSON = false;
-            var userData = $localStorage.userGeoJson;
-            var accIds = _.uniq(_.map(userData, function (d) {
-                return d.properties.accenumb;
-            }));
-            geoJsonService.setAccessionIds(accIds.join(','), true);
-            $uibModalInstance.close(true);
-        };
-
         $scope.onCancel = function () {
             $uibModalInstance.close(null);
         };
@@ -119,12 +103,86 @@ app.controller('userDataController',
         $scope.onSave = function () {
             var setName = $scope.model.dataSetName;
             $localStorage.userData[setName] = $scope.model.results;
-                        $scope.model.results = null;
+            $scope.model.results = null;
             $scope.model.file = null;
             $scope.model.dataSetName = null;
             $scope.errors = [];
             $scope.warnings = [];
         };
+
+
+        $scope.onOK = function () {
+            if ($scope.model.results) {
+                $scope.onSave();
+            }
+            $scope.model.converting = true;
+            generateGeoJson();
+            generateTraitJson();
+            updateSearchAccessionIds();
+            updateSearchTaxon();
+            updateSearchTrait();
+            $scope.model.converting = false;
+            geoJsonService.search();
+            $uibModalInstance.close(true);
+        };
+
+        /* updateSearchAccessionIds() : assist the user by filling in the
+        * search model with the distinct set of accession ids in the user
+        * provided data sets. Overwrite any existing accession ids. */
+        function updateSearchAccessionIds() {
+            var userData = $localStorage.userGeoJson;
+            var accIds = _.uniq(_.map(userData, function (d) {
+                return d.properties.accenumb;
+            }));
+            geoJsonService.setAccessionIds(accIds.join(','), false);
+        }
+
+        /* updateSearchTaxon() : assist the user by filling in the search model
+         * with a taxon from their data sets. If the taxon already is in the
+         * search model, then check it's validity. */
+        function updateSearchTaxon() {
+            var userData = $localStorage.userGeoJson;
+            var taxons = _.uniq(_.map(userData, function(d) {
+                return d.properties.taxon;
+            }));
+            if(_.isEmpty(taxons)) {
+                 // it's possible user specified some GRIN accession ids, but
+                 // not the taxon. The geoJsonService will have to set the
+                 // taxonQuery after fetching the accession Ids. Early out for
+                 // this edge case here.
+                 var traitData = $localStorage.userTraitData;
+                 var descrs = _.uniq(_.map(traitData, function(d) {
+                    return d.descriptor_name;
+                 }));
+                if(! _.isEmpty(descriptors)) {
+                    geoJsonService.bootSearchTaxonForTraitDescriptor = descrs[0];
+                }
+                return;
+            }
+            var params = geoJsonService.params;
+            if(! _.includes(taxons, params.taxonQuery)) {
+                geoJsonService.setTaxonQuery(taxons[0], false);
+            }
+        }
+
+        /* updateSearchTrait() : assist the user by filling in the search model
+         * with a trait descriptor_name from their data sets. If the trait is
+         * already in the search model, then check it's validity. */
+        function updateSearchTrait() {
+            var userData = $localStorage.userTraitData;
+            var descriptors = _.uniq(_.map(userData, function(d) {
+                return d.descriptor_name;
+            }));
+            if(_.isEmpty(descriptors)) {
+                // it's possible user did not provide trait data- it's not
+                // required
+                return;
+            }
+            var params = geoJsonService.params;
+            if(! _.includes(descriptors, params.traitOverlay)){
+                geoJsonService.setTraitOverlay(descriptors[0], false);
+            }
+        }
 
         function generateTraitJson() {
             // iterate the userData collections, build an array of

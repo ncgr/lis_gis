@@ -50,6 +50,11 @@ app.service('geoJsonService',
             'accessionIdsUpdated',
         ];
 
+        // userData controller may set this descriptor_name for the edge case
+        // where the user provided accession ids, but did not specifify the
+        // taxon of the accessions in their data sets.
+        s.bootSearchTaxonForTraitDescriptor = null;
+
         s.init = function () {
 
             // set default search values on $location service
@@ -123,6 +128,18 @@ app.service('geoJsonService',
             if ($localStorage.userGeoJson) {
                mergeUserGeoJson();
                mergeUserTraitJson();
+            }
+            if(! _.isEmpty(s.bootSearchTaxonForTraitDescriptor) &&
+               ! _.isEmpty(s.params.accessionIds) &&
+               ! _.isEmpty(s.data)) {
+                // extract the taxon from the first accession in the search
+                // results (assuming that userData controller has set the list
+                // of accession ids), then search again.
+                var acc = s.data[0];
+                console.log(acc);
+                s.bootSearchTaxonForTraitDescriptor = null;
+                $timeout(postProcessSearch);
+                return;
             }
             s.updateBounds();
             s.updateColors();
