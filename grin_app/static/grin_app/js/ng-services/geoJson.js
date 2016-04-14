@@ -864,19 +864,17 @@ app.service('geoJsonService',
                         feature.properties,
                         traitSubDescriptors,
                         latlng);
-                    break;
                 case TRAIT_TYPE.NUMERIC:
                     return pieChartNumericMarkerMaker(
                         feature.properties,
                         traitSubDescriptors,
                         latlng);
-                    break;
                 case TRAIT_TYPE.HYBRID:
                     return pieChartHybridMarkerMaker(
                         feature.properties,
                         traitSubDescriptors,
                         latlng);
-                    break;
+
             }
         };
 
