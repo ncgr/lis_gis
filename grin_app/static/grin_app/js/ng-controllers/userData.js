@@ -33,7 +33,9 @@ app.controller('userDataController',
                     $timeout(function() {
                         var msg = 'Unable to load URL '+ $scope.model.fileURL +
                             '. Please check your web browser\'s Javascript ' +
-                            'console for further detail.';
+                            'console for further detail. Please note: ' +
+                            'cross-origin requests require ' +
+                            'Access-Control-Allow-Origin header from server.';
                        $scope.errors.push(msg);
                     });
                 }
