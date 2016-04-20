@@ -143,6 +143,9 @@ app.controller('userDataController',
             else if(accIds.length > 1) {
                 geoJsonService.setAccessionIds(accIds.join(','), false);                
             }
+            else {
+                geoJsonService.setAccessionIds(null, false);
+            }
         }
 
         /* getUserTraitDescriptors() :  a helper fn to get the unique set of
@@ -194,6 +197,7 @@ app.controller('userDataController',
             if(_.isEmpty(descrs)) {
                 // it's possible user did not provide trait data- they are not
                 // required.
+                geoJsonService.setTraitOverlay(null, false)
                 return;
             }
             var params = geoJsonService.params;
