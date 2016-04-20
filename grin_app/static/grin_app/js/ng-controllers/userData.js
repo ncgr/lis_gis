@@ -13,6 +13,7 @@
  - html5 local storage api support via angular ngStorage lib
  (github.com/gsklee/ngStorage, cdnjs.cloudflare.com/ajax/libs/ngStorage)
  - PapaParse (papaparse.com, cdnjs.cloudflare.com/ajax/libs/PapaParse)
+
  */
 
 app.controller('userDataController',
@@ -25,7 +26,18 @@ app.controller('userDataController',
             encoding: 'utf-8',
             skipEmptyLines: true,
             dynamicTyping: true,
-            complete: onParseComplete
+            complete: onParseComplete,
+            error: function(evt) {
+                console.log(evt);
+                if(evt.type === 'error') {
+                    $timeout(function() {
+                        var msg = 'Unable to load URL '+ $scope.model.fileURL +
+                            '. Please check your web browser\'s Javascript ' +
+                            'console for further detail.';
+                       $scope.errors.push(msg);
+                    });
+                }
+            }
         };
 
         $scope.model = model;
@@ -123,6 +135,7 @@ app.controller('userDataController',
             updateSearchTrait();
             $scope.model.converting = false;
             geoJsonService.search();
+            $scope.errors = [];
             $uibModalInstance.close(true);
         };
 
@@ -296,9 +309,6 @@ app.controller('userDataController',
                 }
                 if (results.meta.fields.indexOf('accession_id') === -1) {
                     $scope.errors.push('missing required header: accession_id');
-                }
-                if ($scope.errors.length) {
-                    $scope.$apply();
                     return;
                 }
                 $scope.model.results = results;
