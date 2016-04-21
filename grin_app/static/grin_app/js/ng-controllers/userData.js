@@ -23,8 +23,8 @@
  */
 
 app.controller('userDataController',
-    function ($scope, $localStorage, $uibModalInstance, $http, $timeout,
-              model, geoJsonService) {
+    function ($scope, $rootScope, $localStorage, $uibModalInstance, $http, $timeout,
+              $location, model, geoJsonService) {
 
         /* ppErrorHandler() : papa parse error callback. */
         function ppErrorHandler(evt) {
@@ -35,7 +35,7 @@ app.controller('userDataController',
                     'console for further detail. Please note: ' +
                     'cross-origin requests require ' +
                     'Access-Control-Allow-Origin header from server.';
-               $scope.errors = [msg];
+               $rootScope.errors = [msg];
             });
         }
 
@@ -59,6 +59,8 @@ app.controller('userDataController',
         $scope.model.previewLimit = 5;
         $scope.model.localStorage = $localStorage;
         $scope.model.converting = false;
+        $scope.model.dataSetName = null;
+        $scope.model.fileURL = null;
 
         // the user's csv->json original data
         $localStorage.userData = $localStorage.userData || {};
@@ -66,21 +68,33 @@ app.controller('userDataController',
         $localStorage.userTraitData = $localStorage.userTraitData || [];
 
         if (!Papa) {
-            throw('PapaParse javascript library is required.');
+            throw 'PapaParse javascript library is required.';
         }
 
-        $scope.onLoadURL = function() {
+        /* onLoadURL() : attempt to load from url, with optional callback. */
+        $scope.onLoadURL = function(url, cb) {
             $scope.model.results = null;
-            $scope.errors = [];
-            var url = $scope.model.fileURL;
+            $rootScope.errors = [];
+            if(_.isEmpty(url)) {
+                url = $scope.model.fileURL;
+            }
+            else {
+                $scope.model.fileURL = url;
+            }
             var config = angular.extend({}, ppConfig);
             config.download = true;
+            if(cb) {
+                 config.complete = function(results, file) {
+                   onParseComplete(results, file);
+                   cb(results, file);
+                 };
+            }
             Papa.parse(url, config);
         };
 
         $scope.onLoadFile = function () {
             $scope.model.results = null;
-            $scope.errors = [];
+            $rootScope.errors = [];
             $('input[type=file]').parse({
                 config: ppConfig,
                 before: function (file, inputElem) {
@@ -92,7 +106,7 @@ app.controller('userDataController',
                     // or if before callback aborted for some reason. (note this is
                     // separate from a parsing error)
                     console.log(err);
-                    $scope.errors.push(err + ' ' + file + ' ' + reason);
+                    $rootScope.errors.push(err + ' ' + file + ' ' + reason);
                     $scope.$apply();
                 },
                 complete: function () {
@@ -102,7 +116,9 @@ app.controller('userDataController',
         };
 
         $scope.onCancel = function () {
-            $uibModalInstance.close(null);
+            if($uibModalInstance) {
+                $uibModalInstance.close(null);
+            }
         };
 
         $scope.onRemoveDataSet = function (name) {
@@ -114,6 +130,7 @@ app.controller('userDataController',
             $scope.model.showExample = true;
             $scope.model.dataSetName = 'example.csv';
             var url = STATIC_PATH + 'grin_app/example-user-data.txt';
+            $scope.model.fileURL = url;
             $http.get(url).then(function (result) {
                 $scope.model.exampleCSV = result.data;
                 Papa.parse(result.data, ppConfig);
@@ -133,8 +150,8 @@ app.controller('userDataController',
             $scope.model.results = null;
             $scope.model.file = null;
             $scope.model.dataSetName = null;
-            $scope.errors = [];
-            $scope.warnings = [];
+            $rootScope.errors = [];
+            $rootScope.warnings = [];
         };
 
         $scope.onOK = function () {
@@ -147,10 +164,16 @@ app.controller('userDataController',
             updateSearchAccessionIds();
             updateSearchTaxon();
             updateSearchTrait();
+
+            $location.search('userDataURL', $scope.model.fileURL);
+            $location.search('userDataName', $scope.model.dataSetName);
+
             $scope.model.converting = false;
+            $rootScope.errors = [];
             geoJsonService.search();
-            $scope.errors = [];
-            $uibModalInstance.close(true);
+            if($uibModalInstance) {
+                $uibModalInstance.close(true);
+            }
         };
 
         /* updateSearchAccessionIds() : assist the user by filling in the
@@ -309,7 +332,7 @@ app.controller('userDataController',
             _.each(uniqErrors, function (e) {
                 console.log(e);
                 var msg = e.message + ' (row: ' + e.row + ')';
-                $scope.errors.push(msg);
+                $rootScope.errors.push(msg);
             });
             $scope.$apply();
         }
@@ -325,7 +348,7 @@ app.controller('userDataController',
                     return;
                 }
                 if (results.meta.fields.indexOf('accession_id') === -1) {
-                    $scope.errors.push('missing required header: accession_id');
+                    $rootScope.errors.push('missing required header: accession_id');
                     return;
                 }
                 $scope.model.results = results;
@@ -338,6 +361,9 @@ app.controller('userDataController',
                     var url = $scope.model.fileURL;
                     var path = url.split('/').pop();
                     $scope.model.dataSetName = path;
+
+                    $location.search('userDataURL', url);
+                    $location.search('userDataName', path);
                 }
             });
         }

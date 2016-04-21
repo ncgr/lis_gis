@@ -2,18 +2,21 @@
 
 app.service('geoJsonService',
     function ($http, $rootScope, $location, $timeout, $q,
-              $localStorage, $uibModal) {
+              $localStorage, $uibModal, $controller) {
 
         var DEFAULT_CENTER = {'lat': 35.87, 'lng': -109.47};
         var MAX_RECS = 200;
         var DEFAULT_ZOOM = 6;
         var MARKER_RADIUS = 8;
+        var MAX_URL = 2000;
         var DEFAULT_TRAIT = '(default)';
         var TRAIT_TYPE = {
             NOMINAL : 'nominal',
             NUMERIC : 'numeric',
             HYBRID : 'hybrid',
         };
+
+        $localStorage.$reset(); // TODO: remove from development
 
         // Brewer nominal category colors from chroma.js set1,2,3 concatenated/
         // this code is duplicated from views.py -> evaluation_metadata()
@@ -84,13 +87,19 @@ app.service('geoJsonService',
             if (!('traitExcludeUnchar' in s.params)) {
                 $location.search('traitExcludeUnchar', false);
             }
-            if (!('limitToMapExtent' in s.params) && !('accessionIds' in s.params)) {
+            if (!('limitToMapExtent' in s.params) &&
+                !('accessionIds' in s.params)) {
                 $location.search('limitToMapExtent', true);
             }
             if (!('lng' in s.params)) {
                 $location.search('lat', DEFAULT_CENTER.lat);
                 $location.search('lng', DEFAULT_CENTER.lng);
             }
+
+            if('userDataURL' in s.params) {
+                preProcessUserData();
+            }
+
             // store updated search params in property of service, for ease of
             // use by controllers and views.
             s.params = getSearchParams();
@@ -124,9 +133,43 @@ app.service('geoJsonService',
             return new L.LatLngBounds(boundsArr);
         };
 
+        /* preProcessUserData() : if userDataURL was in the search parameters
+         * (URL query string) and the data set is not in local storage, attempt
+         * to fetch it */
+        function preProcessUserData() {
+            var params = s.params;
+            if(!('userDataURL' in params)) {
+                return;
+            }
+            var dataSetName = params.userDataName;
+            if($localStorage.userData && $localStorage.userData[dataSetName]) {
+                // is appears this data set is already loaded.
+                return;
+            }
+            var dataSetURL = params.userDataURL;
+            var scope = {};
+            var controller = $controller('userDataController', {
+                '$scope' : scope,
+                '$localStorage': $localStorage,
+                '$uibModalInstance' : null,
+                '$http': $http,
+                '$timeout': $timeout,
+                geoJsonService: s,
+                model: {
+                    BRANDING: BRANDING,
+                    STATIC_PATH: STATIC_PATH
+                }
+            });
+            var cb = function() {
+                scope.onOK();
+            };
+            scope.onLoadURL(dataSetURL, cb);
+        }
+
+        /* postProcessSearch() : */
         function postProcessSearch() {
-            // merge results with user provided data, if any
             if ($localStorage.userGeoJson) {
+                // merge results with user provided data, if any
                mergeUserGeoJson();
                mergeUserTraitJson();
             }
@@ -134,7 +177,7 @@ app.service('geoJsonService',
                ! _.isEmpty(s.params.accessionIds) &&
                ! _.isEmpty(s.data)) {
                 // extract the taxon from the first accession in the search
-                // results (assuming that userData controller has set 
+                // results (assuming that userData controller has set
                 // the list of accession ids), then search again.
                 var acc = s.data[0];
                 var taxon = acc.properties.taxon;
@@ -168,8 +211,11 @@ app.service('geoJsonService',
         };
 
         s.search = function () {
-            $rootScope.errors = [];
-            $rootScope.warnings = [];
+            if(s.updating) {
+                console.log('search already in progress');
+                return;
+            }
+
             s.updating = true;
             s.data = [];
             s.traitData = [];
@@ -179,6 +225,11 @@ app.service('geoJsonService',
             // s.params will be used by various templates and controllers,
             // so refresh it upon every search
             s.params = getSearchParams();
+
+            if(window.location.href.length > MAX_URL) {
+                $rootScope.warnings.push('Warning: location.href is exceeding '+
+                    'recommended length (2k): ' + window.location.href.length);
+            }
 
             $http({
                 url: API_PATH + '/search',
