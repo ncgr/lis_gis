@@ -14,32 +14,40 @@
  (github.com/gsklee/ngStorage, cdnjs.cloudflare.com/ajax/libs/ngStorage)
  - PapaParse (papaparse.com, cdnjs.cloudflare.com/ajax/libs/PapaParse)
 
+ HTTP file loading requires CORS header Access-Control-Allow-Origin to be
+ returned by the remote web server. This is a core security restriction of web
+ browsers and javascript- and there is no way around it. See
+ scripts/test_cors_httpserver.py for a simple test case of HTTP loading of user
+ provided data.
+
  */
 
 app.controller('userDataController',
     function ($scope, $rootScope, $localStorage, $uibModalInstance, $http,
               $timeout, model, geoJsonService) {
 
+        /* ppErrorHandler() : papa parse error callback. */
+        function ppErrorHandler(evt) {
+            console.log(evt);
+            $timeout(function() {
+                var msg = evt + '. Unable to load URL: '+ $scope.model.fileURL +
+                    '. Please check your web browser\'s Javascript ' +
+                    'console for further detail. Please note: ' +
+                    'cross-origin requests require ' +
+                    'Access-Control-Allow-Origin header from server.';
+               $scope.errors = [msg];
+            });
+        }
+
         var that = this;
+
         var ppConfig = {
             header: true,
             encoding: 'utf-8',
             skipEmptyLines: true,
             dynamicTyping: true,
             complete: onParseComplete,
-            error: function(evt) {
-                console.log(evt);
-                if(evt.type === 'error') {
-                    $timeout(function() {
-                        var msg = 'Unable to load URL '+ $scope.model.fileURL +
-                            '. Please check your web browser\'s Javascript ' +
-                            'console for further detail. Please note: ' +
-                            'cross-origin requests require ' +
-                            'Access-Control-Allow-Origin header from server.';
-                       $scope.errors.push(msg);
-                    });
-                }
-            }
+            error: ppErrorHandler,
         };
 
         $scope.model = model;
@@ -62,6 +70,8 @@ app.controller('userDataController',
         }
 
         $scope.onLoadURL = function() {
+            $scope.model.results = null;
+            $scope.errors = [];
             var url = $scope.model.fileURL;
             var config = angular.extend({}, ppConfig);
             config.download = true;
@@ -116,6 +126,9 @@ app.controller('userDataController',
 
         $scope.onSave = function () {
             var setName = $scope.model.dataSetName;
+            if(_.isEmpty(setName)) {
+                setName = 'my data';
+            }
             $localStorage.userData[setName] = $scope.model.results;
             $scope.model.results = null;
             $scope.model.file = null;
@@ -123,7 +136,6 @@ app.controller('userDataController',
             $scope.errors = [];
             $scope.warnings = [];
         };
-
 
         $scope.onOK = function () {
             if ($scope.model.results) {
@@ -318,6 +330,11 @@ app.controller('userDataController',
                 if (file) {
                     $scope.model.file = file;
                     $scope.model.dataSetName = file.name;
+                }
+                else {
+                    var url = $scope.model.fileURL;
+                    var path = url.split('/').pop();
+                    $scope.model.dataSetName = path;
                 }
             });
         }
