@@ -331,7 +331,7 @@ app.controller('userDataController',
                     $scope.model.file = file;
                     $scope.model.dataSetName = file.name;
                 }
-                else {
+                else if(! _.isEmpty($scope.model.fileURL)) {
                     var url = $scope.model.fileURL;
                     var path = url.split('/').pop();
                     $scope.model.dataSetName = path;
