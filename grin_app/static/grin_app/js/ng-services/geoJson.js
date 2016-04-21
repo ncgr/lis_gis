@@ -512,7 +512,7 @@ app.service('geoJsonService',
                     _.extendWith(dst, src, customizer);
                     // make sure the lat/long are defined, otherwise default
                     // to the GRIN accessions geographic coords.
-                    if (d.geometry.coordinates.length &&
+                    if ((! _.isEmpty(d.geometry.coordinates)) &&
                         d.geometry.coordinates[0]) {
                         allAccessions[accId].geometry.coordinates =
                             d.geometry.coordinates;

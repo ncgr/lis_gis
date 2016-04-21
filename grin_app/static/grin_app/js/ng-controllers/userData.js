@@ -273,10 +273,7 @@ app.controller('userDataController',
                     var o = {
                         geometry: {
                             type: 'Point',
-                            coordinates: [
-                                rec.longitude,
-                                rec.latitude
-                            ]
+                            coordinates: null
                         },
                         type : 'Feature',
                         properties: {
@@ -292,6 +289,12 @@ app.controller('userDataController',
                             taxon: rec.taxon
                         }
                     };
+                    if(rec.longitude) {
+                        o.geometry.coordinates =  [
+                                rec.longitude,
+                                rec.latitude
+                        ];
+                    }
                     geoJson.push(o);
                 });
             });
