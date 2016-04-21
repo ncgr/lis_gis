@@ -23,8 +23,8 @@
  */
 
 app.controller('userDataController',
-    function ($scope, $rootScope, $localStorage, $uibModalInstance, $http,
-              $timeout, model, geoJsonService) {
+    function ($scope, $localStorage, $uibModalInstance, $http, $timeout,
+              model, geoJsonService) {
 
         /* ppErrorHandler() : papa parse error callback. */
         function ppErrorHandler(evt) {
