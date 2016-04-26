@@ -157,8 +157,18 @@ app.controller('userDataController',
                 setName = 'my data';
             }
             $localStorage.userData[setName] = $scope.model.results;
+
+            if(! _.isEmpty($scope.model.fileURL)) {
+                $location.search('userDataURL', $scope.model.fileURL);
+                $location.search('userDataName', $scope.model.dataSetName);
+            }
+            else {
+                $location.search('userDataURL', null);
+                $location.search('userDataName', null);
+            }
             $scope.model.results = null;
             $scope.model.file = null;
+            $scope.model.fileURL = null;
             $scope.model.dataSetName = null;
             $rootScope.errors = [];
             $rootScope.warnings = [];
@@ -174,10 +184,6 @@ app.controller('userDataController',
             updateSearchAccessionIds();
             updateSearchTaxon();
             updateSearchTrait();
-
-            $location.search('userDataURL', $scope.model.fileURL);
-            $location.search('userDataName', $scope.model.dataSetName);
-
             $scope.model.converting = false;
             $rootScope.errors = [];
             geoJsonService.search();
@@ -369,11 +375,13 @@ app.controller('userDataController',
                 }
                 else if(! _.isEmpty($scope.model.fileURL)) {
                     var url = $scope.model.fileURL;
-                    var path = url.split('/').pop();
-                    $scope.model.dataSetName = path;
-
                     $location.search('userDataURL', url);
-                    $location.search('userDataName', path);
+                    if(! $scope.model.dataSetName) {
+                        var path = url.split('/').pop();
+                        $scope.model.dataSetName = path;
+
+                    }
+                    $location.search('userDataName', $scope.model.dataSetName);
                 }
             });
         }
