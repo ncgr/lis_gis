@@ -97,7 +97,7 @@ app.service('geoJsonService',
             }
 
             if('userDataURL' in s.params) {
-                preProcessUserData();
+                $timeout(preProcessUserData);
             }
 
             // store updated search params in property of service, for ease of
@@ -135,7 +135,8 @@ app.service('geoJsonService',
 
         /* preProcessUserData() : if userDataURL was in the search parameters
          * (URL query string) and the data set is not in local storage, attempt
-         * to fetch it */
+         * to fetch it and parse it into localstorage (same as if user had
+         * manually loaded it via the 'Add my data' tool. */
         function preProcessUserData() {
             var params = s.params;
             if(!('userDataURL' in params)) {
@@ -146,7 +147,8 @@ app.service('geoJsonService',
                 // is appears this data set is already loaded.
                 return;
             }
-            var dataSetURL = params.userDataURL;
+            var url = params.userDataURL;
+            var setName = params.userDataName;
             var scope = {};
             var controller = $controller('userDataController', {
                 '$scope' : scope,
@@ -157,13 +159,15 @@ app.service('geoJsonService',
                 geoJsonService: s,
                 model: {
                     BRANDING: BRANDING,
-                    STATIC_PATH: STATIC_PATH
+                    STATIC_PATH: STATIC_PATH,
+                    fileURL: url,
+                    dataSetName : setName,
                 }
             });
             var cb = function() {
                 scope.onOK();
             };
-            scope.onLoadURL(dataSetURL, cb);
+            scope.onLoadURL(url, cb);
         }
 
         /* postProcessSearch() : */
@@ -211,8 +215,11 @@ app.service('geoJsonService',
         };
 
         s.search = function () {
+
             if(s.updating) {
-                console.log('search already in progress');
+                $timeout(function() {
+                    s.updating = false;
+                });
                 return;
             }
 

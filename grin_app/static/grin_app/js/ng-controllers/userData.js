@@ -59,9 +59,8 @@ app.controller('userDataController',
         $scope.model.previewLimit = 5;
         $scope.model.localStorage = $localStorage;
         $scope.model.converting = false;
-        $scope.model.dataSetName = null;
-        $scope.model.fileURL = null;
-
+        $scope.model.dataSetName = model.dataSetName || null;
+        $scope.model.fileURL = model.fileURL || null;
         // the user's csv->json original data
         $localStorage.userData = $localStorage.userData || {};
         $localStorage.userGeoJson = $localStorage.userGeoJson || [];
@@ -84,9 +83,12 @@ app.controller('userDataController',
             var config = angular.extend({}, ppConfig);
             config.download = true;
             if(cb) {
+                 // customize the completion callback to include callback 'cb'
                  config.complete = function(results, file) {
                    onParseComplete(results, file);
-                   cb(results, file);
+                   $timeout(function() {
+                       cb(results, file);
+                   });
                  };
             }
             Papa.parse(url, config);
@@ -123,6 +125,14 @@ app.controller('userDataController',
 
         $scope.onRemoveDataSet = function (name) {
             delete $localStorage.userData[name];
+
+            // clear out query string parameters, to prevent remote userdata
+            // from re-loading next time
+            var params = $location.search();
+            if(name === params.userDataName) {
+                $location.search('userDataURL', null);
+                $location.search('userDataName', null);
+            }
         };
 
         $scope.onExample = function () {
