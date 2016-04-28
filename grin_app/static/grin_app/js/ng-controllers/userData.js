@@ -20,6 +20,13 @@
  scripts/test_cors_httpserver.py for a simple test case of HTTP loading of user
  provided data.
 
+ It is possible to proxy http requests and add the CORS header, if sufficient
+ care is taken to implement it in a secure manner. Here is an example:
+
+ https://github.com/Rob--W/cors-anywhere
+ runs a live proxy @
+ https://cors-anywhere.herokuapp.com/
+
  */
 
 app.controller('userDataController',
@@ -33,8 +40,9 @@ app.controller('userDataController',
                 var msg = evt + '. Unable to load URL: '+ $scope.model.fileURL +
                     '. Please check your web browser\'s Javascript ' +
                     'console for further detail. Please note: ' +
-                    'cross-origin requests require ' +
-                    'Access-Control-Allow-Origin header from server.';
+                    'Cross Origin Resource Sharing (CORS) requires the ' +
+                    'Access-Control-Allow-Origin header from server, and/or ' +
+                    'may need to be accessed through an HTTP proxy.';
                $rootScope.errors = [msg];
             });
         }
