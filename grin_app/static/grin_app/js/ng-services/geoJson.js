@@ -16,8 +16,6 @@ app.service('geoJsonService',
             HYBRID : 'hybrid',
         };
 
-        $localStorage.$reset(); // TODO: remove from development
-
         // Brewer nominal category colors from chroma.js set1,2,3 concatenated/
         // this code is duplicated from views.py -> evaluation_metadata()
         var NOMINAL_COLORS = [
