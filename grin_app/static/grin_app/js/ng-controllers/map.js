@@ -352,22 +352,6 @@ app.controller('mapController',
             app.tour();
         };
 
-        // $scope.onUserData = function () {
-        //     $uibModal.open({
-        //         animation: true,
-        //         templateUrl: STATIC_PATH +
-        //                     'grin_app/partials/user-data-modal.html',
-        //         controller: 'userDataController',
-        //         size: 'lg',
-        //         resolve: {
-        //             model: {
-        //                 BRANDING: BRANDING,
-        //                 STATIC_PATH: STATIC_PATH
-        //             }
-        //         }
-        //     });
-        // };
-
         function get2CharAbbrev(feature) {
             var species = feature.properties.taxon.split(' ')[1];
             return species.substring(0, 2);

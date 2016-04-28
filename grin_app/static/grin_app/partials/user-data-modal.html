@@ -113,31 +113,31 @@
     </div>
 
     <h4>New Data Set</h4>
-    <form>
         <div class="form-group form-inline">
-            <label for="user-file-method">Provide a file via:</label>
-            <div class="radio" id="user-file-method">
-                <label>
-                    <input type="radio"
-                           name="fileMethod"
-                           value="local"
-                           ng-model="model.fileMethod"> Local file (filereader)
-                </label>
-            </div>
-            <div class="radio">
-                <label>
-                    <input type="radio"
-                           name="fileMethod"
-                           value="url"
-                           ng-model="model.fileMethod"> Web file (HTTP)
-                </label>
-            </div>
-            <p class="help-block" ng-if="! model.fileMethod">
-                Select a file source you wish to load.
-            </p>
+        <label for="user-file-method">Provide a file via:</label>
+        <div class="radio" id="user-file-method">
+            <label>
+                <input type="radio"
+                       name="fileMethod"
+                       value="local"
+                       ng-model="model.fileMethod"> Local file (filereader)
+            </label>
+        </div>
+        <div class="radio">
+            <label>
+                <input type="radio"
+                       name="fileMethod"
+                       value="url"
+                       ng-model="model.fileMethod"> Web file (HTTP)
+            </label>
+        </div>
+        <p class="help-block" ng-if="! model.fileMethod">
+            Select a file source you wish to load.
+        </p>
         </div>
 
-        <div class="form-group"
+        <form ng-submit="onLoadFile()">
+         <div class="form-group"
              ng-if="model.fileMethod == 'local'">
             <label for="user-data-file">Local file:</label>
             <input type="file" id="user-data-file">
@@ -146,19 +146,21 @@
                 Select a local file, then click
                 Load File.
             </p>
-            <button type="button" class="btn btn-default"
+            <button type="submit" class="btn btn-default"
                     ng-click="onLoadFile()">
                 <span class="glyphicon glyphicon-level-up"></span>
                 Load File
             </button>
         </div>
+        </form>
 
-        <div class="form-group"
+        <form ng-submit="onLoadURL()">
+          <div class="form-group"
              ng-if="model.fileMethod == 'url'">
             <label for="url-data-url">Web file (HTTP):</label>
             <input id="url-data-url"
                    class="form-control"
-                   placeholder="enter a url, e.g. http://you.com/your-file.csv"
+                   placeholder="enter a url, e.g. http://your.org/your-file.csv"
                    ng-model="model.fileURL">
             <p class="help-block" ng-if="!model.fileURL">
                 Enter the HTTP URL of your .csv or .tsv data source, then
@@ -166,14 +168,14 @@
                 (Please note: cross-origin requests require
                 Access-Control-Allow-Origin header)
             </p>
-            <button type="button"
-                    class="btn btn-default"
-                    ng-click="onLoadURL()">
+            <button type="submit"
+                    class="btn btn-default">
                 <span class="glyphicon glyphicon-level-up"></span>
                 Load file
             </button>
-        </div>
-    </form>
+            </div>
+        </form>
+
 
     <div ng-if="model.results.data.length">
         <a name="parsing-results"></a>
@@ -262,16 +264,18 @@
         <p class="help-block">
             Click OK when you are finished adding/removing data sets.
         </p>
-        <p ng-if="model.convertingGeoJSON">
+        <p ng-if="model.converting">
             <img ng-src="{{model.STATIC_PATH}}grin_app/images/ajax-loader.gif"/>
-                Converting to GeoJSON...
+                Processing your data...
         </p>
-        <button class="btn btn-success"
-                type="button"
-                ng-disabled="model.convertingGeoJSON"
+        <form ng-submit="onOK()">
+            <button class="btn btn-success"
+                type="submit"
+                ng-disabled="model.converting"
                 ng-click="onOK()">
-            <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-            OK
-        </button>
+                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                OK
+            </button>
+        </form>
     </div>
 </div>
