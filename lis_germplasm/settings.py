@@ -43,6 +43,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_nose',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -139,10 +140,13 @@ LOGGING = {
 }
 
 BRANDING = {
-    'home_url' : '/',
-    'logo_url' : STATIC_URL + 'grin_app/images/legumeinfo_logo.png',
-    'site_heading' : 'Legume Information System',
-    'site_subheading' : 'Germplasm Map',
-    'site_abbrev' : 'LIS',
+    'home_url': '/',
+    'logo_url': STATIC_URL + 'grin_app/images/legumeinfo_logo.png',
+    'site_heading': 'Legume Information System',
+    'site_subheading': 'Germplasm Map',
+    'site_abbrev': 'LIS',
 }
 
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+NOSE_ARGS = ['--nocapture',
+             '--nologcapture']
