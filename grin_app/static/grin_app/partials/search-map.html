@@ -1,198 +1,210 @@
-<!-- this div for development/testing only  -->
-<div ng-repeat="(k,v) in model.legumeGenera">
-  <span style="display: inline-block"
-	ng-style="{'background-color': v}">
-    {{v}}
-  </span>
-  {{k}}
+<div class="menu-btn-div">
+    <button id="menu-btn"
+            class="btn btn-default menu-btn"
+            ng-click="model.showMenu = ! model.showMenu">
+        <span class="glyphicon glyphicon-menu-hamburger"></span>
+        Menu
+    </button>
 </div>
 
-<button id="reframe-btn"
-	type="submit" class="btn btn-xs btn-default"
-	ng-click="onZoomToAccessions()">
-  <span class="glyphicon glyphicon-eye-open"
-	aria-hidden="true"></span>
-  Reframe map to accessions
-</button>
-
-<button id="change-base-map-btn"
-	class="btn btn-xs btn-default"
-	ng-click="model.baseMapSelect = true; model.geoCoordsSelect = false; model.mapHeightSelect = false;">
-  <span class="glyphicon glyphicon-picture"></span>
-  Change base map
-</button>
-
-<button class="btn btn-xs btn-default"
-	id="enter-coords-btn"
-	ng-click="model.geoCoordsSelect = true; model.baseMapSelect = false; model.mapHeightSelect = false;">
-  <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>    
-  Go to geographic coordinates
-</button>
-
-<button id="geolocate-btn"
-	type="submit" class="btn btn-xs btn-default"
-	ng-click="onGeoLocate()">
-  <span class="glyphicon glyphicon-map-marker"
-	aria-hidden="true"></span>
-  Go to my location
-</button>
-
-<button id="map-height-btn"
-	type="submit" class="btn btn-xs btn-default"
-	ng-click="model.mapHeightSelect = true; model.baseMapSelect = false; model.geoCoordsSelect = false;">
-  <span class="glyphicon glyphicon-resize-vertical"
-	aria-hidden="true"></span>
-  Map height
-</button>
-
-<button id="tour-btn"
-	type="submit" class="btn btn-xs btn-default"
-	ng-click="onTour()">
-  <span class="glyphicon glyphicon-question-sign"
-	aria-hidden="true"></span>
-  View Tour/Help
-</button>
-
-<div class="panel panel-info"
-     ng-if="model.mapHeightSelect"  style="margin-top: 0.5rem;">
-  <div class="panel-heading">
-    <button type="button" class="close"
-	    ng-click="model.mapHeightSelect = false; model.map.invalidateSize();">
-      <span aria-hidden="true">&times;</span>
+<div id="menu" ng-if="model.showMenu" class="menu-spc">
+    <button id="reframe-btn"
+            type="submit" class="btn btn-sm btn-default"
+            ng-click="onZoomToAccessions()">
+    <span class="glyphicon glyphicon-eye-open"
+          aria-hidden="true"></span>
+        Reframe map to accessions
     </button>
-    <span class="glyphicon glyphicon-resize-vertical"></span>
-    Adjust map vertical size:
-  </div>
-  <div class="panel-body">
-    <button class="btn btn-sm btn-xs btn-default"
-	    ng-click="onMapHeight('+')">
-      <span class="glyphicon glyphicon-plus-sign"></span>
-      Taller
+
+    <button id="add-my-data-btn" class="btn btn-sm btn-default"
+            ng-click="model.geoJsonService.onUserData()">
+        <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
+        Add my data
     </button>
-    <button class="btn btn-sm btn-xs btn-default"
-	    ng-click="onMapHeight('-')">
-      <span class="glyphicon glyphicon-minus-sign"></span>      
-      Shorter
+
+    <button id="change-base-map-btn"
+            class="btn btn-sm btn-default"
+            ng-click="model.baseMapSelect = true; model.geoCoordsSelect = false; model.mapHeightSelect = false;">
+        <span class="glyphicon glyphicon-picture"></span>
+        Base map
     </button>
-    <button class="btn btn-sm btn-success"
-	    ng-click="model.mapHeightSelect = false; model.map.invalidateSize();">
-      <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-      OK
-    </button>
+
     <button class="btn btn-sm btn-default"
-	    ng-click="onMapHeightCancel()">
-      <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-      Cancel
+            id="enter-coords-btn"
+            ng-click="model.geoCoordsSelect = true; model.baseMapSelect = false; model.mapHeightSelect = false;">
+        <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>
+        Go to geographic coordinates
     </button>
-  </div>
-</div>
 
-<div class="panel panel-info"
-     ng-if="model.baseMapSelect"  style="margin-top: 0.5rem;">
-
-  <div class="panel-heading">
-    
-    <button type="button" class="close" ng-click="model.baseMapSelect = false">
-      <span aria-hidden="true">&times;</span>
+    <button id="geolocate-btn"
+            type="submit" class="btn btn-sm btn-default"
+            ng-click="onGeoLocate()">
+    <span class="glyphicon glyphicon-map-marker"
+          aria-hidden="true"></span>
+        Go to my location
     </button>
-    
-    <span class="glyphicon glyphicon-picture"></span>
-    Select a basemap:
-  </div>
-  <div class="panel-body">
-    <div ng-repeat="(key,value) in model.baseMaps" style="margin-top: 0.2rem;">
-      <button class="btn btn-sm btn-success" ng-click="onSelectBaseMap(key)">
-	Go
-      </button>
-      {{key}}
+
+    <button id="map-height-btn"
+            type="submit" class="btn btn-sm btn-default"
+            ng-click="model.mapHeightSelect = true; model.baseMapSelect = false; model.geoCoordsSelect = false;">
+    <span class="glyphicon glyphicon-resize-vertical"
+          aria-hidden="true"></span>
+        Map height
+    </button>
+
+    <button id="tour-btn"
+            type="submit" class="btn btn-sm btn-default"
+            ng-click="onTour()">
+    <span class="glyphicon glyphicon-question-sign"
+          aria-hidden="true"></span>
+        View Tour/Help
+    </button>
+
+    <div class="panel panel-info section-spc"
+         ng-if="model.mapHeightSelect">
+        <div class="panel-heading">
+            <button type="button" class="close"
+                    ng-click="model.mapHeightSelect = false; model.map.invalidateSize();">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            <span class="glyphicon glyphicon-resize-vertical"></span>
+            Adjust map vertical size:
+        </div>
+        <div class="panel-body">
+            <button class="btn btn-sm btn-xs btn-default"
+                    ng-click="onMapHeight('+')">
+                <span class="glyphicon glyphicon-plus-sign"></span>
+                Taller
+            </button>
+            <button class="btn btn-sm btn-xs btn-default"
+                    ng-click="onMapHeight('-')">
+                <span class="glyphicon glyphicon-minus-sign"></span>
+                Shorter
+            </button>
+            <button class="btn btn-sm btn-success"
+                    ng-click="model.mapHeightSelect = false; model.map.invalidateSize();">
+                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                OK
+            </button>
+            <button class="btn btn-sm btn-default"
+                    ng-click="onMapHeightCancel()">
+                <span class="glyphicon glyphicon-remove"
+                      aria-hidden="true"></span>
+                Cancel
+            </button>
+        </div>
     </div>
-    <div style="margin-top: 0.2rem;">
-      <button class="btn btn-sm btn-default"
-	      ng-click="model.baseMapSelect = false">
-	<span class="glyphicon glyphicon-remove"
-	      aria-hidden="true"></span>
-	Cancel
-      </button>
+
+    <div class="panel panel-info section-spc"
+         ng-if="model.baseMapSelect">
+
+        <div class="panel-heading">
+            <button type="button" class="close"
+                    ng-click="model.baseMapSelect = false">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            <span class="glyphicon glyphicon-picture"></span>
+            Select a basemap:
+        </div>
+        <div class="panel-body">
+            <div ng-repeat="(key,value) in model.baseMaps"
+                 class="panel-list-item">
+                <button class="btn btn-sm btn-success"
+                        ng-click="onSelectBaseMap(key)">
+                    Go
+                </button>
+                {{key}}
+            </div>
+            <div>
+                <button class="btn btn-sm btn-default"
+                        ng-click="model.baseMapSelect = false">
+	  <span class="glyphicon glyphicon-remove"
+            aria-hidden="true"></span>
+                    Cancel
+                </button>
+            </div>
+        </div>
     </div>
-  </div>
+    <div class="panel panel-info section-spc"
+         ng-if="model.geoCoordsSelect">
+        <div class="panel-heading">
+            <button type="button" class="close"
+                    ng-click="model.geoCoordsSelect = false">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>
+            Center map at Geographic Coordinates:
+        </div>
+        <div class="panel-body">
+            <form class="form-inline" ng-submit="onSetCenter()">
+                <div class="form-group">
+                    <label for="lat">Latitude:</label>
+                    <input id="lat"
+                           type="text"
+                           ng-model="model.center.lat"
+                           size="8"/>
+                    <label for="lng">Longitude:</label>
+                    <input id="lng"
+                           type="text"
+                           ng-model="model.center.lng"
+                           size="8"/>
+                    <button type="submit" class="btn btn-sm btn-success">
+                        <span class="glyphicon glyphicon-globe"
+                              aria-hidden="true"></span>
+                        Go
+                    </button>
+                </div>
+                <button class="btn btn-sm btn-default"
+                        ng-click="model.baseMapSelect = false">
+	  <span class="glyphicon glyphicon-remove"
+            aria-hidden="true"></span>
+                    Cancel
+                </button>
+            </form>
+        </div>
+    </div>
 </div>
 
-<div class="panel panel-info"
-     ng-if="model.geoCoordsSelect" style="margin-top: 0.5rem;">
-  <div class="panel-heading">
-    <button type="button" class="close"
-	    ng-click="model.geoCoordsSelect = false">
-      <span aria-hidden="true">&times;</span>
-    </button>
-    <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>
-    Center map at Geographic Coordinates:
-  </div>
-  <div class="panel-body">
-    <form class="form-inline" ng-submit="onSetCenter()">
-      <div class="form-group">
-	<label for="lat">Latitude:</label>
-	<input id="lat"
-	       type="text"
-	       ng-model="model.center.lat"
-	       size="8"></input>
-	<label for="lng">Longitude:</label>
-	<input id="lng"
-	       type="text"
-	       ng-model="model.center.lng"
-	       size="8"></input>
-	<button type="submit" class="btn btn-sm btn-success">
-	  <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>
-	  Go
-	</button>
-      </div>
-      <button class="btn btn-sm btn-default"
-	      ng-click="model.baseMapSelect = false">
-	<span class="glyphicon glyphicon-remove"
-	      aria-hidden="true"></span>
-	Cancel
-      </button>
-    </form>
-  </div>
-</div>
-
-<div id="map" style="margin-top: 0.2rem;"
-     ng-style="{ height: '' + model.mapHeight + 'px'}">
+<div id="map" ng-style="{ height: '' + model.mapHeight + 'px'}">
 </div>
 
 <div id="legend"
-     class="well well-sm"
-     style="margin-top: 0.5rem"
-     ng-if="! model.geoJson.updating && model.geoJson.params.traitOverlay">
+     class="well well-sm section-spc"
+     ng-if="! model.geoJsonService.updating && model.geoJsonService.params.traitOverlay">
 
-  {{model.geoJson.params.traitOverlay}}
+    {{model.geoJsonService.params.traitOverlay}}
 
   <span class="badge"
-	ng-repeat="legendItem in model.geoJson.traitLegend.values"
-	ng-style="{'background-color': legendItem.color }">
-    <span style="color: black">{{legendItem.label}}</span>
+        ng-repeat="legendItem in model.geoJsonService.traitLegend.values"
+        ng-style="{'background-color': legendItem.color }">
+    <span class="badge-text">{{legendItem.label}}</span>
   </span>
-  <span ng-if="! model.geoJson.traitLegend.values.length">
+  <span ng-if="! model.geoJsonService.traitLegend.values.length">
     : No matching trait data found for these accessions.
   </span>
 </div>
 
-<div class="alert alert-info"
-     style="margin-top: 0.5rem"
-     ng-if="showHiddenAccHelp()">
+<div ng-if="showHiddenAccHelp()" class="alert alert-info section-spc">
+    <button type="button" class="close" data-dismiss="alert">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <strong>Please note:</strong>
+    {{model.geoJsonService.data.length}} results are in your query, but
+    none are visible on the map.
+    <button type="button"
+            class="btn btn-sm btn-primary"
+            ng-click="onZoomToAccessions()">
+        Zoom map to view these accessions
+    </button>
+</div>
 
-   <button type="button" class="close" data-dismiss="alert">
-    <span aria-hidden="true">&times;</span>
-   </button>
+<div class="alert alert-warning section-spc"
+     ng-if="showHiddenAccHelp2()">
+    <button type="button" class="close" data-dismiss="alert">
+        <span aria-hidden="true">&times;</span>
+    </button>
 
-   <strong>Please note:</strong>
-
-   {{model.geoJsonService.data.length}} results are in your query, but
-   are not visible on the map.
-   
-   <button type="button"
-	   class="btn btn-sm btn-primary"
-	   ng-click="onZoomToAccessions()">
-     Zoom map to view these accessions
-   </button>
-   
+    <strong>Please note:</strong>
+    None of the search results have geographic coordinates, so they will
+    not appear on the map above.
 </div>

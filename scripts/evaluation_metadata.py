@@ -1,16 +1,17 @@
 #!/usr/bin/env python
 
-'''
+"""
 Update the evaluation metadata in
 lis_germplasm.grin_evaluation_metadata. Should be done after all
 genera evaluation data are loaded/updated.
-'''
+"""
 import psycopg2
 
 PSQL_DB = 'dbname=drupal user=www'
 NOMINAL_THRESHOLD = 10
 
 conn = psycopg2.connect(PSQL_DB)
+
 
 def main():
     cur = conn.cursor()
@@ -31,8 +32,8 @@ def main():
         WHERE descriptor_name = %(q)s
         AND observation_value IS NOT NULL
         '''
-        cur.execute(sql, {'q' : descriptor_name})
-        obs_values = [ _string2num(row[0]) for row in cur.fetchall() ]
+        cur.execute(sql, {'q': descriptor_name})
+        obs_values = [_string2num(row[0]) for row in cur.fetchall()]
         if _detect_numeric_trait(obs_values):
             handler = _update_numeric_trait_metadata
         else:
@@ -45,9 +46,9 @@ def main():
 
 
 def _update_numeric_trait_metadata(**params):
-    '''
+    """
     Update the metadata for this numeric trait.
-    '''
+    """
     sql = '''
     INSERT INTO lis_germplasm.grin_evaluation_metadata
       (taxon, descriptor_name, obs_type, obs_min, obs_max)
@@ -62,9 +63,9 @@ def _update_numeric_trait_metadata(**params):
 
 
 def _update_nominal_trait_metadata(**params):
-    '''
+    """
     Update the metadata for this nominal trait.
-    '''
+    """
     sql = '''
     INSERT INTO lis_germplasm.grin_evaluation_metadata
       (taxon, descriptor_name, obs_type, obs_nominal_values)
@@ -78,35 +79,31 @@ def _update_nominal_trait_metadata(**params):
 
 
 def _string2num(s):
-    '''
+    """
     Convert a string to int or float, if possible.
-    '''
-    intval = None
-    floatval = None
+    """
     try:
-        intval = int(s)
-        return intval
+        return int(s)
     except ValueError:
         pass
     try:
-        floatval = float(s)
-        return floatval
+        return float(s)
     except ValueError:
         pass
     return s
 
 
 def _detect_numeric_trait(rows):
-    '''
+    """
     1. If there are any strings, assume this must not be a numeric trait.
     2. If there are only ints within a narrow range, then assume it's a
        category trait using ints as classes.
     3. Otherwise by default it must be numeric.
-    '''
-    strings = [ val for val in rows if isinstance(val, basestring) ]
+    """
+    strings = [val for val in rows if isinstance(val, basestring)]
     if len(strings) > 0:
         return False  # have at least one string, must not be numeric.
-    ints = [ val for val in rows if isinstance(val, int) ]
+    ints = [val for val in rows if isinstance(val, int)]
     if len(ints) == len(rows):
         uniq = sorted(list(set(ints)))
         if len(uniq) <= NOMINAL_THRESHOLD:
@@ -119,4 +116,3 @@ def _detect_numeric_trait(rows):
 
 if __name__ == '__main__':
     main()
-

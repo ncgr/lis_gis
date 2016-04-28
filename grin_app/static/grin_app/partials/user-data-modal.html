@@ -1,0 +1,281 @@
+<div class="modal-header">
+    <button type="button" class="close"
+            ng-click="onCancel()">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <h3 class="modal-title">
+        <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
+        Your Data | {{model.BRANDING.site_subheading}}
+    </h3>
+</div>
+<div class="modal-body">
+    <p class="lead">
+        Add new accessions, or override existing data attributes.
+    </p>
+
+    <div class="alert alert-success" ng-if="model.showExample">
+        <button type="button" class="close"
+                data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        An example file has been parsed, and the results are shown in the
+        section <em>Parsing Results</em> below. The format of the original
+        delimited text file is shown here.
+
+        Data source:
+        <a href="http://dx.doi.org/10.3389/fpls.2013.00095" target="_blank">
+            Lucas et al. (2013)
+        </a>
+
+        <pre class="scroll-pre">{{model.exampleCSV}}</pre>
+
+        <ul>
+            <li>
+                <strong>accession_id</strong> is the only required column. A
+                column <strong>trait_is_nominal</strong>, having 'true' or
+                'false' values, indicates whether the trait_desciptor has
+                numeric or categorical values.
+            </li>
+            <li>
+                Geographic coordinates, if provided, should be in decimal
+                degrees in the columns <strong>latitude</strong> and
+                <strong>longitude</strong> and should reference the WGS84
+                datum (SRID 4326) for best accuracy.
+            </li>
+            <li>
+                Fields may be quoted or unquoted, and the delimiter (comma or
+                tab) is auto-detected. To retain special characters, use UTF-8
+                encoding for your text file.
+            </li>
+        </ul>
+
+        <p class="help-block">
+            Review the <em>Parsing Results</em> below, then click SAVE, and
+            then optionally, click REMOVE, if you wish to remove the example
+            data set.
+        </p>
+        <button type="button"
+                class="btn btn-default"
+                data-dismiss="alert"
+                aria-label="Close">
+            <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+            OK
+        </button>
+    </div>
+
+    <div class="alert alert-info" ng-if="model.showWelcome">
+        <button type="button" class="close"
+                data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        You can add your CSV or TSV (delimited text) data to the
+        {{model.BRANDING.site_subheading}} in a couple of ways: a) via
+        the html5 local file reader api, or b) web download direct
+        to your browser.
+        <strong>
+            In either case, your data is not publicly shared, and not stored on
+            the server.
+        </strong>
+        <br/>
+        <button type="button" class="btn btn-xs btn-default"
+                data-dismiss="alert" aria-label="Close">
+            <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+            Let's do this
+        </button>
+
+        <button type="button"
+                ng-click="onExample()"
+                class="btn btn-xs btn-default">
+	    <span class="glyphicon glyphicon-question-sign"
+              aria-hidden="true"></span>
+            View an example
+        </button>
+    </div>
+
+
+    <!-- note: the errors and warnings divs are duplicated from errors.html -->
+    <div class="alert alert-danger alert-spc"
+         ng-repeat="error in errors">
+        <button type="button" class="close"
+                data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <strong>Error:</strong> {{error}}
+    </div>
+
+    <div class="alert alert-warning alert-spc"
+         ng-repeat="warning in warnings">
+        <button type="button" class="close"
+                data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <strong>Warning:</strong> {{warning}}
+    </div>
+
+    <h4>New Data Set</h4>
+        <div class="form-group form-inline">
+        <label for="user-file-method">Provide a file via:</label>
+        <div class="radio" id="user-file-method">
+            <label>
+                <input type="radio"
+                       name="fileMethod"
+                       value="local"
+                       ng-model="model.fileMethod"> Local file (filereader)
+            </label>
+        </div>
+        <div class="radio">
+            <label>
+                <input type="radio"
+                       name="fileMethod"
+                       value="url"
+                       ng-model="model.fileMethod"> Web file (HTTP)
+            </label>
+        </div>
+        <p class="help-block" ng-if="! model.fileMethod">
+            Select a file source you wish to load.
+        </p>
+        </div>
+
+        <form ng-submit="onLoadFile()">
+         <div class="form-group"
+             ng-if="model.fileMethod == 'local'">
+            <label for="user-data-file">Local file:</label>
+            <input type="file" id="user-data-file">
+
+            <p class="help-block" ng-if="! model.file">
+                Select a local file, then click
+                Load File.
+            </p>
+            <button type="submit" class="btn btn-default"
+                    ng-click="onLoadFile()">
+                <span class="glyphicon glyphicon-level-up"></span>
+                Load File
+            </button>
+        </div>
+        </form>
+
+        <form ng-submit="onLoadURL()">
+          <div class="form-group"
+             ng-if="model.fileMethod == 'url'">
+            <label for="url-data-url">Web file (HTTP):</label>
+            <input id="url-data-url"
+                   class="form-control"
+                   placeholder="enter a url, e.g. http://your.org/your-file.csv"
+                   ng-model="model.fileURL">
+            <p class="help-block" ng-if="!model.fileURL">
+                Enter the HTTP URL of your .csv or .tsv data source, then
+                click LOAD FILE.
+                (Please note: cross-origin requests require
+                Access-Control-Allow-Origin header)
+            </p>
+            <button type="submit"
+                    class="btn btn-default">
+                <span class="glyphicon glyphicon-level-up"></span>
+                Load file
+            </button>
+            </div>
+        </form>
+
+
+    <div ng-if="model.results.data.length">
+        <a name="parsing-results"></a>
+        <h4 id="parsing-results">Parsing Results</h4>
+        <p class="help-block">
+            Please review the results below, and then click SAVE.
+            Otherwise, try loading a new file, or click OK to dismiss this
+            dialog.
+        </p>
+        <div class="form-group form-inline">
+            Preview <input ng-model="model.previewLimit"
+                           class="form-control" size="3">
+            of {{model.results.data.length }} total records.
+        </div>
+        {{ getHeaders() }}
+        <table class="table table-striped">
+            <tr>
+                <th class="parsed-csv"
+                    ng-repeat="h in model.sortedHeaders">
+                    {{h}}
+                </th>
+            </tr>
+            <tr ng-repeat="rec in model.results.data | limitTo: model.previewLimit">
+                <td class="parsed-csv" ng-repeat="h in model.sortedHeaders">
+                    {{rec[h]}}
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div ng-if="model.results">
+        <form ng-submit="onSave()">
+            <h4>Save data set</h4>
+            <div class="form-group form-inline"
+                 ng-class="{'has-error':!onValidateDataSetName(),'has-success':onValidateDataSetName()}">
+                <label for="user-file-method">
+                    Data set name:
+                    <input type="text"
+                           class="form-control"
+                           required
+                           ng-model="model.dataSetName">
+                </label>
+
+                <p class="help-block">
+                    <span ng-if="! onValidateDataSetName()">
+                      * this data set name already exists.
+                    </span>
+                    Please enter a name for the data set, then click SAVE.
+                </p>
+                <button class="btn btn-info"
+                        type="submit"
+                        ng-disabled="! model.dataSetName || ! onValidateDataSetName()"
+                        ng-click="onSave()">
+                <span class="glyphicon glyphicon-save"
+                      aria-hidden="true"></span>
+                    Save
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div ng-if="model.localStorage.userData">
+        <h4>Your Data Sets</h4>
+        <table class="table table-striped">
+            <tr>
+                <th>Data Set Name</th>
+                <th>Records</th>
+                <th></th>
+            </tr>
+            <tr ng-repeat="(dataSetName, results) in model.localStorage.userData">
+                <td>{{dataSetName}}</td>
+                <td>{{results.data.length}}</td>
+                <td>
+                    <button type="button" class="btn btn-xs btn-default"
+                            ng-click="onRemoveDataSet(dataSetName)">
+                        <span class="glyphicon glyphicon-remove"
+                              aria-hidden="true"></span>
+                        Remove
+                    </button>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section-spc">
+        <p class="help-block">
+            Click OK when you are finished adding/removing data sets.
+        </p>
+        <p ng-if="model.converting">
+            <img ng-src="{{model.STATIC_PATH}}grin_app/images/ajax-loader.gif"/>
+                Processing your data...
+        </p>
+        <form ng-submit="onOK()">
+            <button class="btn btn-success"
+                type="submit"
+                ng-disabled="model.converting"
+                ng-click="onOK()">
+                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                OK
+            </button>
+        </form>
+    </div>
+</div>

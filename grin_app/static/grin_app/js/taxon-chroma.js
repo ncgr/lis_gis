@@ -1,14 +1,14 @@
+"use strict";
+
 /* colorize accessions by taxon name, with a set of defaults and
  * overrides. If the genera matches the colorMap, the species will be
  * used to darken/lighten for more unique color values. Requires
  * chroma.js https://github.com/gka/chroma.js/
  */
-"use strict";
 
 var taxonChroma = {};
 
-(function() {
-
+(function () {
   var colorCache = {};
   var LIGHTNESS_FACTOR = 1; // default lightness factor (1= don't post-adjust)
   var MIN_LIGHTNESS = 0.3;
@@ -109,19 +109,20 @@ var taxonChroma = {};
     colorCache[t] = color;
     return color;
   };
-  
-  function fnv32a(str, hashSize) {
-    /* a consistent hashing algorithm
-       https://gist.github.com/vaiorabbit/5657561
-       http://isthe.com/chongo/tech/comp/fnv/#xor-fold
-    */
-    var FNV1_32A_INIT = 0x811c9dc5;
-    var hval = FNV1_32A_INIT;
-    for ( var i = 0; i < str.length; ++i ) {
-      hval ^= str.charCodeAt(i);
-      hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
+
+    function fnv32a(str, hashSize) {
+        /* a consistent hashing algorithm
+         https://gist.github.com/vaiorabbit/5657561
+         http://isthe.com/chongo/tech/comp/fnv/#xor-fold
+         */
+        var FNV1_32A_INIT = 0x811c9dc5;
+        var hval = FNV1_32A_INIT;
+        var len = str.length
+        for (var i = 0; i < len; ++i) {
+            hval ^= str.charCodeAt(i);
+            hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
+        }
+        return (hval >>> 0) % hashSize;
     }
-    return (hval >>> 0) % hashSize;
-  }
-  
+
 }.call(taxonChroma));
