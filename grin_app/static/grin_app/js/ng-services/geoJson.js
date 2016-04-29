@@ -5,7 +5,10 @@ app.service('geoJsonService',
     function ($http, $rootScope, $location, $timeout, $q,
               $localStorage, $uibModal, $controller) {
 
-        var DEFAULT_CENTER = {'lat': 35.87, 'lng': -109.47};
+      //var DEFAULT_CENTER = {'lat': 35.87, 'lng': -109.47};
+      // better default for arachis
+      var DEFAULT_CENTER = { 'lat' : -2.17, 'lng' : -79.38 };
+      
         var MAX_RECS = 200;
         var DEFAULT_ZOOM = 6;
         var MARKER_RADIUS = 8;
