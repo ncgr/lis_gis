@@ -191,8 +191,10 @@ app.service('geoJsonService',
             }
             s.updateBounds();
             s.updateColors();
-            s.updating = false;
+            // setSelectedAccession will order the search results so the sel. is
+            // in first position.
             s.setSelectedAccession(s.selectedAccession);
+             s.updating = false;
             notify('updated');
         }
 
@@ -382,35 +384,30 @@ app.service('geoJsonService',
             }).then(postProcess);
         };
         
-        /* set one selected accession to hilight in the UI */
+        /* set one selected accession (may be set by various controllers). */
         s.setSelectedAccession = function (accId) {
-            // early out if accId is null (de-selection)
-            if (!accId) {
-                var changed = (s.selectedAccession !== null);
-                s.selectedAccession = null;
-                if (changed) {
-                    notify('selectedAccessionUpdated');
-                }
-                return;
-            }
+            var changed = false;
+            var prevAccId = s.selectedAccession;
             var accession = _.find(s.data, function (d) {
                 return (d.properties.accenumb === accId);
             });
-            if (!accession) {
-                // the accession id is not in the current result set,
-                // so forcibly clear the selection.
-                accId = null;
+            if (! accession) {
+                // the accession id is not in the current result set, or accId
+                // is null, in either case just clear the result
+                s.selectedAccession = null;
+                changed = (prevAccId !== null);
             }
             else {
-                // splice the record to beginning of geoJson dataset
+                // splice the record to beginning of geoJson dataset, if it's
+                // not already at top of list.
                 var idx = _.indexOf(s.data, accession);
                 if (idx !== -1) {
                     s.data.splice(idx, 1);
                     s.data.splice(0, 0, accession);
                 }
+                changed = (prevAccId !== accId);
+                s.selectedAccession = accId;
             }
-            var changed = (s.selectedAccession !== accId);
-            s.selectedAccession = accId;
             if (changed) {
                 notify('selectedAccessionUpdated');
             }

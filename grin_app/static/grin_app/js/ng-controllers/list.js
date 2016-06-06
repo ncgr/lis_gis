@@ -81,41 +81,19 @@ app.controller('listController',
         };
 
         $scope.onGoInternalMap = function (accDetail) {
-            /* user hit a map marker buton in the results table */
+            /* user hit a map marker button in the results table */
 
             // convert from geoJson point to leafletjs point
             var accNum = accDetail.properties.accenumb;
             var lng = accDetail.geometry.coordinates[0];
             var lat = accDetail.geometry.coordinates[1];
             var center = {'lat': lat, 'lng': lng};
-
-            geoJsonService.setSelectedAccession(accNum);
-
-            // register callback from geoJsonService after search is updated
-            // for new extent.
+            // register a callback from geoJsonService after map is updated
+            // with new extent
             var unsub = geoJsonService.subscribe($scope, 'updated', function () {
-                $timeout(function () {
-                    // display a popup
-                    var content = accNum +
-                        '<br/>' + accDetail.properties.taxon;
-                    var popup = L.popup()
-                        .setLatLng(center)
-                        .setContent(content)
-                        .openOn(geoJsonService.map);
-                    // bring the matching marker forward in the map view
-                    var marker = _.find(geoJsonService.map._layers, function (l) {
-                        if (_.has(l, 'feature.properties.accenumb')) {
-                            return (l.feature.properties.accenumb === accNum);
-                        }
-                        return false;
-                    });
-                    if (marker) {
-                        marker.bringToFront();
-                    }
-                    unsub(); // dispose of the callback
-                }, 0);
+                geoJsonService.setSelectedAccession(accNum);
+                unsub(); // dispose of the callback
             });
-
             // force the search to update (even if already centered at this
             // position, we definitely want the above callback to run)
             var c = L.latLng(lat, lng);

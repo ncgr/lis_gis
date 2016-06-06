@@ -30,6 +30,7 @@ app.controller('mapController',
 
         var mapLayer;
         var currentPopup = null;
+        var ignorePopupEvts = false;
 
         $scope.model = {
             geoJsonService: geoJsonService,
@@ -100,16 +101,9 @@ app.controller('mapController',
                     var accId = feature.properties.accenumb;
                     var content = accId + '<br/>' + feature.properties.taxon;
                     var popup = L.popup();
-                    popup.accId = accId; // cache the accession number in a property
                     popup.setContent(content);
+                    popup.accId = accId;
                     layer.bindPopup(popup);
-                    if (accId === geoJsonService.selectedAccession) {
-                        // for some reason openPopup won't work immediately
-                        // so delay 1 tick
-                        $timeout(function () {
-                            layer.openPopup();
-                        });
-                    }
                 },
                 filter: filterNonGeocoded
             });
@@ -156,8 +150,10 @@ app.controller('mapController',
                 $location.search('lng', $scope.model.center.lng);
                 $location.search('zoom', $scope.model.map.getZoom());
 
-                // remove previous map markers, and then update with the new geojson
+                // remove previous map markers, and then update the new geojson
+                ignorePopupEvts = true;
                 mapLayer.clearLayers();
+                ignorePopupEvts = false;
 
                 var filteredGeoJson = geoJsonService.data;
                 if (geoJsonService.params.traitExcludeUnchar &&
@@ -176,15 +172,13 @@ app.controller('mapController',
                 }
 
                 $timeout(addMaxResultsSymbology);
-                $timeout(fixMarkerZOrder);
+                $timeout(updateMarkersAndPopups);
             });
 
             $scope.model.map.on('moveend', function (e) {
-                /* moveend fires at the end of drag and zoom events as well.
-                 * don't subscribe to those events because it was causing
-                 * multiple queries to be issued for same extent. */
-
-                // timeout to force this to be asynchronous
+                // moveend event fires at the end of drag and zoom events as
+                // well. so don't explicitly subscribe to those drag and zoom
+                // events. timeout to force this to be asynchronous
                 $timeout(function () {
                     var mapCenter = $scope.model.map.getCenter();
                     $scope.model.center = {
@@ -204,70 +198,45 @@ app.controller('mapController',
             /* manage leaflet popup & associate with selected accession in
              * list view */
             $scope.model.map.on('popupopen', function (e) {
-
                 currentPopup = e.popup; // keep track of current popup
-
+                if(ignorePopupEvts) {
+                    // ignore this event if we are reloading a result set.
+                    // (leaflet will fire events even though they were not
+                    // user-initiated event)
+                    return;
+                }
                 // use timeout to enter ng event digest
                 $timeout(function () {
-                    var accId = e.popup.accId;
-                    // handle the case where popup originates from the user
-                    // interacting with leaflet map (clicking on a marker)
-                    if (accId && accId !== geoJsonService.selectedAccession) {
-                        geoJsonService.setSelectedAccession(accId);
-                    }
+                    geoJsonService.setSelectedAccession(e.popup.accId);
                 });
             });
 
             $scope.model.map.on('popupclose', function (e) {
-                // TODO: is it possible to fix this this, and maintain user
-                // selected accession id? is currently broken, so ignore
-                // popupclose for now.
-
-                //use timeout to enter ng event digest
-                //currentPopup = null;
-
-                // if(e.popup.ignoreCloseEvt) {
-                //     delete e.popup.ignoreCloseEvt;
-                //     return;
-                // }
-                // $timeout(function () {
-                //     var accId = geoJsonService.selectedAccession;
-                //     if (accId === e.popup.accId) {
-                //         // the popup was closed, and it matches the selected
-                //         // accession, so... user wants to dismiss selected acc.
-                //         // currentPopup = null;
-                //         geoJsonService.setSelectedAccession(null);
-                //     }
-                // });
+                currentPopup = null;
+                if(ignorePopupEvts) {
+                    // ignore this event if we are reloading a result set.
+                    // (leaflet will fire events even though they was not
+                    // user-initiated event)
+                    return;
+                }
+                $timeout(function () {
+                    var accId = geoJsonService.selectedAccession;
+                    if (accId === e.popup.accId) {
+                        // the popup was closed, and it matches the selected
+                        // accession, so... user wants to dismiss selected acc.
+                        // currentPopup = null;
+                        geoJsonService.setSelectedAccession(null);
+                    }
+                });
             });
 
             geoJsonService.subscribe($scope, 'selectedAccessionUpdated',
                 function () {
-                    // handle the case where selected accession event is
-                    // coming from elsewhere, e.g. the search filter controller.
-                    var accId = geoJsonService.selectedAccession;
-                    if(_.isEmpty(accId)) {
-                        if(currentPopup) {
-                            $scope.model.map.closePopup(currentPopup);
-                            currentPopup = null;
-                            return;
-                        }
-                    }
-                    var cp = currentPopup;
-                    if(cp && cp.accId === accId) {
-                        //  leave the existing popup if matches selection.
-                        return;
-                    }
-                    mapLayer.eachLayer(function (layer) {
-                        if(accId === layer.feature.properties.accenumb) {
-                            layer.openPopup();
-                        }
-                    });
-                    $timeout(fixMarkerZOrder);
+                    $timeout(updateMarkersAndPopups);
                 });
 
-            // finally, sync the bounds of the leaflet map with the geojson
-            // service (this could trigger a search() so perform it last.
+            // init(), final step-> sync the bounds of the leaflet map with the
+            // geojso service (this could trigger a search() so perform last).
             geoJsonService.setBounds($scope.model.map.getBounds(), true);
 
         }; // init()
@@ -357,43 +326,51 @@ app.controller('mapController',
             return species.substring(0, 2);
         }
 
-        /* fixMarkerZOrder(): attempt to handle some cases where certain markers
-         * need to bubble to top.
-         * TODO: this may be massively innificient, should be benchmarked, maybe refactor as a custom sort routine in geoJsonService */
-        function fixMarkerZOrder() {
-
-            // if there is a trait overlay, those should appear above
-            // uncharacterized accessions.
-            if (geoJsonService.params.traitOverlay) {
-                $scope.model.map.eachLayer(function (l) {
-                    if (_.has(l, 'feature.properties.haveTrait')) {
-                        if ('bringToFront' in l) {
-                            l.bringToFront();
-                        }
-                    }
-                });
+        /* updateMarkersAndPopups(): attempt to handle some cases where certain
+        markers need to bubble to top, or when selected accession popup needs
+        to be restored after search results. */
+        function updateMarkersAndPopups() {
+            var selAccId = geoJsonService.selectedAccession;
+            var trait = geoJsonService.params.traitOverlay;
+            var accIds = geoJsonService.params.accessionIds ?
+                           geoJsonService.params.accessionIds.split(',') : null;
+            var bounds = $scope.model.map.getBounds();
+            // iterate once through all the map markers and send to back
+            // or front to remedy the z-order.
+            ignorePopupEvts = true;
+            if(currentPopup && currentPopup.accId !== selAccId) {
+                $scope.model.map.closePopup(currentPopup);
+                currentPopup = null;
             }
-
-            // if there is a specific set of accession ids to search for,
-            // they should bubble up.
-            if (geoJsonService.params.accessionIds) {
-                var accIds = geoJsonService.params.accessionIds.split(',');
-                $scope.model.map.eachLayer(function (l) {
-                    if (accIds.indexOf(_.get(l, 'feature.properties.accenumb')) !== -1) {
-                        l.bringToFront();
-                    }
-                });
-            }
-            // finally, if there is a user selected accession id, as the
-            // hilited marker, it needs to always be on top.
-            if(geoJsonService.selectedAccession) {
-                var accId = geoJsonService.selectedAccession;
-                 $scope.model.map.eachLayer(function (l) {
-                    if (accId === _.get(l, 'feature.properties.accenumb')) {
-                        l.bringToFront();
-                    }
-                });
-            }
+            $scope.model.map.eachLayer(function (l) {
+                 if (selAccId &&
+                     selAccId === _.get(l, 'feature.properties.accenumb')) {
+                     l.bringToFront();
+                     // openPopup() will also cause leaflet to scroll the popup
+                     // into view, which is not desired, so check bounds before
+                     // restoring the popup.
+                     if(bounds.contains(l.getLatLng())) {
+                         if(! l._popup._isOpen) {
+                             l.openPopup();
+                         }
+                     }
+                }
+                else if(trait && _.has(l, 'feature.properties.haveTrait')) {
+                    // if there is a trait overlay, those should appear above
+                    // uncharacterized accessions.
+                    l.bringToFront();
+                }
+                 else if(accIds &&
+                     accIds.indexOf(_.get(l, 'feature.properties.accenumb')) !== -1) {
+                    // if there is a set of user's accession ids,
+                    // they should bubble to top of z.
+                    l.bringToFront();
+                 }
+                else if('bringToBack' in l) {
+                     l.bringToBack();
+                 }
+            });
+            ignorePopupEvts = false;
         }
 
         function addMaxResultsSymbology() {
