@@ -139,8 +139,8 @@ app.controller('filterController',
             $scope.model.limitToMapExtent = false;
             $scope.model.country = null;
             $scope.model.accessionIds = null;
-            $scope.model.traitOverlay = 'SEEDWGT';
-            $scope.model.taxonQuery = 'Phaseolus vulgaris';
+            $scope.model.traitOverlay = 'PODWEIGHT';
+            $scope.model.taxonQuery = 'Arachis hypogaea';
             $scope.model.traitScale = 'local';
             $scope.onTaxonQuery($scope.model.taxonQuery);
         };
