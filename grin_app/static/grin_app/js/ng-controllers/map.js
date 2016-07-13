@@ -4,7 +4,14 @@
  */
 
 app.controller('mapController',
-    function ($scope, $state, $timeout, $location, $uibModal, geoJsonService) {
+    function (
+        $scope, 
+        $rootScope,
+        $state,
+        $timeout,
+        $location,
+        $uibModal,
+        geoJsonService) {
 
         var DEFAULT_BASEMAP = geoJsonService.params.baseMap ||
             Cookies.get('baseMap') ||
@@ -42,6 +49,7 @@ app.controller('mapController',
                 lng: geoJsonService.params.lng
             },
             geoCoordsSelect: false, // show geocoords selector ui
+            geoLocationSupported: navigator.geolocation ? true : false,
             baseMapSelect: false,   // show basemap selector ui
             mapHeight: DEFAULT_MAP_HEIGHT,
             mapHeightUndo: DEFAULT_MAP_HEIGHT,
@@ -241,7 +249,6 @@ app.controller('mapController',
 
         }; // init()
 
-
         $scope.onZoomToAccessions = function () {
             var b = geoJsonService.getBoundsOfGeoJSONPoints();
             if (b && '_southWest' in b) {
@@ -275,17 +282,40 @@ app.controller('mapController',
         };
 
         $scope.onGeoLocate = function () {
+            if(! navigator.geolocation) { 
+                $scope.warnings.push('geolocation is not supported by your browser');
+                $scope.model.geoLocationSupported = false;
+                return ;
+            }
             // user hit go to my location button
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function (position) {
+            function geoOK(position) {
+                // callback is outside of ng digest cycle, so re-enter it.
+                $timeout(function() {
                     $scope.model.center = {
                         lat: position.coords.latitude,
                         lng: position.coords.longitude
                     };
                     $scope.model.map.panTo($scope.model.center);
+                    $scope.model.geoCoordsSelect = false;
+                    $scope.model.geoLocationSupported = true;
                 });
             }
-            $scope.model.geoCoordsSelect = false;
+            function geoError(error) {
+                // callback is outside of ng digest cycle, so re-enter it.
+                $timeout(function() {                  
+                    var msg = error.message;
+                    if(msg.indexOf('Only secure origins are allowed') !== -1) {
+                        $scope.model.geoLocationSupported = false;
+                        $scope.warnings.push('Sorry, geolocation is not supported by your browser for non-HTTPS origins.');
+                        return;
+                    }
+                    else { 
+                        $scope.errors.push('Geolocation was not successful: ' + msg);                    
+                    }
+                    console.log($scope.model.geoLocationSupported);
+                });                 
+            }
+            navigator.geolocation.getCurrentPosition(geoOK, geoError); 
         };
 
         $scope.onMapHeight = function (direction) {
