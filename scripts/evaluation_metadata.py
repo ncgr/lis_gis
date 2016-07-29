@@ -26,6 +26,7 @@ def main():
     cur.execute(sql)
     rows = cur.fetchall()
     for taxon, descriptor_name in rows:
+        print('%s : %s...' % (taxon, descriptor_name))
         sql = '''
         SELECT DISTINCT observation_value
         FROM lis_germplasm.legumes_grin_evaluation_data
