@@ -239,7 +239,9 @@ app.service('geoJsonService',
             }
 
             $http({
-                url: API_PATH + '/search',
+                // POST should never be cached, but append a unique query 
+                // string to the url anyways.
+                url: API_PATH + '/search?v=' + new Date().getTime(),
                 method: 'POST',
                 data: {
                     taxon_query: s.params.taxonQuery,
@@ -253,7 +255,7 @@ app.service('geoJsonService',
                     accession_ids: s.params.accessionIds,
                     accession_ids_inclusive: parseBool(s.params.accessionIdsInclusive),
                     trait_overlay: s.params.traitOverlay,
-                    limit: s.params.maxRecs
+                    limit: s.params.maxRecs,
                 }
             }).then(
                 function (resp) {
@@ -270,11 +272,13 @@ app.service('geoJsonService',
                         ! _.isEmpty(s.params.traitOverlay) &&
                         ! _.isEmpty(s.data)) {
                         var promise1 = $http({
-                            url: API_PATH + '/evaluation_search',
+                            // POST should never be cached, but append a 
+                            // unique query string to the url anyways.
+                            url: API_PATH + '/evaluation_search?v=' + new Date().getTime(),
                             method: 'POST',
                             data: {
                                 accession_ids: s.getAccessionIds(),
-                                descriptor_name: s.params.traitOverlay
+                                descriptor_name: s.params.traitOverlay,
                             }
                         }).then(
                             function (resp) {
@@ -293,7 +297,7 @@ app.service('geoJsonService',
                                 taxon: s.params.taxonQuery,
                                 descriptor_name: s.params.traitOverlay,
                                 accession_ids: (s.params.traitScale === 'local') ? s.getAccessionIds() : [],
-                                trait_scale: s.params.traitScale
+                                trait_scale: s.params.traitScale,                                
                             }
                         }).then(
                             function (resp) {
@@ -380,7 +384,7 @@ app.service('geoJsonService',
             $http({
                 url: API_PATH + '/evaluation_descr_names',
                 method: 'GET',
-                params: { taxon: taxon }
+                params: { taxon: taxon, v: new Date().getTime() }
             }).then(postProcess);
         };
         

@@ -147,7 +147,9 @@ app.controller('userDataController',
             $scope.model.showWelcome = false;
             $scope.model.showExample = true;
             $scope.model.dataSetName = 'example.csv';
-            var url = STATIC_PATH + 'grin_app/example-user-data.txt';
+            // generate url w/ cache bust
+            var url = STATIC_PATH + 'grin_app/example-user-data.txt?v=' + 
+                 new Date().getTime();
             $scope.model.fileURL = url;
             $http.get(url).then(function (result) {
                 $scope.model.exampleCSV = result.data;

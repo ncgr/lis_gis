@@ -7,6 +7,7 @@ from django.db import connection
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
+from ensure_nocache import ensure_nocache
 
 # SRID 4326 is WGS 84 long lat unit=degrees, also the specification of the
 # geoometric_coord field in the grin_accessions table.
@@ -94,6 +95,7 @@ GRIN_EVAL_WHERE_FRAGS = {
 
 
 @ensure_csrf_cookie
+@ensure_nocache
 def index(req):
     """Render the index template, which will boot up angular-js.
     """
@@ -101,6 +103,7 @@ def index(req):
 
 
 @ensure_csrf_cookie
+@ensure_nocache
 def evaluation_descr_names(req):
     """Return JSON for all distinct trait descriptor names matching the
     given taxon. (the trait overlay choice is only available after a
@@ -139,6 +142,7 @@ def evaluation_descr_names(req):
 
 
 @ensure_csrf_cookie
+@ensure_nocache
 def evaluation_search(req):
     """Return JSON array of observation_value for all trait records
     matching a set of accession ids, and matching the descriptor_name
@@ -189,6 +193,7 @@ def _string2num(s):
 
 
 @ensure_csrf_cookie
+@ensure_nocache
 def evaluation_metadata(req):
     """Return JSON with trait metadata for the given taxon and trait
     descriptor_name. This enables the client to display a legend, and
@@ -292,6 +297,7 @@ def evaluation_metadata(req):
 
 
 @ensure_csrf_cookie
+@ensure_nocache
 def evaluation_detail(req):
     """Return JSON for all evalation/trait records matching this accession id.
     """
@@ -357,6 +363,7 @@ def evaluation_detail(req):
 
 
 @ensure_csrf_cookie
+@ensure_nocache
 def accession_detail(req):
     """Return JSON for all columns for a accession id."""
     assert req.method == 'GET', 'GET request method required'
@@ -374,6 +381,7 @@ def accession_detail(req):
 
 
 @ensure_csrf_cookie
+@ensure_nocache
 def countries(req):
     """Return a json array of countries for search filtering ui.
     """
@@ -389,6 +397,7 @@ def countries(req):
 
 
 @ensure_csrf_cookie
+@ensure_nocache
 def search(req):
     """Search by map bounds and return GeoJSON results."""
     assert req.method == 'POST', 'POST request method required'

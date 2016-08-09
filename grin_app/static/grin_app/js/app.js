@@ -93,6 +93,14 @@ app.config(function ($httpProvider, $stateProvider) {
     $httpProvider.defaults.xsrfCookieName = 'csrftoken';
     $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
 
+    // Prevent caching for all our Ajax API calls (GET and POST)
+    if (!$httpProvider.defaults.headers.common) {
+        $httpProvider.defaults.headers.common = {};    
+    }
+    $httpProvider.defaults.headers.common['Cache-Control'] = 'no-cache';
+    $httpProvider.defaults.headers.common['Pragma'] = 'no-cache';
+    // hack to disable IE ajax request caching
+    $httpProvider.defaults.headers.common['If-Modified-Since'] = 'Mon, 26 Jul 1997 05:00:00 GMT';
 });
 
 app.filter('highlight', function ($sce) {
