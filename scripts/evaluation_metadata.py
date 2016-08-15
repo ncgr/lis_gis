@@ -44,7 +44,7 @@ def main():
                 obs_values=obs_values)
     print('committing...')
     conn.commit()
-
+    print('done!')
 
 def _update_numeric_trait_metadata(**params):
     """
