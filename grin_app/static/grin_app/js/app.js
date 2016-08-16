@@ -129,7 +129,9 @@ function showTourOneTime() {
   var TOUR_ID = 'germplasm-map';
   var j = localStorage.getItem('lisTourVisited');
   if(!j || ! JSON.parse(j)[TOUR_ID]) {
-    lisTours.go(TOUR_ID);
+    if(! lisTours.active()) {
+      lisTours.go(TOUR_ID);
+    }
   }
 }
 
