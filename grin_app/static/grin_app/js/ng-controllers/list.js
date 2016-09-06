@@ -6,7 +6,6 @@
 app.controller('listController',
     function ($scope,
               $state,
-              $http,
               $sanitize,
               $uibModal,
               $window,

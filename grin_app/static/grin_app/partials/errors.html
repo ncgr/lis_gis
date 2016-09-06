@@ -1,5 +1,5 @@
 <div class="alert alert-danger alert-spc"
-     ng-repeat="error in errors">
+     ng-repeat="error in errors track by $index">
   <button type="button" class="close"
 	  data-dismiss="alert" aria-label="Close">
     <span aria-hidden="true">&times;</span>
@@ -7,7 +7,7 @@
     <strong>Error:</strong> {{error}}
 </div>
 <div class="alert alert-warning alert-spc"
-     ng-repeat="warning in warnings">
+     ng-repeat="warning in warnings track by $index">
   <button type="button" class="close"
 	  data-dismiss="alert" aria-label="Close">
     <span aria-hidden="true">&times;</span>

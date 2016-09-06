@@ -27,7 +27,7 @@ SECRET_KEY = open(os.path.join(os.path.dirname(__file__),
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 if socket.gethostname()[0:4] == 'lis-':
-    ALLOWED_HOSTS = [socket.gethostname(), 'localhost']
+    ALLOWED_HOSTS = [socket.gethostname(), 'localhost', 'mcintosh.ncgr.org']
 else:
     ALLOWED_HOSTS = [socket.gethostname(), 'legumeinfo.org', 'legumeinfo.com',
                      'www.legumeinfo.org', 'www.legumeinfo.com']
