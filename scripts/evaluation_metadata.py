@@ -26,6 +26,7 @@ def main():
     cur.execute(sql)
     rows = cur.fetchall()
     for taxon, descriptor_name in rows:
+        print('%s : %s...' % (taxon, descriptor_name))
         sql = '''
         SELECT DISTINCT observation_value
         FROM lis_germplasm.legumes_grin_evaluation_data
@@ -43,7 +44,7 @@ def main():
                 obs_values=obs_values)
     print('committing...')
     conn.commit()
-
+    print('done!')
 
 def _update_numeric_trait_metadata(**params):
     """

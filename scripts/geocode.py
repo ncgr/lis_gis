@@ -6,103 +6,6 @@ Use Google geocoding service
 https://developers.google.com/maps/documentation/geocoding/intro
 to locate germplasm accessions which are missing lat/lng coordinates.
 
-Arachis accessions for example data:
-
-PI 152146
-PI 155107
-PI 157542
-PI 158854
-PI 159786
-PI 162655
-PI 162857
-PI 196622
-PI 196635
-PI 200441
-PI 240560
-PI 259617
-PI 259658
-PI 259836
-PI 259851
-PI 262038
-PI 268586
-PI 268696
-PI 268755
-PI 268806
-PI 268868
-PI 268996
-PI 270786
-PI 270905
-PI 270907
-PI 270998
-PI 271019
-PI 274193
-PI 288146
-PI 290536
-PI 290560
-PI 290566
-PI 290594
-PI 290620
-PI 292950
-PI 295250
-PI 295309
-PI 295730
-PI 296550
-PI 296558
-PI 298854
-PI 313129
-PI 319768
-PI 323268
-PI 325943
-PI 331297
-PI 331314
-PI 337293
-PI 337399
-PI 337406
-PI 338338
-PI 339960
-PI 343384
-PI 343398
-PI 355268
-PI 355271
-PI 356004
-PI 370331
-PI 372271
-PI 372305
-PI 399581
-PI 403813
-PI 407667
-PI 429420
-PI 442768
-PI 461434
-PI 471952
-PI 471954
-PI 475863
-PI 475918
-PI 476025
-PI 476636
-PI 478819
-PI 478850
-PI 481795
-PI 482120
-PI 482189
-PI 493329
-PI 493356
-PI 493547
-PI 493581
-PI 493631
-PI 493693
-PI 493717
-PI 493729
-PI 493880
-PI 493938
-PI 494795
-PI 496401
-PI 496448
-PI 502040
-PI 502111
-PI 502120
-PI 504614
-
 """
 from urllib import urlencode
 import requests
@@ -116,7 +19,7 @@ import pycountry
 
 
 REST_API = 'https://maps.googleapis.com/maps/api/geocode/json?%s'
-REST_KEY = 'AIzaSyCYykwgCjwmnMpV-K8AiwsE7aCLXSydg6E'
+REST_KEY = 'xxx'
 REQ_PER_DAY = 2500  # free API limits
 REQ_PER_SEC = 10.0
 PSQL_DB = 'dbname=lis_gis user=agr'
@@ -197,8 +100,12 @@ def get_accession_info(acc_id):
             if country_code:
                 country = pycountry.countries.get(alpha3=country_code)
                 country_name = country.name
-                country_name = country_name.replace('Bolivia, Plurinational State of',
-                                                    'Bolivia')
+                country_name = country_name.replace(
+                    'Bolivia, Plurinational State of',
+                    'Bolivia')
+                country_name = country_name.replace(
+                    'Tanzania, United Republic of',
+                    'Tanzania')
             else:
                 country_name = country_code
             if rec[0] == 0 and rec[1] == 0:
@@ -230,7 +137,7 @@ def search_location(rec):
         queries.append('%s, %s' % (rec.site, rec.country))
         if '.' in rec.site:
             site_parts = rec.site.split('.')
-            queries.append('%s, %s' % (site_parts[0].strip()), rec.country)
+            queries.append('%s, %s' % (site_parts[0].strip(), rec.country))
     if rec.site:
         queries.append(rec.site.strip())
         if '.' in rec.site:
@@ -291,7 +198,7 @@ if __name__ == '__main__':
     if not args.file:
         exit()
 
-    tab = etl.fromtsv(args.file)
+    tab = etl.fromcsv(args.file)
 
     result_tab = [('accession_id',
                    'latitude',  # new field
@@ -299,7 +206,8 @@ if __name__ == '__main__':
                    'taxon',
                    'trait_descriptor',
                    'trait_sub_descriptor',
-                   'trait_observation_value')]
+                   'trait_observation_value',
+                   'trait_is_nominal')]
 
     for rec in tab[1:]:
         acc_id = rec[0]
@@ -314,9 +222,11 @@ if __name__ == '__main__':
                 lat,
                 lng,
                 rec[1],
-                rec[2],
-                rec[3],
                 rec[4],
+                rec[5],
+                rec[6],
+                rec[7],
+
             ))
             continue
         if not gc_stat.need_geo:
@@ -326,9 +236,10 @@ if __name__ == '__main__':
                 gc_stat.curr_lat,
                 gc_stat.curr_lng,
                 rec[1],
-                rec[2],
-                rec[3],
                 rec[4],
+                rec[5],
+                rec[6],
+                rec[7],
             ))
             continue
         if not gc_stat.country and not gc_stat.site:
@@ -338,9 +249,10 @@ if __name__ == '__main__':
                 lat,
                 lng,
                 rec[1],
-                rec[2],
-                rec[3],
                 rec[4],
+                rec[5],
+                rec[6],
+                rec[7],
             ))
             continue
         gc_stat = search_location(gc_stat)
@@ -358,9 +270,10 @@ if __name__ == '__main__':
                 lat,
                 lng,
                 rec[1],
-                rec[2],
-                rec[3],
                 rec[4],
+                rec[5],
+                rec[6],
+                rec[7],
             ))
     etl.tocsv(result_tab, 'geocoded.csv')
     print '*** unresolved %s ***' % len(unresolved)

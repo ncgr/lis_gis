@@ -29,7 +29,9 @@ app.controller('filterController',
                 traitScale: params.traitScale,
                 traitExcludeUnchar: parseBool(params.traitExcludeUnchar)
             };
-            $http.get(API_PATH + '/countries').then(function (resp) {
+            // generate URL w/ cache bust
+            var url = API_PATH + '/countries?v=' + new Date().getTime();
+            $http.get(url).then(function (resp) {
                 // success callback
                 $scope.model.countries = resp.data;
             }, function (resp) {
@@ -119,7 +121,8 @@ app.controller('filterController',
             $scope.model.accessionIds = null;
             $scope.model.traitOverlay = null;
 
-            var url = STATIC_PATH + '/grin_app/js/example-accession-ids.json';
+            // generate url w/ cache bust
+            var url = STATIC_PATH + '/grin_app/js/example-accession-ids.json?v=' + new Date().getTime();
             $http.get(url).then(function (resp) {
                 // success callback
                 var ids = resp.data;

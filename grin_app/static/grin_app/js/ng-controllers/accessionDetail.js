@@ -24,7 +24,7 @@ app.controller('accessionDetailController',
             $http({
                 url: API_PATH + '/accession_detail',
                 method: 'GET',
-                params: {accenumb: $scope.accId}
+                params: { accenumb: $scope.accId, v: new Date().getTime() }
             }).then(function (resp) {
                 // success callback
                 $scope.model.acc = resp.data[0];
@@ -33,7 +33,7 @@ app.controller('accessionDetailController',
             $http({
                 url: API_PATH + '/evaluation_detail',
                 method: 'GET',
-                params: {accenumb: $scope.accId}
+                params: {accenumb: $scope.accId, v: new Date().getTime() }
             }).then(function (resp) {
                 // success callback
                 $scope.model.evaluation = resp.data;
