@@ -13,10 +13,15 @@ app.controller('mapController',
         $uibModal,
         geoJsonService) {
 
-        var DEFAULT_BASEMAP = geoJsonService.params.baseMap ||
+        var baseMap = geoJsonService.params.baseMap ||
             Cookies.get('baseMap') ||
             'ESRI - NatGeo (default, reference map)';
+			if(baseMap === 'MapQuest (aerial imagery)') {
+				// the mapquest basemap was discontinued
+				baseMap = 'ESRI - world imagery';
+			}
 
+				
         /* 350px is the default height used by leafletjs. If another default
          * size is set, it will result in the map size being invlidated and
          * causing an initial reload of the search which is bad UX.
@@ -58,7 +63,8 @@ app.controller('mapController',
             maxResultsCircle: null,
             countries: [],
             baseMaps: {
-                'ESRI - NatGeo (default, reference map)': function () {
+
+              'ESRI - NatGeo (default, reference map)': function () {
                     return L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}', {
                         attribution: 'Tiles &copy; Esri &mdash; National Geographic, Esri, DeLorme, NAVTEQ, UNEP-WCMC, USGS, NASA, ESA, METI, NRCAN, GEBCO, NOAA, iPC',
                         noWrap: true
@@ -78,7 +84,7 @@ app.controller('mapController',
               }
             }
         };
-
+			
         $scope.init = function () {
 
             if (!('mapHeight' in geoJsonService.params)) {
@@ -97,7 +103,7 @@ app.controller('mapController',
             geoJsonService.map = $scope.model.map;
 
             // add the default basemap
-            $scope.model.baseMapLayer = $scope.model.baseMaps[DEFAULT_BASEMAP]();
+            $scope.model.baseMapLayer = $scope.model.baseMaps[baseMap]();
             $scope.model.baseMapLayer.addTo($scope.model.map);
             mapLayer = L.geoJson(geoJsonService.data, {
                 pointToLayer: geoJsonService.getFeatureMarker,
@@ -127,8 +133,8 @@ app.controller('mapController',
             north.addTo($scope.model.map);
 
             mapLayer.addTo($scope.model.map);
-            Cookies.set('baseMap', DEFAULT_BASEMAP);
-            $location.search('baseMap', DEFAULT_BASEMAP);
+            Cookies.set('baseMap', baseMap);
+            $location.search('baseMap', baseMap);
 
             geoJsonService.subscribe($scope, 'updated', function () {
 
