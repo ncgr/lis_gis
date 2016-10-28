@@ -104,7 +104,8 @@ app.controller('mapController',
                 onEachFeature: function (feature, layer) {
                     // bind a popup to each feature
                     var accId = feature.properties.accenumb;
-                    var content = accId + '<br/>' + feature.properties.taxon;
+                  var content = '<b>'+ accId + '</b>: ' +
+											    feature.properties.taxon;
                     var popup = L.popup();
                     popup.setContent(content);
                     popup.accId = accId;
@@ -202,8 +203,9 @@ app.controller('mapController',
 
             /* manage leaflet popup & associate with selected accession in
              * list view */
-            $scope.model.map.on('popupopen', function (e) {
-                currentPopup = e.popup; // keep track of current popup
+          $scope.model.map.on('popupopen', function (e) {
+						  e.popup._source.closeTooltip();
+              currentPopup = e.popup; // keep track of current popup
                 if(ignorePopupEvts) {
                     // ignore this event if we are reloading a result set.
                     // (leaflet will fire events even though they were not
