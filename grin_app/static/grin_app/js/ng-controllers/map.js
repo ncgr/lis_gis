@@ -351,9 +351,9 @@ app.controller('mapController',
             $scope.model.map.invalidateSize();
         };
 
-        $scope.onTour = function () {
-	  lisTours.go('germplasm-map');
-        };
+//      $scope.onTour = function () {
+//          lisTours.go('germplasm-map');
+//      };
 
         function get2CharAbbrev(feature) {
             var species = feature.properties.taxon.split(' ')[1];

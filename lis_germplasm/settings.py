@@ -21,16 +21,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = open(os.path.join(os.path.dirname(__file__),
-                               'django_secret_key.txt')).read()
+SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-if socket.gethostname()[0:4] == 'lis-':
-    ALLOWED_HOSTS = [socket.gethostname(), 'localhost', 'mcintosh.ncgr.org']
-else:
-    ALLOWED_HOSTS = [socket.gethostname(), 'legumeinfo.org', 'legumeinfo.com',
-                     'www.legumeinfo.org', 'www.legumeinfo.com']
+DEBUG = True
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
@@ -84,10 +79,10 @@ WSGI_APPLICATION = 'lis_germplasm.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'drupal',
-        'USER': 'www',
-        'PASSWORD': '',
-        'HOST': '',
+        'NAME': os.environ['PGDATABASE'],
+        'USER': os.environ['PGUSER'],
+        'PASSWORD': os.environ['PGPASSWORD'],
+        'HOST': os.environ['PGHOST'],
         'PORT': os.environ['PGPORT'],
     }
 }
@@ -110,8 +105,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
-STATIC_URL = '/germplasm/map/static/'
-STATIC_ROOT = '/usr/local/www/lis_gis/static_collected'
+STATIC_URL = os.environ['STATIC_URL']
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )

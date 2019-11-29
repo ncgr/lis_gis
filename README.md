@@ -5,6 +5,34 @@ server requirements
 * Django
 * PostgreSQL and PostGIS
 
+## Docker quick start
+
+Docker can be used to start Django and Postres, loading an example data set from PeanutBase:
+
+```
+docker-compose up --build
+```
+
+Point your browser to http://localhost:8000/
+
+To substitute your own (PostGIS 2.5) schema, first dump the database to an SQL script:
+
+```
+pg_dump --no-owner --no-privileges --schema=<SCHEMA_NAME> --compress=9 > z-SCHEMA_NAME.sql.gz
+
+```
+
+(The file name can be any name matching the pattern `*.sql.gz`, as long as it lexicographically sorts after the script `postgis.sh`, which must be executed first in /docker-entrypoint-initdb.d/)
+
+Then modify docker-compose.yml, replacing the name of the file that is bind mounted inside the "db" service container:
+
+```
+  db:
+...
+    volumes:
+      - ./docker-entrypoint-initdb.d/z-peanutbase.sql.gz:/docker-entrypoint-initdb.d/z-peanutbase.sql.gz
+```
+
 ## PostgreSQL setup
 Create a database and before loading the schema.sql, create the spatial extension (assuming PostGIS is already available in your PostgrSQL install). Creating the schema will fail unless PostGIS extension is created first.
 
