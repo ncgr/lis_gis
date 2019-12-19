@@ -7,7 +7,7 @@ from django.db import connection
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
-from ensure_nocache import ensure_nocache
+from grin_app.ensure_nocache import ensure_nocache
 
 # SRID 4326 is WGS 84 long lat unit=degrees, also the specification of the
 # geoometric_coord field in the grin_accessions table.
