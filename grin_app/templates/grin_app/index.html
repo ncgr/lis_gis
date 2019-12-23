@@ -76,7 +76,7 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet-dvf/0.3.0/leaflet-dvf.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet-dvf/0.3.0/leaflet-dvf.markers.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/PapaParse/4.1.2/papaparse.min.js"></script>
-  <script src="{% static 'grin_app/js/angular-auto-focus.js'%}" ></script>
+  <script src="{% static '/grin_app/js/node_modules/angular-auto-focus/angular-auto-focus.js'%}" ></script>
   </script>
   
   <script>
@@ -108,8 +108,10 @@
   <script src="{% static 'grin_app/js/ng-controllers/accessionDetail.js'%}"></script>
   <script src="{% static 'grin_app/js/ng-controllers/traitOverlayOptions.js'%}"></script>
   <script src="{% static 'grin_app/js/ng-controllers/accessionSearchOptions.js'%}"></script>
+  <!--<script src="{% static 'grin_app/js/node_modules/lis_tours/dist/bundle.js'%}" ></script>-->
+  <script src="https://cdn.jsdelivr.net/gh/legumeinfo/lis_tours@lis_gis_docker_cdn/dist/bundle.js" ></script>
 
-<!--  <script src="/sites/all/modules/lis_tours/build/bundle.js"></script> -->
+<!-- <script src="https://localhost:8888/sites/all/modules/lis_tours/build/bundle.js"></script> -->
 
 </body>
 </html>
