@@ -1,0 +1,32 @@
+version: '3.7'
+
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - web
+
+  web:
+    build: .
+    environment:
+      SECRET_KEY: secret_key
+      PGHOST: db
+      PGPORT: 5432
+      PGPASSWORD: postgres
+      PGUSER: postgres
+      PGDATABASE: postgres
+      STATIC_URL: /static/
+    depends_on:
+      - db
+    command: ["sh", "-c", "gunicorn --bind 0.0.0.0:8000 lis_germplasm.wsgi"]
+    
+  db:
+    image: mdillon/postgis:11-alpine
+    command: sh -c "
+      wget -O /docker-entrypoint-initdb.d/z-peanutbase.sql.gz https://github.com/legumeinfo/lis_gis/raw/docker/docker-entrypoint-initdb.d/z-peanutbase.sql.gz
+      && docker-entrypoint.sh postgres
+      "
