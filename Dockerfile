@@ -18,7 +18,7 @@ WORKDIR /app
 
 COPY . .
 
-WORKDIR static_collected/grin_app/js/
+WORKDIR grin_app/static/grin_app/js/
 RUN apk add --no-cache npm \
  && npm install \
  && apk del -r npm
