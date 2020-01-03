@@ -13,14 +13,15 @@ RUN apk add --no-cache \
 RUN apk add --no-cache gcc python3-dev musl-dev \
  && pip3 install --no-cache-dir django-angular django-compressor django-extensions django-nose petl \
  && apk del -r gcc python3-dev musl-dev
-RUN apk add --no-cache npm
 
 WORKDIR /app
 
 COPY . .
 
 WORKDIR static_collected/grin_app/js/
-RUN npm install
+RUN apk add --no-cache npm \
+ && npm install \
+ && apk del -r npm
 
 WORKDIR /app
 
