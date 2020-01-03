@@ -5,6 +5,8 @@ services:
   web:
     build: .
     environment:
+      ALLOWED_HOSTS: '*'
+      DEBUG: '1'
       SECRET_KEY: secret_key
       PGHOST: db
       PGPORT: 5432
@@ -16,9 +18,8 @@ services:
       - db
     ports:
       - "8000:8000"
-    command: ["sh", "-c", "sleep 10 && python3 manage.py runserver 0.0.0.0:8000"]
-    
+    command: ["sh", "-c", "sleep 5 && python3 manage.py runserver 0.0.0.0:8000"]
+
   db:
-    image: mdillon/postgis:11-alpine
-    volumes:
-      - ./docker-entrypoint-initdb.d/z-peanutbase.sql.gz:/docker-entrypoint-initdb.d/z-peanutbase.sql.gz
+    build:
+      context: postgres

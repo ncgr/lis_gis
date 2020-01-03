@@ -1,2 +1,6 @@
+*.md
 .git/
+Dockerfile
 docker-entrypoint-initdb.d/
+nginx/
+postgres/

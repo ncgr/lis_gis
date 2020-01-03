@@ -1,32 +1,35 @@
+# Usage:
+#     SECRET_KEY='mysecretkey' ALLOWED_HOSTS='*' docker-compose -f docker-compose.prod.yml up --build -d
+#
+# where ALLOWED_HOSTS is a space-separated list of hostnames (or "*")
 version: '3.7'
 
 services:
   nginx:
     build:
-      context: .
-      dockerfile: nginx/Dockerfile
+      context: nginx
     ports:
       - "80:80"
     depends_on:
-      - web
+      - django
 
-  web:
+  django:
     build: .
+    image: lis_gis-django:1
     environment:
-      SECRET_KEY: secret_key
+      ALLOWED_HOSTS:
+      DEBUG: '0'
       PGHOST: db
       PGPORT: 5432
       PGPASSWORD: postgres
       PGUSER: postgres
       PGDATABASE: postgres
+      SECRET_KEY:
       STATIC_URL: /static/
     depends_on:
       - db
     command: ["sh", "-c", "gunicorn --bind 0.0.0.0:8000 lis_germplasm.wsgi"]
     
   db:
-    image: mdillon/postgis:11-alpine
-    command: sh -c "
-      wget -O /docker-entrypoint-initdb.d/z-peanutbase.sql.gz https://github.com/legumeinfo/lis_gis/raw/docker/docker-entrypoint-initdb.d/z-peanutbase.sql.gz
-      && docker-entrypoint.sh postgres
-      "
+    build:
+      context: postgres
