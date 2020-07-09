@@ -1,7 +1,7 @@
 # lis_gis
 Map viewer for and search interface for USDA/GRIN germplasm accessions and traits. See http://legumeinfo.org/germplasm/map for a live demo.
 server requirements
-* Python 2.7.x
+* Python >= 3.5.x
 * Django
 * PostgreSQL and PostGIS
 
@@ -22,16 +22,9 @@ pg_dump --no-owner --no-privileges --schema=<SCHEMA_NAME> --compress=9 > z-SCHEM
 
 ```
 
-(The file name can be any name matching the pattern `*.sql.gz`, as long as it lexicographically sorts after the script `postgis.sh`, which must be executed first in /docker-entrypoint-initdb.d/)
+Move the .sql.gz file to ./postgres/docker-entrypoint-initdb.d/ before executing `docker-compose up --build`.
+The name of the file does not matter, as long as the extension is `*.sql.gz`, `*.sql.xz`, or `*.sql`, and as long as it lexicographically sorts after the `/docker-entrypoint-initdb.d/10_postgis.sh` script from the container image, which must be executed first.
 
-Then modify docker-compose.yml, replacing the name of the file that is bind mounted inside the "db" service container:
-
-```
-  db:
-...
-    volumes:
-      - ./docker-entrypoint-initdb.d/z-peanutbase.sql.gz:/docker-entrypoint-initdb.d/z-peanutbase.sql.gz
-```
 
 ## PostgreSQL setup
 Create a database and before loading the schema.sql, create the spatial extension (assuming PostGIS is already available in your PostgrSQL install). Creating the schema will fail unless PostGIS extension is created first.
