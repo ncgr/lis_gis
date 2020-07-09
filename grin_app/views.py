@@ -216,7 +216,7 @@ def evaluation_metadata(req):
     }
     where_clauses = [
         val['sql'] for
-        key, val in GRIN_ACC_WHERE_FRAGS.items() + GRIN_EVAL_WHERE_FRAGS.items()
+        key, val in {**GRIN_ACC_WHERE_FRAGS, **GRIN_EVAL_WHERE_FRAGS}.items()
         if val['include'](sql_params)
         ]
     if len(where_clauses) == 0:
