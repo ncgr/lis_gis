@@ -1,20 +1,13 @@
-FROM alpine:3.11
+FROM python:3.8-alpine3.12
 
-RUN apk add --no-cache \
-  python3 \
-  py3-django \
-  py3-django-appconf \
-  py3-gunicorn \
-  py3-nose \
-  py3-psycopg2 \
-  py3-simplejson \
-  py3-pip
-
-RUN apk add --no-cache gcc python3-dev musl-dev \
- && pip3 install --no-cache-dir django-angular django-compressor django-extensions django-nose petl \
- && apk del -r gcc python3-dev musl-dev
+RUN apk add --no-cache py3-psycopg2
+ENV PYTHONPATH=/usr/lib/python3.8/site-packages
 
 WORKDIR /app
+
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
