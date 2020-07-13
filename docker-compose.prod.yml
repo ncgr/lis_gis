@@ -1,5 +1,6 @@
+# local or remote production deployment
 # Usage:
-#     SECRET_KEY='mysecretkey' ALLOWED_HOSTS='*' docker-compose -f docker-compose.prod.yml up --build -d
+#     POSTGRES_PASSWORD='mypassword' SECRET_KEY='mysecretkey' ALLOWED_HOSTS='myhost.mydomain' docker-compose -f docker-compose.prod.yml up --build -d
 #
 # where ALLOWED_HOSTS is a space-separated list of hostnames (or "*")
 version: '3.7'
@@ -18,18 +19,19 @@ services:
     image: lis_gis-django:1
     environment:
       ALLOWED_HOSTS:
-      DEBUG: '0'
+      #DEBUG: ''
       PGHOST: db
       PGPORT: 5432
-      PGPASSWORD: postgres
+      PGPASSWORD: ${POSTGRES_PASSWORD}
       PGUSER: postgres
       PGDATABASE: postgres
       SECRET_KEY:
       STATIC_URL: /static/
     depends_on:
       - db
-    command: ["sh", "-c", "gunicorn --bind 0.0.0.0:8000 lis_germplasm.wsgi"]
     
   db:
     build:
       context: postgres
+    environment:
+      POSTGRES_PASSWORD:

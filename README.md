@@ -7,13 +7,25 @@ server requirements
 
 ## Docker quick start
 
-Docker can be used to start Django and Postres, loading an example data set from PeanutBase:
+Docker can be used to start Django and Postgres, loading an example data set from PeanutBase:
 
 ```
 docker-compose up --build
 ```
 
 Point your browser to http://localhost:8000/
+
+The lis_gis git working tree is bind-mounted at /app in the container, so changes to source files will be immediatey reflected in the container.
+
+### Running Unit Tests
+
+After building container images & running containers with `docker-compose up --build`, Django unit tests can be executed thus:
+
+```
+docker-compose exec web python3 manage.py test
+```
+
+### Loading your own data
 
 To substitute your own (PostGIS 2.5) schema, first dump the database to an SQL script:
 
@@ -25,6 +37,14 @@ pg_dump --no-owner --no-privileges --schema=<SCHEMA_NAME> --compress=9 > z-SCHEM
 Move the .sql.gz file to ./postgres/docker-entrypoint-initdb.d/ before executing `docker-compose up --build`.
 The name of the file does not matter, as long as the extension is `*.sql.gz`, `*.sql.xz`, or `*.sql`, and as long as it lexicographically sorts after the `/docker-entrypoint-initdb.d/10_postgis.sh` script from the container image, which must be executed first.
 
+### Production Docker Compose
+
+lis_gis can be built & deployed on a remote node (after setting DOCKER_HOST or docker context) thus:
+
+```
+export ALLOWED_HOSTS='myhost.mydomain' SECRET_KEY='mysecret' POSTGRES_PASSWORD='mypassword'
+docker-compose -f docker-compose.prod.yml up -d --build
+```
 
 ## PostgreSQL setup
 Create a database and before loading the schema.sql, create the spatial extension (assuming PostGIS is already available in your PostgrSQL install). Creating the schema will fail unless PostGIS extension is created first.
