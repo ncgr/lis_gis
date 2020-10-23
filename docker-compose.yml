@@ -6,9 +6,9 @@ services:
       target: dev
     environment:
       DEBUG: '1'
-      PGHOST: db
-      PGPORT: 5432
-      PGPASSWORD: postgres
+      PGHOST: /run/postgresql
+      PGPORT:
+      PGPASSWORD:
       PGUSER: postgres
       PGDATABASE: postgres
       STATIC_URL: /static/
@@ -24,11 +24,26 @@ services:
         read_only: true
       - type: volume
         target: /app/grin_app/static/grin_app/js/node_modules
+      - type: volume
+        source: postgres-socket
+        target: /run/postgresql
 
   db:
     build: postgres
     environment:
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
     healthcheck:
-      test: "pg_isready -U postgres -h 127.0.0.1 || exit 1"
+      test: "pg_isready -U postgres || exit 1"
       retries: 10
+    volumes:
+      - type: volume
+        source: postgres-socket
+        target: /run/postgresql
+# don't listen on TCP port; write optimizations
+    command: ["-c", "listen_addresses=",
+              "-c", "wal_level=minimal",
+              "-c", "max_wal_senders=0",
+              "-c", "synchronous_commit=off"]
+
+volumes:
+  postgres-socket:
