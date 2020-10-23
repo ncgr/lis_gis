@@ -1,6 +1,6 @@
-Django==2.2.14
-django-extensions==3.0.2
-django-nose==1.4.6
-petl==1.6.0
+Django==2.2.16
+django-extensions==3.0.9
+django-nose==1.4.7
+petl==1.6.8
 psycopg2
-simplejson==3.17.0
+simplejson==3.17.2
