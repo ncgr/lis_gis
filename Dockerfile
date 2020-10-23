@@ -18,12 +18,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 FROM build AS dev
 
-RUN apk add --no-cache postgresql-client
+RUN apk add --no-cache postgresql-client \
+ && pip install --no-cache-dir Werkzeug==1.0.1
 
 WORKDIR /app
 
+USER daemon
 ENV PYTHONUNBUFFERED=1
-CMD ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["python3", "manage.py", "runserver_plus", "0.0.0.0:8000"]
 
 EXPOSE 8000
 
@@ -39,5 +41,4 @@ WORKDIR /app
 
 COPY . .
 
-USER daemon
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "lis_germplasm.wsgi:application"]
