@@ -3,8 +3,6 @@
 #     POSTGRES_PASSWORD='mypassword' ALLOWED_HOSTS='myhost.mydomain' docker-compose -f docker-compose.prod.yml up --build -d
 #
 # where ALLOWED_HOSTS is a space-separated list of hostnames (or "*")
-version: '3.7'
-
 services:
   nginx:
     build:

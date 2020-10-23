@@ -1,6 +1,4 @@
 # local development deployment
-version: '2.3'
-
 services:
   web:
     build:
