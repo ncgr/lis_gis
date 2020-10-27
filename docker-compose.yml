@@ -33,7 +33,7 @@ services:
     environment:
       POSTGRES_HOST_AUTH_METHOD: trust
     healthcheck:
-      test: "pg_isready -U postgres || exit 1"
+      test: "su-exec postgres pg_isready || exit 1"
       retries: 10
     volumes:
       - type: volume
