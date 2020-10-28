@@ -6,29 +6,53 @@
 services:
   nginx:
     build:
-      context: nginx
+      context: .
+      target: nginx
     ports:
       - "80:80"
     depends_on:
       - django
 
   django:
-    build: .
-    image: lis_gis-django:1
+    build:
+      context: .
+      target: prod
+    depends_on:
+      db:
+        condition: service_healthy
     environment:
       ALLOWED_HOSTS:
-      #DEBUG: ''
-      PGHOST: db
-      PGPORT: 5432
-      PGPASSWORD: ${POSTGRES_PASSWORD}
-      PGUSER: postgres
+      DEBUG:
+      PGHOST: /run/postgresql
+      PGPORT:
+      PGPASSWORD:
+      PGUSER:
       PGDATABASE: postgres
       STATIC_URL: /static/
-    depends_on:
-      - db
-    
+    volumes:
+      - type: volume
+        source: postgres-socket
+        target: /run/postgresql
+
   db:
     build:
-      context: postgres
+      context: .
+      target: db
+    healthcheck:
+      test: "su-exec postgres pg_isready || exit 1"
+      retries: 10
     environment:
-      POSTGRES_PASSWORD:
+      POSTGRES_PASSWORD: unused
+      POSTGRES_INITDB_ARGS: --auth=peer
+    volumes:
+      - type: volume
+        source: postgres-socket
+        target: /run/postgresql
+# don't listen on TCP port; write optimizations
+    command: ["-c", "listen_addresses=",
+              "-c", "wal_level=minimal",
+              "-c", "max_wal_senders=0",
+              "-c", "synchronous_commit=off"]
+
+volumes:
+  postgres-socket:

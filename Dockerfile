@@ -1,3 +1,8 @@
+FROM postgis/postgis:12-2.5-alpine AS db
+COPY ./docker-entrypoint-initdb.d/ /docker-entrypoint-initdb.d/
+
+########################################
+
 FROM python:3.8-alpine3.12 AS build
 
 RUN apk add --no-cache py3-psycopg2
@@ -33,12 +38,23 @@ VOLUME ["/app/grin_app/static/grin_app/js/node_modules"]
 
 ########################################
 
+FROM nginx:1.19-alpine AS nginx
+
+COPY ./nginx/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/grin_app/static/ /usr/share/nginx/html/static/
+COPY ./grin_app/static/ /usr/share/nginx/html/static/
+
+########################################
+
 FROM build AS prod
 
 RUN pip install --no-cache-dir gunicorn==20.0.4
 
 WORKDIR /app
 
-COPY . .
+COPY manage.py ./
+COPY grin_app ./grin_app
+COPY lis_germplasm ./lis_germplasm
 
+USER daemon
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "lis_germplasm.wsgi:application"]

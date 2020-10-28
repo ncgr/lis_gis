@@ -42,7 +42,7 @@ The name of the file does not matter, as long as the extension is `*.sql.gz`, `*
 lis_gis can be built & deployed on a remote node (after setting DOCKER_HOST or docker context) thus:
 
 ```
-export ALLOWED_HOSTS='myhost.mydomain' POSTGRES_PASSWORD='mypassword'
+export ALLOWED_HOSTS='myhost.mydomain'
 docker-compose -f docker-compose.prod.yml up -d --build
 ```
 
