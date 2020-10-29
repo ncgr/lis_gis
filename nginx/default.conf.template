@@ -3,6 +3,7 @@ upstream django {
 }
 
 server {
+    underscores_in_headers on;
 
     listen 80;
 
@@ -13,7 +14,7 @@ server {
         proxy_redirect off;
     }
 
-    location /static/ {
+    location ${SCRIPT_NAME}/static/ {
         alias /usr/share/nginx/html/static/;
     }
 

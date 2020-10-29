@@ -105,11 +105,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = os.environ.get('SCRIPT_NAME', '') + '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
-
 
 # setup django logging to write to the console. control the level by this 
 # environment var DJANGO_LOG_LEVEL, or it will default to INFO.
@@ -139,6 +138,7 @@ BRANDING = {
     'site_heading': 'Legume Information System',
     'site_subheading': 'Germplasm Map',
     'site_abbrev': 'LIS',
+    'script_name': os.environ.get('SCRIPT_NAME', '')
 }
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'

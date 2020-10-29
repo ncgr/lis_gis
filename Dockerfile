@@ -40,7 +40,7 @@ VOLUME ["/app/grin_app/static/grin_app/js/node_modules"]
 
 FROM nginx:1.19-alpine AS nginx
 
-COPY ./nginx/nginx.conf /etc/nginx/conf.d/default.conf
+COPY ./nginx/ /etc/nginx/templates
 COPY --from=build /app/grin_app/static/ /usr/share/nginx/html/static/
 COPY ./grin_app/static/ /usr/share/nginx/html/static/
 

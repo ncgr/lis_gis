@@ -84,7 +84,7 @@
    var STATIC_PATH = "{% static ''%}";
    // where is the django web application (set to '' for devel with
    // django runserver, set to '/germplasm/map' for LIS deploy)
-   var API_PATH = '';
+   var API_PATH = '{{ script_name }}';
 
    // get branding from the settings.py
    var BRANDING = {
