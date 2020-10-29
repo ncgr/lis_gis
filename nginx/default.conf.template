@@ -3,7 +3,6 @@ upstream django {
 }
 
 server {
-    underscores_in_headers on;
 
     listen 80;
 
