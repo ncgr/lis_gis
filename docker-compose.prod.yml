@@ -28,7 +28,6 @@ services:
       PGPASSWORD:
       PGUSER:
       PGDATABASE: postgres
-      STATIC_URL: /static/
     volumes:
       - type: volume
         source: postgres-socket
