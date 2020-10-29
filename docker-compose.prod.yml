@@ -12,6 +12,8 @@ services:
       - "80:80"
     depends_on:
       - django
+    volumes:
+      - gunicorn-socket:/run/gunicorn
 
   django:
     build:
@@ -29,9 +31,8 @@ services:
       PGUSER:
       PGDATABASE: postgres
     volumes:
-      - type: volume
-        source: postgres-socket
-        target: /run/postgresql
+      - gunicorn-socket:/run/gunicorn
+      - postgres-socket:/run/postgresql
 
   db:
     build:
@@ -44,9 +45,7 @@ services:
       POSTGRES_PASSWORD: unused
       POSTGRES_INITDB_ARGS: --auth=peer
     volumes:
-      - type: volume
-        source: postgres-socket
-        target: /run/postgresql
+      - postgres-socket:/run/postgresql
 # don't listen on TCP port; write optimizations
     command: ["-c", "listen_addresses=",
               "-c", "wal_level=minimal",
@@ -54,4 +53,5 @@ services:
               "-c", "synchronous_commit=off"]
 
 volumes:
+  gunicorn-socket:
   postgres-socket:

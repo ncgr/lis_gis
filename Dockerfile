@@ -28,7 +28,7 @@ RUN apk add --no-cache postgresql-client \
 
 WORKDIR /app
 
-USER daemon
+USER nobody
 ENV PYTHONUNBUFFERED=1
 CMD ["python3", "manage.py", "runserver_plus", "0.0.0.0:8000"]
 
@@ -55,6 +55,9 @@ WORKDIR /app
 COPY manage.py ./
 COPY grin_app ./grin_app
 COPY lis_germplasm ./lis_germplasm
+# Allow socket directory to be accessed by "nobody" (gunicorn) and nginx (gid 101)
+RUN mkdir -m 750 /run/gunicorn && chown nobody:101 /run/gunicorn
+USER nobody
+CMD ["gunicorn", "--bind", "unix:/run/gunicorn/gunicorn.sock", "lis_germplasm.wsgi:application"]
 
-USER daemon
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "lis_germplasm.wsgi:application"]
+VOLUME ["/run/gunicorn"]
