@@ -8,12 +8,6 @@ FROM python:3.8-alpine3.12 AS build
 RUN apk add --no-cache py3-psycopg2
 ENV PYTHONPATH=/usr/lib/python3.8/site-packages
 
-WORKDIR /app/grin_app/static/grin_app/js/
-COPY grin_app/static/grin_app/js/package.json .
-RUN apk add --no-cache npm \
- && npm install \
- && apk del -r npm
-
 WORKDIR /app
 
 COPY requirements.txt .
@@ -34,8 +28,6 @@ CMD ["python3", "manage.py", "runserver_plus", "0.0.0.0:8000"]
 
 EXPOSE 8000
 
-VOLUME ["/app/grin_app/static/grin_app/js/node_modules"]
-
 ########################################
 
 FROM nginx:1.19-alpine AS nginx
@@ -43,7 +35,6 @@ FROM nginx:1.19-alpine AS nginx
 # remove "worker_processes auto;" & use default (1)
 RUN sed -i'' '/^worker_processes/d' /etc/nginx/nginx.conf
 COPY ./nginx/ /etc/nginx/templates
-COPY --from=build /app/grin_app/static/ /usr/share/nginx/html/static/
 COPY ./grin_app/static/ /usr/share/nginx/html/static/
 
 ########################################
