@@ -78,7 +78,6 @@ app.controller('accessionDetailController',
             // FIXME: update to reference new legumeinfo.org site?
             // CORS issues with legacy.legumeinfo.org site; just always display a link for now.
             // This code will have to change anyway.
-            var lisURL = 'https://legacy.legumeinfo.org/organism/' + acc.genus + '/' + acc.species;
 //          $http({url: lisURL, method: 'HEAD'}).then(function (resp) {
                 // success callback
                 $scope.model.hideLISSpeciesLink = false;

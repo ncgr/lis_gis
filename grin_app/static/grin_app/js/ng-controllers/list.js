@@ -118,7 +118,7 @@ app.controller('listController',
         };
 
         function onGoExternalLISTaxon(accDetail) {
-            var url = '/organism/' +
+            var url = 'https://legacy.legumeinfo.org/organism/' +
                 encodeURIComponent(accDetail.properties.genus) + '/' +
                 encodeURIComponent(accDetail.properties.species);
             $window.open(url, 'LIS');
