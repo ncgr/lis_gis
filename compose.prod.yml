@@ -1,8 +1,9 @@
 # local or remote production deployment
 # Usage:
-#     POSTGRES_PASSWORD='mypassword' ALLOWED_HOSTS='myhost.mydomain' docker-compose -f docker-compose.prod.yml up --build -d
+#     1. Edit prod.env (if necessary)
 #
-# where ALLOWED_HOSTS is a space-separated list of hostnames (or "*")
+#     2. docker compose --env-file prod.env up --build -d
+
 services:
   nginx:
     build:

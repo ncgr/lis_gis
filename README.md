@@ -39,11 +39,10 @@ The name of the file does not matter, as long as the extension is `*.sql.gz`, `*
 
 ### Production Docker Compose
 
-lis_gis can be built & deployed on a remote node (after setting DOCKER_HOST or docker context) thus:
+lis_gis can be built & deployed on a remote node (after setting DOCKER_HOST or docker context, and editing `prod.env`) thus:
 
 ```
-export ALLOWED_HOSTS='myhost.mydomain'
-docker-compose -f docker-compose.prod.yml up -d --build
+docker-compose --env-file prod.env up -d --build
 ```
 
 ## PostgreSQL setup

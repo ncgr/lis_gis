@@ -22,8 +22,6 @@ services:
         target: /app
         read_only: true
       - type: volume
-        target: /app/grin_app/static/grin_app/js/node_modules
-      - type: volume
         source: postgres-socket
         target: /run/postgresql
 

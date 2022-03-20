@@ -1,4 +1,5 @@
 FROM postgis/postgis:12-2.5-alpine AS db
+RUN wget -O ./docker-entrypoint-initdb.d/lis_germplasm.sql.xz https://ars-usda.box.com/shared/static/ambc9t4xorieg8qd8e065x9r6dqtua20.xz
 COPY ./docker-entrypoint-initdb.d/ /docker-entrypoint-initdb.d/
 
 ########################################
