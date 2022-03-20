@@ -75,7 +75,8 @@ app.controller('accessionDetailController',
              * note: this may fail from other hosts outside of production,
              * because of 'Access-Control-Allow-Origin' header. */
             var acc = $scope.model.acc.properties;
-            var lisURL = '/organism/' + acc.genus + '/' + acc.species;
+            // FIXME: update to reference new legumeinfo.org site?
+            var lisURL = 'https://legacy.legumeinfo.org/organism/' + acc.genus + '/' + acc.species;
             $http({url: lisURL, method: 'HEAD'}).then(function (resp) {
                 // success callback
                 $scope.model.hideLISSpeciesLink = false;

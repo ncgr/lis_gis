@@ -9,7 +9,7 @@ services:
       context: .
       target: nginx
     environment:
-      SCRIPT_NAME: /germplasm/map # can be null (i.e., ''), but not unset for envsubst
+      SCRIPT_NAME: '' # can be null (i.e., ''), but not unset for envsubst
     ports:
       - "${PORT:-80}:80"
     depends_on:
@@ -34,7 +34,7 @@ services:
       PGPASSWORD:
       PGUSER:
       PGDATABASE: postgres
-      SCRIPT_NAME: /germplasm/map
+      SCRIPT_NAME: ''
     volumes:
       - gunicorn-socket:/run/gunicorn
       - postgres-socket:/run/postgresql
