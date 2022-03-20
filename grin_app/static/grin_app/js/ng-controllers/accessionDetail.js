@@ -76,14 +76,16 @@ app.controller('accessionDetailController',
              * because of 'Access-Control-Allow-Origin' header. */
             var acc = $scope.model.acc.properties;
             // FIXME: update to reference new legumeinfo.org site?
+            // CORS issues with legacy.legumeinfo.org site; just always display a link for now.
+            // This code will have to change anyway.
             var lisURL = 'https://legacy.legumeinfo.org/organism/' + acc.genus + '/' + acc.species;
-            $http({url: lisURL, method: 'HEAD'}).then(function (resp) {
+//          $http({url: lisURL, method: 'HEAD'}).then(function (resp) {
                 // success callback
                 $scope.model.hideLISSpeciesLink = false;
-            }, function (resp) {
+//          }, function (resp) {
                 // error callback
-                $scope.model.hideLISSpeciesLink = true;
-            });
+//              $scope.model.hideLISSpeciesLink = true;
+//          });
         }
 
         $scope.init();
