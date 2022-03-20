@@ -3,12 +3,7 @@ COPY ./docker-entrypoint-initdb.d/ /docker-entrypoint-initdb.d/
 
 ########################################
 
-FROM python:3.8-alpine3.12 AS build
-
-RUN apk add --no-cache py3-psycopg2
-ENV PYTHONPATH=/usr/lib/python3.8/site-packages
-
-WORKDIR /app
+FROM python:3.9-alpine3.15 AS build
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
@@ -18,7 +13,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 FROM build AS dev
 
 RUN apk add --no-cache postgresql-client \
- && pip install --no-cache-dir Werkzeug==1.0.1
+ && pip install --no-cache-dir 'Werkzeug==2.*'
 
 WORKDIR /app
 
@@ -30,7 +25,7 @@ EXPOSE 8000
 
 ########################################
 
-FROM nginx:1.19-alpine AS nginx
+FROM nginx:1.20-alpine AS nginx
 
 # remove "worker_processes auto;" & use default (1)
 RUN sed -i'' '/^worker_processes/d' /etc/nginx/nginx.conf
@@ -40,8 +35,6 @@ COPY ./grin_app/static/ /usr/share/nginx/html/static/
 ########################################
 
 FROM build AS prod
-
-RUN pip install --no-cache-dir gunicorn==20.0.4
 
 WORKDIR /app
 

@@ -1,0 +1,7 @@
+Django==3.2.*
+django-extensions==3.*
+django-nose
+gunicorn
+petl
+psycopg2-binary
+simplejson
