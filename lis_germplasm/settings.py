@@ -39,7 +39,6 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_nose',
 )
 
 MIDDLEWARE = (
@@ -140,7 +139,3 @@ BRANDING = {
     'site_abbrev': 'LIS',
     'script_name': os.environ.get('SCRIPT_NAME', '')
 }
-
-TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-NOSE_ARGS = ['--nocapture',
-             '--nologcapture']

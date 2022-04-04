@@ -7,7 +7,7 @@ most part the ORM was not used for this app.
 # import logging
 import subprocess
 
-from django_nose.runner import settings
+from lis_germplasm import settings
 
 SCHEMA = 'scripts/schema.sql'
 DATA = 'grin_app/tests/test_sql.txt'

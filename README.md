@@ -76,10 +76,10 @@ The required python modules are in the requirements.txt
 ```pip install -r requirements.txt```
 
 
-## Unit tests using django_nose
+## Unit tests
 
 
 ```./manage.py test```
 
-This command will run Nose test, first populating the test db with subset of the legume accessions. All of views.py is covered. Note: Client side javascript code is not yet covered by this test suite. TODO: implement Selenium or something to test the angular-js application itself.
+This command will run unit tests, first populating the test db with subset of the legume accessions. All of views.py is covered. Note: Client side javascript code is not yet covered by this test suite. TODO: implement Selenium or something to test the angular-js application itself.
 
