@@ -16,7 +16,6 @@ SET client_min_messages = warning;
 CREATE SCHEMA lis_germplasm;
 
 
-ALTER SCHEMA lis_germplasm OWNER TO www;
 
 SET search_path = lis_germplasm, pg_catalog;
 
@@ -30,7 +29,6 @@ CREATE TYPE grin_observation_type AS ENUM (
 );
 
 
-ALTER TYPE lis_germplasm.grin_observation_type OWNER TO www;
 
 --
 -- Name: grin_evaluation_data_concat_accenumb(); Type: FUNCTION; Schema: lis_germplasm; Owner: www
@@ -46,7 +44,6 @@ CREATE FUNCTION grin_evaluation_data_concat_accenumb() RETURNS trigger
   $$;
 
 
-ALTER FUNCTION lis_germplasm.grin_evaluation_data_concat_accenumb() OWNER TO www;
 
 SET default_tablespace = '';
 
@@ -100,7 +97,6 @@ CREATE TABLE grin_accession (
 );
 
 
-ALTER TABLE lis_germplasm.grin_accession OWNER TO www;
 
 --
 -- Name: grin_accession_gid_seq; Type: SEQUENCE; Schema: lis_germplasm; Owner: www
@@ -114,7 +110,6 @@ CREATE SEQUENCE grin_accession_gid_seq
     CACHE 1;
 
 
-ALTER TABLE lis_germplasm.grin_accession_gid_seq OWNER TO www;
 
 --
 -- Name: grin_accession_gid_seq; Type: SEQUENCE OWNED BY; Schema: lis_germplasm; Owner: www
@@ -138,7 +133,6 @@ CREATE TABLE grin_evaluation_metadata (
 );
 
 
-ALTER TABLE lis_germplasm.grin_evaluation_metadata OWNER TO www;
 
 --
 -- Name: grin_evaluation_metadata_id_seq; Type: SEQUENCE; Schema: lis_germplasm; Owner: www
@@ -152,7 +146,6 @@ CREATE SEQUENCE grin_evaluation_metadata_id_seq
     CACHE 1;
 
 
-ALTER TABLE lis_germplasm.grin_evaluation_metadata_id_seq OWNER TO www;
 
 --
 -- Name: grin_evaluation_metadata_id_seq; Type: SEQUENCE OWNED BY; Schema: lis_germplasm; Owner: www
@@ -190,7 +183,6 @@ CREATE TABLE legumes_grin_evaluation_data (
 );
 
 
-ALTER TABLE lis_germplasm.legumes_grin_evaluation_data OWNER TO www;
 
 --
 -- Name: gid; Type: DEFAULT; Schema: lis_germplasm; Owner: www
@@ -325,81 +317,3 @@ CREATE INDEX legumes_grin_evaluation_data_taxon_idx ON legumes_grin_evaluation_d
 --
 
 CREATE TRIGGER accenumb_trigger BEFORE INSERT ON legumes_grin_evaluation_data FOR EACH ROW EXECUTE PROCEDURE grin_evaluation_data_concat_accenumb();
-
-
---
--- Name: grin_observation_type; Type: ACL; Schema: lis_germplasm; Owner: www
---
-
-REVOKE ALL ON TYPE grin_observation_type FROM PUBLIC;
-REVOKE ALL ON TYPE grin_observation_type FROM www;
-GRANT ALL ON TYPE grin_observation_type TO www;
-GRANT ALL ON TYPE grin_observation_type TO PUBLIC;
-GRANT ALL ON TYPE grin_observation_type TO staff;
-
-
---
--- Name: grin_evaluation_data_concat_accenumb(); Type: ACL; Schema: lis_germplasm; Owner: www
---
-
-REVOKE ALL ON FUNCTION grin_evaluation_data_concat_accenumb() FROM PUBLIC;
-REVOKE ALL ON FUNCTION grin_evaluation_data_concat_accenumb() FROM www;
-GRANT ALL ON FUNCTION grin_evaluation_data_concat_accenumb() TO www;
-GRANT ALL ON FUNCTION grin_evaluation_data_concat_accenumb() TO PUBLIC;
-GRANT ALL ON FUNCTION grin_evaluation_data_concat_accenumb() TO staff;
-
-
---
--- Name: grin_accession; Type: ACL; Schema: lis_germplasm; Owner: www
---
-
-REVOKE ALL ON TABLE grin_accession FROM PUBLIC;
-REVOKE ALL ON TABLE grin_accession FROM www;
-GRANT ALL ON TABLE grin_accession TO www;
-GRANT ALL ON TABLE grin_accession TO staff;
-
-
---
--- Name: grin_accession_gid_seq; Type: ACL; Schema: lis_germplasm; Owner: www
---
-
-REVOKE ALL ON SEQUENCE grin_accession_gid_seq FROM PUBLIC;
-REVOKE ALL ON SEQUENCE grin_accession_gid_seq FROM www;
-GRANT ALL ON SEQUENCE grin_accession_gid_seq TO www;
-GRANT ALL ON SEQUENCE grin_accession_gid_seq TO staff;
-
-
---
--- Name: grin_evaluation_metadata; Type: ACL; Schema: lis_germplasm; Owner: www
---
-
-REVOKE ALL ON TABLE grin_evaluation_metadata FROM PUBLIC;
-REVOKE ALL ON TABLE grin_evaluation_metadata FROM www;
-GRANT ALL ON TABLE grin_evaluation_metadata TO www;
-GRANT ALL ON TABLE grin_evaluation_metadata TO staff;
-
-
---
--- Name: grin_evaluation_metadata_id_seq; Type: ACL; Schema: lis_germplasm; Owner: www
---
-
-REVOKE ALL ON SEQUENCE grin_evaluation_metadata_id_seq FROM PUBLIC;
-REVOKE ALL ON SEQUENCE grin_evaluation_metadata_id_seq FROM www;
-GRANT ALL ON SEQUENCE grin_evaluation_metadata_id_seq TO www;
-GRANT ALL ON SEQUENCE grin_evaluation_metadata_id_seq TO staff;
-
-
---
--- Name: legumes_grin_evaluation_data; Type: ACL; Schema: lis_germplasm; Owner: www
---
-
-REVOKE ALL ON TABLE legumes_grin_evaluation_data FROM PUBLIC;
-REVOKE ALL ON TABLE legumes_grin_evaluation_data FROM www;
-GRANT ALL ON TABLE legumes_grin_evaluation_data TO www;
-GRANT ALL ON TABLE legumes_grin_evaluation_data TO staff;
-
-
---
--- PostgreSQL database dump complete
---
-

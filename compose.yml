@@ -34,6 +34,7 @@ services:
       POSTGRES_INITDB_ARGS: --auth=peer
     healthcheck:
       test: "su-exec postgres pg_isready || exit 1"
+      start_period: 1s
       retries: 10
     volumes:
       - type: volume

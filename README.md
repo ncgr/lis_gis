@@ -19,10 +19,10 @@ The lis_gis git working tree is bind-mounted at /app in the container, so change
 
 ### Running Unit Tests
 
-After building container images & running containers with `docker-compose up --build`, Django unit tests can be executed thus:
+Django unit tests can be executed thus:
 
 ```
-docker-compose exec web python3 manage.py test
+docker compose run -u postgres web python3 manage.py test
 ```
 
 ### Loading your own data
