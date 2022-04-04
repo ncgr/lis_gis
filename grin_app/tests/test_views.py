@@ -1,5 +1,5 @@
 import logging
-import simplejson as json
+import json
 
 from lis_germplasm import settings
 from unittest import TestCase
