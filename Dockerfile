@@ -13,8 +13,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 FROM build AS dev
 
+# Werkzeug >= 2.1.x incompatible with Django-extensions 3.1.5:
+# https://github.com/django-extensions/django-extensions/pull/1716
 RUN apk add --no-cache postgresql-client \
- && pip install --no-cache-dir 'Werkzeug==2.*'
+ && pip install --no-cache-dir 'Werkzeug==2.0.*'
 
 WORKDIR /app
 
