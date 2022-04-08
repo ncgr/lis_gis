@@ -1,0 +1,178 @@
+[
+  {
+    "observationDbId": "4818362",
+    "additionalInfo": null,
+    "collector": "Taylor, Lisa, USDA-ARS WRPIS",
+    "externalReferences": [
+      {
+        "referenceID": "",
+        "referenceSource": ""
+      }
+    ],
+    "germplasmDbId": "1505582",
+    "germplasmName": "Ames 22714 ",
+    "observationTimeStamp": "2000-07-18T00:00:00",
+    "observationUnitDbId": "2293606",
+    "observationUnitName": "Sub-Plot",
+    "observationVariableDbId": "145007",
+    "observationVariableName": "SEED WEIGHT100",
+    "season": null,
+    "studyDbId": "222",
+    "uploadedBy": "Stout, Dave, USDA-ARS WRPIS",
+    "value": "0.15000"
+  },
+  {
+    "observationDbId": "1493283",
+    "additionalInfo": null,
+    "collector": "Taylor, Lisa, USDA-ARS WRPIS",
+    "externalReferences": [
+      {
+        "referenceID": "",
+        "referenceSource": ""
+      }
+    ],
+    "germplasmDbId": "1522307",
+    "germplasmName": "Ames 22884 ",
+    "observationTimeStamp": "2000-07-19T00:00:00",
+    "observationUnitDbId": "2339142",
+    "observationUnitName": "Sub-Plot",
+    "observationVariableDbId": "128021",
+    "observationVariableName": "SEED WEIGHT100",
+    "season": null,
+    "studyDbId": "491325",
+    "uploadedBy": "Stout, Dave, USDA-ARS WRPIS",
+    "value": "0.15100"
+  },
+  {
+    "observationDbId": "4818534",
+    "additionalInfo": null,
+    "collector": "Taylor, Lisa, USDA-ARS WRPIS",
+    "externalReferences": [
+      {
+        "referenceID": "",
+        "referenceSource": ""
+      }
+    ],
+    "germplasmDbId": "1021513",
+    "germplasmName": "Ames 2672 ",
+    "observationTimeStamp": "2000-07-18T00:00:00",
+    "observationUnitDbId": "2293605",
+    "observationUnitName": "Sub-Plot",
+    "observationVariableDbId": "145007",
+    "observationVariableName": "SEED WEIGHT100",
+    "season": null,
+    "studyDbId": "222",
+    "uploadedBy": "Stout, Dave, USDA-ARS WRPIS",
+    "value": "0.13000"
+  },
+  {
+    "observationDbId": "8403660",
+    "additionalInfo": null,
+    "collector": "Taylor, Lisa, USDA-ARS WRPIS",
+    "externalReferences": [
+      {
+        "referenceID": "",
+        "referenceSource": ""
+      }
+    ],
+    "germplasmDbId": "1854592",
+    "germplasmName": "Ames 30707 ",
+    "observationTimeStamp": "2011-01-18T00:00:00",
+    "observationUnitDbId": "3011503",
+    "observationUnitName": "Sub-Plot",
+    "observationVariableDbId": "142048",
+    "observationVariableName": "IMAGE-3",
+    "season": null,
+    "studyDbId": "494594",
+    "uploadedBy": "Stout, Dave, USDA-ARS WRPIS",
+    "value": "collection site"
+  },
+  {
+    "observationDbId": "8403665",
+    "additionalInfo": null,
+    "collector": "Taylor, Lisa, USDA-ARS WRPIS",
+    "externalReferences": [
+      {
+        "referenceID": "",
+        "referenceSource": ""
+      }
+    ],
+    "germplasmDbId": "1854592",
+    "germplasmName": "Ames 30707 ",
+    "observationTimeStamp": "2011-01-18T00:00:00",
+    "observationUnitDbId": "3011503",
+    "observationUnitName": "Sub-Plot",
+    "observationVariableDbId": "142047",
+    "observationVariableName": "IMAGE-2",
+    "season": null,
+    "studyDbId": "494594",
+    "uploadedBy": "Stout, Dave, USDA-ARS WRPIS",
+    "value": "collection site"
+  },
+  {
+    "observationDbId": "8403666",
+    "additionalInfo": null,
+    "collector": "Taylor, Lisa, USDA-ARS WRPIS",
+    "externalReferences": [
+      {
+        "referenceID": "",
+        "referenceSource": ""
+      }
+    ],
+    "germplasmDbId": "1854592",
+    "germplasmName": "Ames 30707 ",
+    "observationTimeStamp": "2011-01-18T00:00:00",
+    "observationUnitDbId": "3011503",
+    "observationUnitName": "Sub-Plot",
+    "observationVariableDbId": "142046",
+    "observationVariableName": "IMAGE-1",
+    "season": null,
+    "studyDbId": "494594",
+    "uploadedBy": "Stout, Dave, USDA-ARS WRPIS",
+    "value": "collection site"
+  },
+  {
+    "observationDbId": "8403667",
+    "additionalInfo": null,
+    "collector": "Taylor, Lisa, USDA-ARS WRPIS",
+    "externalReferences": [
+      {
+        "referenceID": "",
+        "referenceSource": ""
+      }
+    ],
+    "germplasmDbId": "1854592",
+    "germplasmName": "Ames 30707 ",
+    "observationTimeStamp": "2011-01-18T00:00:00",
+    "observationUnitDbId": "3011503",
+    "observationUnitName": "Sub-Plot",
+    "observationVariableDbId": "142050",
+    "observationVariableName": "IMAGE-5",
+    "season": null,
+    "studyDbId": "494594",
+    "uploadedBy": "Stout, Dave, USDA-ARS WRPIS",
+    "value": "collection site"
+  },
+  {
+    "observationDbId": "8403668",
+    "additionalInfo": null,
+    "collector": "Taylor, Lisa, USDA-ARS WRPIS",
+    "externalReferences": [
+      {
+        "referenceID": "",
+        "referenceSource": ""
+      }
+    ],
+    "germplasmDbId": "1854592",
+    "germplasmName": "Ames 30707 ",
+    "observationTimeStamp": "2011-01-18T00:00:00",
+    "observationUnitDbId": "3011503",
+    "observationUnitName": "Sub-Plot",
+    "observationVariableDbId": "142049",
+    "observationVariableName": "IMAGE-4",
+    "season": null,
+    "studyDbId": "494594",
+    "uploadedBy": "Stout, Dave, USDA-ARS WRPIS",
+    "value": "collection site"
+  }
+]

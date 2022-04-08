@@ -23,6 +23,7 @@ class TestViews(TestCase):
         subprocess.check_call(['psql', '-f', SCHEMA])
         subprocess.check_call(['psql', '-f', DATA])
         subprocess.check_call('scripts/load.py', stdin=open('grin_app/tests/germplasm-mcpd.json'))
+        subprocess.check_call('scripts/evaluation_metadata.py')
 
     @classmethod
     def tearDownClass(cls):

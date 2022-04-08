@@ -7,10 +7,9 @@ genera evaluation data are loaded/updated.
 """
 import psycopg2
 
-PSQL_DB = 'dbname=drupal user=www'
 NOMINAL_THRESHOLD = 10
 
-conn = psycopg2.connect(PSQL_DB)
+conn = psycopg2.connect()
 
 
 def main():
@@ -101,7 +100,7 @@ def _detect_numeric_trait(rows):
        category trait using ints as classes.
     3. Otherwise by default it must be numeric.
     """
-    strings = [val for val in rows if isinstance(val, basestring)]
+    strings = [val for val in rows if isinstance(val, str)]
     if len(strings) > 0:
         return False  # have at least one string, must not be numeric.
     ints = [val for val in rows if isinstance(val, int)]
