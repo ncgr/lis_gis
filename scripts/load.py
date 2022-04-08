@@ -5,86 +5,109 @@
 Load GRIN passport data for genus into postgresql genus table,
 with same column names.
 
-CSV files can be downloaded from here:
+MCPD JSON can be downloaded from here:
 
-http://www.ars-grin.gov/~dbmuqs/cgi-bin/ex_mcpd.pl?genus=<Genus>
+https://npgstest2.agron.iastate.edu/gringlobal/BrAPI/V2/germplasm/<germplasmDbId>/mcpd
 
-Expects csv on stdin:
+Expects JSON on stdin:
 
- ./load.py < Arachis.csv
+ ./load.py < MCPD.json
 
 for g in Apios Arachis Cajanus Chamaecrista Cicer Glycine Lens Lotus Lupinus \
      Medicago Phaseolus Pisum Trifolium Vicia Vigna;
       do
-      echo $g; ./load.py < $g-passport.csv;
+      echo $g; ./load.py < $g-passport.json;
       done
 
 """
 
-import petl as etl
+import json
 import psycopg2
+import sys
 from datetime import datetime as dt
 
-PSQL_DB = 'dbname=drupal user=www'
 DATE_FMT = '%Y%m%d'
-PNT_FMT = "ST_GeographyFromText('SRID=4326;POINT(%(longdec)s %(latdec)s)')"
 
 
 def main():
-    conn = psycopg2.connect(PSQL_DB)
+    conn = psycopg2.connect()
     cur = conn.cursor()
-    table = etl.csv.fromcsv(encoding='latin1')
+    germplasm = json.load(sys.stdin)
     inserts = 0
-    for n in etl.dicts(table):
-        n['acckey'] = int(n['acckey'] or 0)
-        n['taxno'] = int(n['taxno'] or 0)
-        n['elevation'] = int(n['elevation'] or 0)
-        n['sampstat'] = int(n['sampstat'] or 0)
-        n['collsrc'] = int(n['collsrc'] or 0)
-        n['longdec'] = float(n['longdec'] or 0)
-        n['latdec'] = float(n['latdec'] or 0)
-        n['accenumb'] = n['accenumb'] or None  # don't allow empty strings
-        if n['acqdate']: 
-            n['acqdate'] = n['acqdate'].replace('--', '01')
+    for n in germplasm:
+#       n["collsrc"] = int(n["collsrc"] or 0) # TODO
+        if n["acquisitionDate"]: 
+            n["acquisitionDate"] = n["acquisitionDate"].replace("--", "01")
             try:
-                date = dt.strptime(n['acqdate'], DATE_FMT).date()
-                n['acqdate'] = date
+                date = dt.strptime(n["acquisitionDate"], DATE_FMT).date()
+                n["acquisitionDate"] = date
             except ValueError:
-                n['acqdate'] = None
+                n["acquisitionDate"] = None
         else:
-            n['acqdate'] = None
-        if n['colldate']:
-            n['colldate'] = n['colldate'].replace('--', '01') 
+            n["acquisitionDate"] = None
+        if n["collectingInfo"]["collectingDate"]:
+            n["collectingInfo"]["collectingDate"] = n["collectingInfo"]["collectingDate"].replace("--", "01") 
             try: 
-                date = dt.strptime(n['colldate'], DATE_FMT).date()
-                n['colldate'] = date
+                date = dt.strptime(n["collectingInfo"]["collectingDate"], DATE_FMT).date()
+                n["collectingInfo"]["collectingDate"] = date
             except ValueError:
-                n['colldate'] = None
+                n["collectingInfo"]["collectingDate"] = None
         else:
-            n['colldate'] = None
-        if n['longdec'] and n['latdec']:
-            geographic_coord = PNT_FMT
+            n["collectingInfo"]["collectingDate"] = None
+        if n["collectingInfo"]["collectingSite"]["longitudeDecimal"] and n["collectingInfo"]["collectingSite"]["latitudeDecimal"]:
+            geographic_coord = f'POINT({n["collectingInfo"]["collectingSite"]["longitudeDecimal"]} {n["collectingInfo"]["collectingSite"]["latitudeDecimal"]})'
         else:
-            geographic_coord = 'NULL'
+            geographic_coord = None
 
         sql = """INSERT INTO lis_germplasm.grin_accession
         (taxon,genus,species,spauthor,subtaxa,subtauthor,
-        cropname,avail,instcode,accenumb,acckey,collnumb,collcode,taxno,
-        accename,acqdate,origcty,collsite,latitude,longitude,elevation,
+        cropname,instcode,accenumb,acckey,collnumb,collcode,
+        accename,acqdate,origcty,collsite,elevation,
         colldate,bredcode,sampstat,ancest,collsrc,donorcode,donornumb,
-        othernumb,duplsite,storage,latdec,longdec,geographic_coord,remarks,
-        history,released,is_legume)
-        VALUES (%(taxon)s,%(genus)s,%(species)s,%(spauthor)s,%(subtaxa)s,
-        %(subtauthor)s,%(cropname)s,%(avail)s,%(instcode)s,%(accenumb)s,
-        %(acckey)s,%(collnumb)s,%(collcode)s,%(taxno)s,%(accename)s,%(acqdate)s,
-        %(origcty)s,%(collsite)s,%(latitude)s,%(longitude)s,%(elevation)s,
-        %(colldate)s,%(bredcode)s,%(sampstat)s,%(ancest)s,%(collsrc)s,
-        %(donorcode)s,%(donornumb)s,%(othernumb)s,%(duplsite)s,%(storage)s,
-        %(latdec)s,%(longdec)s,""" + geographic_coord + """,
-        %(remarks)s,%(history)s,%(released)s, true);"""
+        duplsite,storage,latdec,longdec,geographic_coord,remarks,
+        history)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
+        %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
+        %s,%s,ST_GeographyFromText(%s),%s,%s);"""
+        values = (
+            # taxon: BrAPI v2 mcpd doesn"t have an equivalent, so we"re faking it
+            " ".join(filter(None, (n["genus"], n["species"],
+                     (n["subtaxon"] and f"subsp. {n['subtaxon']}") or None))),
+            n["genus"], # genus
+            n["species"], # species
+            n["speciesAuthority"], # spauthor
+            n["subtaxon"], # subtaxa
+            n["subtaxonAuthority"], # subtauthor
+            n["commonCropName"], # cropname
+            n["instituteCode"], # instcode
+            (n.get("accessionNumber", "").rstrip() or None), # accenumb (NOTE: notified Pete of trailing space issue)
+            int(n["germplasmDbId"]), # acckey
+            n["collectingInfo"]["collectingNumber"], # collnumb
+            "", # FIXME: collcode
+            ";".join(n["accessionNames"]), # accename
+            n["acquisitionDate"], #acqdate
+            n["countryOfOrigin"], #origcty
+            n["collectingInfo"]["collectingSite"]["locationDescription"], #collsite
+            int(n["collectingInfo"]["collectingSite"]["elevation"] or 0), #elevation
+            n["collectingInfo"]["collectingDate"], # colldate
+            ";".join(n["breedingInstitutes"]), # bredcode
+            int(n["biologicalStatusOfAccessionCode"] or 0), # sampstat
+            "", # FIXME: ancest; looks like germplasm.pedigree should work, but this isn"t in the BrAPI v2 mcpd API?
+            0, # FIXME: collsrc
+            n["donorInfo"]["donorInstitute"]["instituteCode"], # donorcode
+            n["donorInfo"]["donorAccessionNumber"], # donornumb
+            ";".join(n["safetyDuplicateInstitutes"]), # duplsite
+            ";".join(n["storageTypeCodes"]), # storage
+            float(n["collectingInfo"]["collectingSite"]["latitudeDecimal"] or 0), # latdec
+            float(n["collectingInfo"]["collectingSite"]["longitudeDecimal"] or 0), # longdec
+            geographic_coord,
+            n["remarks"], # remarks
+            "", # FIXME: history (could partially fake with germplasm seedSource and seedSourceDescription ?
+        )
+
         # print(cur.mogrify(sql, n))
         try:
-            cur.execute(sql, n)
+            cur.execute(sql, values)
             conn.commit()
             inserts += 1
         except psycopg2.Error as e:

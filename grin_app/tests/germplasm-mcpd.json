@@ -1,0 +1,1340 @@
+[
+  {
+    "accessionNames": [
+      "AG 15"
+    ],
+    "accessionNumber": "AG 15 ",
+    "acquisitionDate": "2004-03-24T00:00:00",
+    "acquisitionSourceCode": null,
+    "alternateIDs": [],
+    "ancestralData": "",
+    "biologicalStatusOfAccessionCode": 100,
+    "breedingInstitutes": [],
+    "collectingInfo": {
+      "collectingDate": "1999-10-16T00:00:00",
+      "collectingInstitutes": [
+        {
+          "instituteAddress": "",
+          "instituteCode": "USA007",
+          "instituteName": "National Germplasm Resources Laboratory"
+        }
+      ],
+      "collectingMissionIdentifier": "",
+      "collectingNumber": "",
+      "collectingSite": {
+        "coordinateUncertainty": "",
+        "elevation": "1260",
+        "georeferencingMethod": "GPS",
+        "latitudeDecimal": "52.88027778",
+        "latitudeDegrees": "",
+        "locationDescription": "",
+        "longitudeDecimal": "-173.19388889",
+        "longitudeDegrees": "",
+        "spatialReferenceSystem": ""
+      }
+    },
+    "commonCropName": "",
+    "countryOfOrigin": "USA",
+    "donorInfo": {
+      "donorAccessionNumber": "",
+      "donorAccessionPui": "",
+      "donorInstitute": {
+        "instituteCode": "",
+        "instituteName": ""
+      }
+    },
+    "genus": "Lupinus",
+    "germplasmDbId": "1601141",
+    "germplasmPUI": "",
+    "instituteCode": "USA022",
+    "mlsStatus": null,
+    "remarks": "",
+    "safetyDuplicateInstitutes": [],
+    "species": "nootkatensis",
+    "speciesAuthority": "Donn ex Sims",
+    "storageTypeCodes": [],
+    "subtaxon": "",
+    "subtaxonAuthority": ""
+  },
+  {
+    "accessionNames": [
+      "Ames 22714",
+      "PAK 98165"
+    ],
+    "accessionNumber": "Ames 22714 ",
+    "acquisitionDate": "1995-10-16T00:00:00",
+    "acquisitionSourceCode": null,
+    "alternateIDs": [],
+    "ancestralData": "",
+    "biologicalStatusOfAccessionCode": 100,
+    "breedingInstitutes": [],
+    "collectingInfo": {
+      "collectingDate": "1993-05-23T00:00:00",
+      "collectingInstitutes": [
+        {
+          "instituteAddress": "",
+          "instituteCode": "USA020",
+          "instituteName": "North Central Regional PI Station"
+        }
+      ],
+      "collectingMissionIdentifier": "",
+      "collectingNumber": "",
+      "collectingSite": {
+        "coordinateUncertainty": "2000",
+        "elevation": "1470",
+        "georeferencingMethod": "GIS",
+        "latitudeDecimal": "30.31666667",
+        "latitudeDegrees": "",
+        "locationDescription": "4 km west of Loralai, near Pathan Kot, Loralai District.",
+        "longitudeDecimal": "68.55000000",
+        "longitudeDegrees": "",
+        "spatialReferenceSystem": ""
+      }
+    },
+    "commonCropName": "MEDIC",
+    "countryOfOrigin": "PAK",
+    "donorInfo": {
+      "donorAccessionNumber": "",
+      "donorAccessionPui": "",
+      "donorInstitute": {
+        "instituteCode": "USA020",
+        "instituteName": "North Central Regional PI Station"
+      }
+    },
+    "genus": "Medicago",
+    "germplasmDbId": "1505582",
+    "germplasmPUI": "",
+    "instituteCode": "USA022",
+    "mlsStatus": null,
+    "remarks": "",
+    "safetyDuplicateInstitutes": [],
+    "species": "lupulina",
+    "speciesAuthority": "L.",
+    "storageTypeCodes": [],
+    "subtaxon": "",
+    "subtaxonAuthority": ""
+  },
+  {
+    "accessionNames": [
+      "82",
+      "Ames 22884",
+      "GRA0795",
+      "US Col.# 002",
+      "VIR M168"
+    ],
+    "accessionNumber": "Ames 22884 ",
+    "acquisitionDate": "1996-03-04T00:00:00",
+    "acquisitionSourceCode": null,
+    "alternateIDs": [],
+    "ancestralData": "",
+    "biologicalStatusOfAccessionCode": 100,
+    "breedingInstitutes": [],
+    "collectingInfo": {
+      "collectingDate": "1995-08-29T00:00:00",
+      "collectingInstitutes": [
+        {
+          "instituteAddress": "",
+          "instituteCode": "USA126",
+          "instituteName": "Database Management Unit"
+        },
+        {
+          "instituteAddress": "",
+          "instituteCode": "USA007",
+          "instituteName": "National Germplasm Resources Laboratory"
+        },
+        {
+          "instituteAddress": "",
+          "instituteCode": "USA020",
+          "instituteName": "North Central Regional PI Station"
+        },
+        {
+          "instituteAddress": "",
+          "instituteCode": "USA022",
+          "instituteName": "Western Regional PI Station"
+        }
+      ],
+      "collectingMissionIdentifier": "",
+      "collectingNumber": "",
+      "collectingSite": {
+        "coordinateUncertainty": "",
+        "elevation": "1304",
+        "georeferencingMethod": "",
+        "latitudeDecimal": "44.17500000",
+        "latitudeDegrees": "",
+        "locationDescription": "17.5 km S along road to Nago-Laki from Dakhovskaya.",
+        "longitudeDecimal": "40.07250000",
+        "longitudeDegrees": "",
+        "spatialReferenceSystem": ""
+      }
+    },
+    "commonCropName": "TREFOIL",
+    "countryOfOrigin": "RUS",
+    "donorInfo": {
+      "donorAccessionNumber": "",
+      "donorAccessionPui": "",
+      "donorInstitute": {
+        "instituteCode": "USA029",
+        "instituteName": "National Small Grains Collection"
+      }
+    },
+    "genus": "Lotus",
+    "germplasmDbId": "1522307",
+    "germplasmPUI": "",
+    "instituteCode": "USA022",
+    "mlsStatus": null,
+    "remarks": "",
+    "safetyDuplicateInstitutes": [],
+    "species": "corniculatus",
+    "speciesAuthority": "L.",
+    "storageTypeCodes": [],
+    "subtaxon": "",
+    "subtaxonAuthority": ""
+  },
+  {
+    "accessionNames": [
+      "A 4698",
+      "Ames 2672",
+      "B 52364"
+    ],
+    "accessionNumber": "Ames 2672 ",
+    "acquisitionDate": "1982-04-20T00:00:00",
+    "acquisitionSourceCode": null,
+    "alternateIDs": [],
+    "ancestralData": "",
+    "biologicalStatusOfAccessionCode": 999,
+    "breedingInstitutes": [],
+    "collectingInfo": {
+      "collectingDate": "1959-09-10T00:00:00",
+      "collectingInstitutes": [
+        {
+          "instituteAddress": "",
+          "instituteCode": "USA020",
+          "instituteName": "North Central Regional PI Station"
+        }
+      ],
+      "collectingMissionIdentifier": "",
+      "collectingNumber": "",
+      "collectingSite": {
+        "coordinateUncertainty": "",
+        "elevation": "",
+        "georeferencingMethod": "",
+        "latitudeDecimal": "",
+        "latitudeDegrees": "",
+        "locationDescription": "",
+        "longitudeDecimal": "",
+        "longitudeDegrees": "",
+        "spatialReferenceSystem": ""
+      }
+    },
+    "commonCropName": "MEDIC",
+    "countryOfOrigin": "ETH",
+    "donorInfo": {
+      "donorAccessionNumber": "",
+      "donorAccessionPui": "",
+      "donorInstitute": {
+        "instituteCode": "USA151",
+        "instituteName": "National Arboretum"
+      }
+    },
+    "genus": "Medicago",
+    "germplasmDbId": "1021513",
+    "germplasmPUI": "",
+    "instituteCode": "USA022",
+    "mlsStatus": null,
+    "remarks": "",
+    "safetyDuplicateInstitutes": [],
+    "species": "lupulina",
+    "speciesAuthority": "L.",
+    "storageTypeCodes": [],
+    "subtaxon": "",
+    "subtaxonAuthority": ""
+  },
+  {
+    "accessionNames": [
+      "A 1194",
+      "Ames 2685"
+    ],
+    "accessionNumber": "Ames 2685 ",
+    "acquisitionDate": "1982-04-20T00:00:00",
+    "acquisitionSourceCode": null,
+    "alternateIDs": [],
+    "ancestralData": "",
+    "biologicalStatusOfAccessionCode": 999,
+    "breedingInstitutes": [],
+    "collectingInfo": {
+      "collectingDate": null,
+      "collectingInstitutes": [],
+      "collectingMissionIdentifier": "",
+      "collectingNumber": "",
+      "collectingSite": {
+        "coordinateUncertainty": "",
+        "elevation": "",
+        "georeferencingMethod": "",
+        "latitudeDecimal": "",
+        "latitudeDegrees": "",
+        "locationDescription": "",
+        "longitudeDecimal": "",
+        "longitudeDegrees": "",
+        "spatialReferenceSystem": ""
+      }
+    },
+    "commonCropName": "",
+    "countryOfOrigin": "GTM",
+    "donorInfo": {
+      "donorAccessionNumber": "",
+      "donorAccessionPui": "",
+      "donorInstitute": {
+        "instituteCode": "USA151",
+        "instituteName": "National Arboretum"
+      }
+    },
+    "genus": "Medicago",
+    "germplasmDbId": "1811328",
+    "germplasmPUI": "",
+    "instituteCode": "USA022",
+    "mlsStatus": null,
+    "remarks": "",
+    "safetyDuplicateInstitutes": [],
+    "species": "spp.",
+    "speciesAuthority": "",
+    "storageTypeCodes": [],
+    "subtaxon": "",
+    "subtaxonAuthority": ""
+  },
+  {
+    "accessionNames": [
+      "Ames 2686",
+      "China #3"
+    ],
+    "accessionNumber": "Ames 2686 ",
+    "acquisitionDate": "1983-09-20T00:00:00",
+    "acquisitionSourceCode": null,
+    "alternateIDs": [],
+    "ancestralData": "",
+    "biologicalStatusOfAccessionCode": 300,
+    "breedingInstitutes": [],
+    "collectingInfo": {
+      "collectingDate": null,
+      "collectingInstitutes": [],
+      "collectingMissionIdentifier": "",
+      "collectingNumber": "",
+      "collectingSite": {
+        "coordinateUncertainty": "",
+        "elevation": "",
+        "georeferencingMethod": "",
+        "latitudeDecimal": "",
+        "latitudeDegrees": "",
+        "locationDescription": "",
+        "longitudeDecimal": "",
+        "longitudeDegrees": "",
+        "spatialReferenceSystem": ""
+      }
+    },
+    "commonCropName": "",
+    "countryOfOrigin": "CHN",
+    "donorInfo": {
+      "donorAccessionNumber": "",
+      "donorAccessionPui": "",
+      "donorInstitute": {
+        "instituteCode": "USA126",
+        "instituteName": "Database Management Unit"
+      }
+    },
+    "genus": "Medicago",
+    "germplasmDbId": "1811329",
+    "germplasmPUI": "",
+    "instituteCode": "USA022",
+    "mlsStatus": null,
+    "remarks": "",
+    "safetyDuplicateInstitutes": [],
+    "species": "sativa",
+    "speciesAuthority": "L.",
+    "storageTypeCodes": [],
+    "subtaxon": "",
+    "subtaxonAuthority": ""
+  },
+  {
+    "accessionNames": [
+      "Ames 30707",
+      "AZ2010-23",
+      "DB0910"
+    ],
+    "accessionNumber": "Ames 30707 ",
+    "acquisitionDate": "2010-11-19T00:00:00",
+    "acquisitionSourceCode": null,
+    "alternateIDs": [],
+    "ancestralData": "",
+    "biologicalStatusOfAccessionCode": 100,
+    "breedingInstitutes": [],
+    "collectingInfo": {
+      "collectingDate": "2010-09-22T00:00:00",
+      "collectingInstitutes": [
+        {
+          "instituteAddress": "",
+          "instituteCode": "USA020",
+          "instituteName": "North Central Regional PI Station"
+        },
+        {
+          "instituteAddress": "",
+          "instituteCode": "USA956",
+          "instituteName": "Ornamental Plant Germplasm Center"
+        }
+      ],
+      "collectingMissionIdentifier": "",
+      "collectingNumber": "",
+      "collectingSite": {
+        "coordinateUncertainty": "",
+        "elevation": "2367",
+        "georeferencingMethod": "GPS",
+        "latitudeDecimal": "32.44467000",
+        "latitudeDegrees": "",
+        "locationDescription": "Around parking lot, across North Sabino Canyon Parkway from the Mt. Lemmon Community Center, and along North Sabino Canyon Parkway (FR 10) to the Marshall Gulch trail head, Pima County.",
+        "longitudeDecimal": "-110.76025000",
+        "longitudeDegrees": "",
+        "spatialReferenceSystem": "WGS84"
+      }
+    },
+    "commonCropName": "LUPIN",
+    "countryOfOrigin": "USA",
+    "donorInfo": {
+      "donorAccessionNumber": "",
+      "donorAccessionPui": "",
+      "donorInstitute": {
+        "instituteCode": "USA020",
+        "instituteName": "North Central Regional PI Station"
+      }
+    },
+    "genus": "Lupinus",
+    "germplasmDbId": "1854592",
+    "germplasmPUI": "",
+    "instituteCode": "USA022",
+    "mlsStatus": null,
+    "remarks": "",
+    "safetyDuplicateInstitutes": [],
+    "species": "argenteus",
+    "speciesAuthority": "Pursh",
+    "storageTypeCodes": [],
+    "subtaxon": "",
+    "subtaxonAuthority": ""
+  },
+  {
+    "accessionNames": [
+      "A 4199",
+      "Ames 3120"
+    ],
+    "accessionNumber": "Ames 3120 ",
+    "acquisitionDate": "1984-01-24T00:00:00",
+    "acquisitionSourceCode": null,
+    "alternateIDs": [],
+    "ancestralData": "",
+    "biologicalStatusOfAccessionCode": 999,
+    "breedingInstitutes": [],
+    "collectingInfo": {
+      "collectingDate": null,
+      "collectingInstitutes": [],
+      "collectingMissionIdentifier": "",
+      "collectingNumber": "",
+      "collectingSite": {
+        "coordinateUncertainty": "",
+        "elevation": "",
+        "georeferencingMethod": "",
+        "latitudeDecimal": "",
+        "latitudeDegrees": "",
+        "locationDescription": "",
+        "longitudeDecimal": "",
+        "longitudeDegrees": "",
+        "spatialReferenceSystem": ""
+      }
+    },
+    "commonCropName": "",
+    "countryOfOrigin": "USA",
+    "donorInfo": {
+      "donorAccessionNumber": "",
+      "donorAccessionPui": "",
+      "donorInstitute": {
+        "instituteCode": "",
+        "instituteName": ""
+      }
+    },
+    "genus": "Medicago",
+    "germplasmDbId": "1739579",
+    "germplasmPUI": "",
+    "instituteCode": "USA022",
+    "mlsStatus": null,
+    "remarks": "",
+    "safetyDuplicateInstitutes": [],
+    "species": "spp.",
+    "speciesAuthority": "",
+    "storageTypeCodes": [],
+    "subtaxon": "",
+    "subtaxonAuthority": ""
+  },
+  {
+    "accessionNames": [
+      "Ames 423"
+    ],
+    "accessionNumber": "Ames 423 ",
+    "acquisitionDate": "1961-10-18T00:00:00",
+    "acquisitionSourceCode": null,
+    "alternateIDs": [],
+    "ancestralData": "",
+    "biologicalStatusOfAccessionCode": 999,
+    "breedingInstitutes": [],
+    "collectingInfo": {
+      "collectingDate": null,
+      "collectingInstitutes": [],
+      "collectingMissionIdentifier": "",
+      "collectingNumber": "",
+      "collectingSite": {
+        "coordinateUncertainty": "",
+        "elevation": "",
+        "georeferencingMethod": "",
+        "latitudeDecimal": "",
+        "latitudeDegrees": "",
+        "locationDescription": "",
+        "longitudeDecimal": "",
+        "longitudeDegrees": "",
+        "spatialReferenceSystem": ""
+      }
+    },
+    "commonCropName": "",
+    "countryOfOrigin": "",
+    "donorInfo": {
+      "donorAccessionNumber": "",
+      "donorAccessionPui": "",
+      "donorInstitute": {
+        "instituteCode": "",
+        "instituteName": ""
+      }
+    },
+    "genus": "Medicago",
+    "germplasmDbId": "1006204",
+    "germplasmPUI": "",
+    "instituteCode": "USA022",
+    "mlsStatus": null,
+    "remarks": "",
+    "safetyDuplicateInstitutes": [],
+    "species": "spp.",
+    "speciesAuthority": "",
+    "storageTypeCodes": [],
+    "subtaxon": "",
+    "subtaxonAuthority": ""
+  },
+  {
+    "accessionNames": [
+      "Ames 7610",
+      "WIR 19946"
+    ],
+    "accessionNumber": "Ames 7610 ",
+    "acquisitionDate": "1987-01-26T00:00:00",
+    "acquisitionSourceCode": null,
+    "alternateIDs": [],
+    "ancestralData": "",
+    "biologicalStatusOfAccessionCode": 999,
+    "breedingInstitutes": [],
+    "collectingInfo": {
+      "collectingDate": null,
+      "collectingInstitutes": [],
+      "collectingMissionIdentifier": "",
+      "collectingNumber": "",
+      "collectingSite": {
+        "coordinateUncertainty": "",
+        "elevation": "",
+        "georeferencingMethod": "",
+        "latitudeDecimal": "",
+        "latitudeDegrees": "",
+        "locationDescription": "",
+        "longitudeDecimal": "",
+        "longitudeDegrees": "",
+        "spatialReferenceSystem": ""
+      }
+    },
+    "commonCropName": "",
+    "countryOfOrigin": "RUS",
+    "donorInfo": {
+      "donorAccessionNumber": "",
+      "donorAccessionPui": "",
+      "donorInstitute": {
+        "instituteCode": "USA029",
+        "instituteName": "National Small Grains Collection"
+      }
+    },
+    "genus": "Medicago",
+    "germplasmDbId": "1619330",
+    "germplasmPUI": "",
+    "instituteCode": "USA022",
+    "mlsStatus": null,
+    "remarks": "",
+    "safetyDuplicateInstitutes": [],
+    "species": "sativa",
+    "speciesAuthority": "L.",
+    "storageTypeCodes": [],
+    "subtaxon": "falcata",
+    "subtaxonAuthority": "(L.) Arcang."
+  },
+  {
+    "accessionNames": [
+      "UC 38"
+    ],
+    "accessionNumber": "CSR 1 ",
+    "acquisitionDate": "1974-07-01T00:00:00",
+    "acquisitionSourceCode": null,
+    "alternateIDs": [],
+    "ancestralData": "",
+    "biologicalStatusOfAccessionCode": 400,
+    "breedingInstitutes": [],
+    "collectingInfo": {
+      "collectingDate": null,
+      "collectingInstitutes": [],
+      "collectingMissionIdentifier": "",
+      "collectingNumber": "",
+      "collectingSite": {
+        "coordinateUncertainty": "",
+        "elevation": "",
+        "georeferencingMethod": "",
+        "latitudeDecimal": "",
+        "latitudeDegrees": "",
+        "locationDescription": "",
+        "longitudeDecimal": "",
+        "longitudeDegrees": "",
+        "spatialReferenceSystem": ""
+      }
+    },
+    "commonCropName": "",
+    "countryOfOrigin": "USA",
+    "donorInfo": {
+      "donorAccessionNumber": "",
+      "donorAccessionPui": "",
+      "donorInstitute": {
+        "instituteCode": "USA126",
+        "instituteName": "Database Management Unit"
+      }
+    },
+    "genus": "Medicago",
+    "germplasmDbId": "1000004",
+    "germplasmPUI": "",
+    "instituteCode": "USA022",
+    "mlsStatus": null,
+    "remarks": "",
+    "safetyDuplicateInstitutes": [],
+    "species": "sativa",
+    "speciesAuthority": "L.",
+    "storageTypeCodes": [],
+    "subtaxon": "sativa",
+    "subtaxonAuthority": ""
+  },
+  {
+    "accessionNames": [
+      "2-3-2H"
+    ],
+    "accessionNumber": "CSR 10 ",
+    "acquisitionDate": "1978-03-01T00:00:00",
+    "acquisitionSourceCode": null,
+    "alternateIDs": [],
+    "ancestralData": "",
+    "biologicalStatusOfAccessionCode": 400,
+    "breedingInstitutes": [],
+    "collectingInfo": {
+      "collectingDate": null,
+      "collectingInstitutes": [],
+      "collectingMissionIdentifier": "",
+      "collectingNumber": "",
+      "collectingSite": {
+        "coordinateUncertainty": "",
+        "elevation": "",
+        "georeferencingMethod": "",
+        "latitudeDecimal": "",
+        "latitudeDegrees": "",
+        "locationDescription": "",
+        "longitudeDecimal": "",
+        "longitudeDegrees": "",
+        "spatialReferenceSystem": ""
+      }
+    },
+    "commonCropName": "",
+    "countryOfOrigin": "USA",
+    "donorInfo": {
+      "donorAccessionNumber": "",
+      "donorAccessionPui": "",
+      "donorInstitute": {
+        "instituteCode": "USA029",
+        "instituteName": "National Small Grains Collection"
+      }
+    },
+    "genus": "Medicago",
+    "germplasmDbId": "1000424",
+    "germplasmPUI": "",
+    "instituteCode": "USA022",
+    "mlsStatus": null,
+    "remarks": "",
+    "safetyDuplicateInstitutes": [],
+    "species": "sativa",
+    "speciesAuthority": "L.",
+    "storageTypeCodes": [],
+    "subtaxon": "sativa",
+    "subtaxonAuthority": ""
+  },
+  {
+    "accessionNames": [
+      "2-2-3H"
+    ],
+    "accessionNumber": "CSR 11 ",
+    "acquisitionDate": "1978-03-01T00:00:00",
+    "acquisitionSourceCode": null,
+    "alternateIDs": [],
+    "ancestralData": "",
+    "biologicalStatusOfAccessionCode": 400,
+    "breedingInstitutes": [],
+    "collectingInfo": {
+      "collectingDate": null,
+      "collectingInstitutes": [],
+      "collectingMissionIdentifier": "",
+      "collectingNumber": "",
+      "collectingSite": {
+        "coordinateUncertainty": "",
+        "elevation": "",
+        "georeferencingMethod": "",
+        "latitudeDecimal": "",
+        "latitudeDegrees": "",
+        "locationDescription": "",
+        "longitudeDecimal": "",
+        "longitudeDegrees": "",
+        "spatialReferenceSystem": ""
+      }
+    },
+    "commonCropName": "",
+    "countryOfOrigin": "USA",
+    "donorInfo": {
+      "donorAccessionNumber": "",
+      "donorAccessionPui": "",
+      "donorInstitute": {
+        "instituteCode": "USA029",
+        "instituteName": "National Small Grains Collection"
+      }
+    },
+    "genus": "Medicago",
+    "germplasmDbId": "1000433",
+    "germplasmPUI": "",
+    "instituteCode": "USA022",
+    "mlsStatus": null,
+    "remarks": "",
+    "safetyDuplicateInstitutes": [],
+    "species": "sativa",
+    "speciesAuthority": "L.",
+    "storageTypeCodes": [],
+    "subtaxon": "sativa",
+    "subtaxonAuthority": ""
+  },
+  {
+    "accessionNames": [
+      "10-1-3H"
+    ],
+    "accessionNumber": "CSR 12 ",
+    "acquisitionDate": "1978-03-01T00:00:00",
+    "acquisitionSourceCode": null,
+    "alternateIDs": [],
+    "ancestralData": "",
+    "biologicalStatusOfAccessionCode": 400,
+    "breedingInstitutes": [],
+    "collectingInfo": {
+      "collectingDate": null,
+      "collectingInstitutes": [],
+      "collectingMissionIdentifier": "",
+      "collectingNumber": "",
+      "collectingSite": {
+        "coordinateUncertainty": "",
+        "elevation": "",
+        "georeferencingMethod": "",
+        "latitudeDecimal": "",
+        "latitudeDegrees": "",
+        "locationDescription": "",
+        "longitudeDecimal": "",
+        "longitudeDegrees": "",
+        "spatialReferenceSystem": ""
+      }
+    },
+    "commonCropName": "",
+    "countryOfOrigin": "USA",
+    "donorInfo": {
+      "donorAccessionNumber": "",
+      "donorAccessionPui": "",
+      "donorInstitute": {
+        "instituteCode": "USA029",
+        "instituteName": "National Small Grains Collection"
+      }
+    },
+    "genus": "Medicago",
+    "germplasmDbId": "1000493",
+    "germplasmPUI": "",
+    "instituteCode": "USA022",
+    "mlsStatus": null,
+    "remarks": "",
+    "safetyDuplicateInstitutes": [],
+    "species": "sativa",
+    "speciesAuthority": "L.",
+    "storageTypeCodes": [],
+    "subtaxon": "sativa",
+    "subtaxonAuthority": ""
+  },
+  {
+    "accessionNames": [
+      "10-4-4H"
+    ],
+    "accessionNumber": "CSR 13 ",
+    "acquisitionDate": "1978-03-01T00:00:00",
+    "acquisitionSourceCode": null,
+    "alternateIDs": [],
+    "ancestralData": "",
+    "biologicalStatusOfAccessionCode": 400,
+    "breedingInstitutes": [],
+    "collectingInfo": {
+      "collectingDate": null,
+      "collectingInstitutes": [],
+      "collectingMissionIdentifier": "",
+      "collectingNumber": "",
+      "collectingSite": {
+        "coordinateUncertainty": "",
+        "elevation": "",
+        "georeferencingMethod": "",
+        "latitudeDecimal": "",
+        "latitudeDegrees": "",
+        "locationDescription": "",
+        "longitudeDecimal": "",
+        "longitudeDegrees": "",
+        "spatialReferenceSystem": ""
+      }
+    },
+    "commonCropName": "",
+    "countryOfOrigin": "USA",
+    "donorInfo": {
+      "donorAccessionNumber": "",
+      "donorAccessionPui": "",
+      "donorInstitute": {
+        "instituteCode": "USA029",
+        "instituteName": "National Small Grains Collection"
+      }
+    },
+    "genus": "Medicago",
+    "germplasmDbId": "1000501",
+    "germplasmPUI": "",
+    "instituteCode": "USA022",
+    "mlsStatus": null,
+    "remarks": "",
+    "safetyDuplicateInstitutes": [],
+    "species": "sativa",
+    "speciesAuthority": "L.",
+    "storageTypeCodes": [],
+    "subtaxon": "sativa",
+    "subtaxonAuthority": ""
+  },
+  {
+    "accessionNames": [
+      "10-3-4H"
+    ],
+    "accessionNumber": "CSR 14 ",
+    "acquisitionDate": "1978-03-01T00:00:00",
+    "acquisitionSourceCode": null,
+    "alternateIDs": [],
+    "ancestralData": "",
+    "biologicalStatusOfAccessionCode": 400,
+    "breedingInstitutes": [],
+    "collectingInfo": {
+      "collectingDate": null,
+      "collectingInstitutes": [],
+      "collectingMissionIdentifier": "",
+      "collectingNumber": "",
+      "collectingSite": {
+        "coordinateUncertainty": "",
+        "elevation": "",
+        "georeferencingMethod": "",
+        "latitudeDecimal": "",
+        "latitudeDegrees": "",
+        "locationDescription": "",
+        "longitudeDecimal": "",
+        "longitudeDegrees": "",
+        "spatialReferenceSystem": ""
+      }
+    },
+    "commonCropName": "",
+    "countryOfOrigin": "USA",
+    "donorInfo": {
+      "donorAccessionNumber": "",
+      "donorAccessionPui": "",
+      "donorInstitute": {
+        "instituteCode": "USA029",
+        "instituteName": "National Small Grains Collection"
+      }
+    },
+    "genus": "Medicago",
+    "germplasmDbId": "1000562",
+    "germplasmPUI": "",
+    "instituteCode": "USA022",
+    "mlsStatus": null,
+    "remarks": "",
+    "safetyDuplicateInstitutes": [],
+    "species": "sativa",
+    "speciesAuthority": "L.",
+    "storageTypeCodes": [],
+    "subtaxon": "sativa",
+    "subtaxonAuthority": ""
+  },
+  {
+    "accessionNames": [
+      "10-3-2H"
+    ],
+    "accessionNumber": "CSR 15 ",
+    "acquisitionDate": "1978-03-01T00:00:00",
+    "acquisitionSourceCode": null,
+    "alternateIDs": [],
+    "ancestralData": "",
+    "biologicalStatusOfAccessionCode": 400,
+    "breedingInstitutes": [],
+    "collectingInfo": {
+      "collectingDate": null,
+      "collectingInstitutes": [],
+      "collectingMissionIdentifier": "",
+      "collectingNumber": "",
+      "collectingSite": {
+        "coordinateUncertainty": "",
+        "elevation": "",
+        "georeferencingMethod": "",
+        "latitudeDecimal": "",
+        "latitudeDegrees": "",
+        "locationDescription": "",
+        "longitudeDecimal": "",
+        "longitudeDegrees": "",
+        "spatialReferenceSystem": ""
+      }
+    },
+    "commonCropName": "",
+    "countryOfOrigin": "USA",
+    "donorInfo": {
+      "donorAccessionNumber": "",
+      "donorAccessionPui": "",
+      "donorInstitute": {
+        "instituteCode": "USA029",
+        "instituteName": "National Small Grains Collection"
+      }
+    },
+    "genus": "Medicago",
+    "germplasmDbId": "1000571",
+    "germplasmPUI": "",
+    "instituteCode": "USA022",
+    "mlsStatus": null,
+    "remarks": "",
+    "safetyDuplicateInstitutes": [],
+    "species": "sativa",
+    "speciesAuthority": "L.",
+    "storageTypeCodes": [],
+    "subtaxon": "sativa",
+    "subtaxonAuthority": ""
+  },
+  {
+    "accessionNames": [
+      "11-3-2L"
+    ],
+    "accessionNumber": "CSR 16 ",
+    "acquisitionDate": "1978-03-01T00:00:00",
+    "acquisitionSourceCode": null,
+    "alternateIDs": [],
+    "ancestralData": "",
+    "biologicalStatusOfAccessionCode": 400,
+    "breedingInstitutes": [],
+    "collectingInfo": {
+      "collectingDate": null,
+      "collectingInstitutes": [],
+      "collectingMissionIdentifier": "",
+      "collectingNumber": "",
+      "collectingSite": {
+        "coordinateUncertainty": "",
+        "elevation": "",
+        "georeferencingMethod": "",
+        "latitudeDecimal": "",
+        "latitudeDegrees": "",
+        "locationDescription": "",
+        "longitudeDecimal": "",
+        "longitudeDegrees": "",
+        "spatialReferenceSystem": ""
+      }
+    },
+    "commonCropName": "",
+    "countryOfOrigin": "USA",
+    "donorInfo": {
+      "donorAccessionNumber": "",
+      "donorAccessionPui": "",
+      "donorInstitute": {
+        "instituteCode": "USA029",
+        "instituteName": "National Small Grains Collection"
+      }
+    },
+    "genus": "Medicago",
+    "germplasmDbId": "1000631",
+    "germplasmPUI": "",
+    "instituteCode": "USA022",
+    "mlsStatus": null,
+    "remarks": "",
+    "safetyDuplicateInstitutes": [],
+    "species": "sativa",
+    "speciesAuthority": "L.",
+    "storageTypeCodes": [],
+    "subtaxon": "sativa",
+    "subtaxonAuthority": ""
+  },
+  {
+    "accessionNames": [
+      "11-1-2L"
+    ],
+    "accessionNumber": "CSR 17 ",
+    "acquisitionDate": "1978-03-01T00:00:00",
+    "acquisitionSourceCode": null,
+    "alternateIDs": [],
+    "ancestralData": "",
+    "biologicalStatusOfAccessionCode": 400,
+    "breedingInstitutes": [],
+    "collectingInfo": {
+      "collectingDate": null,
+      "collectingInstitutes": [],
+      "collectingMissionIdentifier": "",
+      "collectingNumber": "",
+      "collectingSite": {
+        "coordinateUncertainty": "",
+        "elevation": "",
+        "georeferencingMethod": "",
+        "latitudeDecimal": "",
+        "latitudeDegrees": "",
+        "locationDescription": "",
+        "longitudeDecimal": "",
+        "longitudeDegrees": "",
+        "spatialReferenceSystem": ""
+      }
+    },
+    "commonCropName": "",
+    "countryOfOrigin": "USA",
+    "donorInfo": {
+      "donorAccessionNumber": "",
+      "donorAccessionPui": "",
+      "donorInstitute": {
+        "instituteCode": "USA029",
+        "instituteName": "National Small Grains Collection"
+      }
+    },
+    "genus": "Medicago",
+    "germplasmDbId": "1000639",
+    "germplasmPUI": "",
+    "instituteCode": "USA022",
+    "mlsStatus": null,
+    "remarks": "",
+    "safetyDuplicateInstitutes": [],
+    "species": "sativa",
+    "speciesAuthority": "L.",
+    "storageTypeCodes": [],
+    "subtaxon": "sativa",
+    "subtaxonAuthority": ""
+  },
+  {
+    "accessionNames": [
+      "Cahone"
+    ],
+    "accessionNumber": "CSR 172 ",
+    "acquisitionDate": "1988-03-01T00:00:00",
+    "acquisitionSourceCode": null,
+    "alternateIDs": [],
+    "ancestralData": "",
+    "biologicalStatusOfAccessionCode": 500,
+    "breedingInstitutes": [],
+    "collectingInfo": {
+      "collectingDate": null,
+      "collectingInstitutes": [],
+      "collectingMissionIdentifier": "",
+      "collectingNumber": "",
+      "collectingSite": {
+        "coordinateUncertainty": "",
+        "elevation": "",
+        "georeferencingMethod": "",
+        "latitudeDecimal": "",
+        "latitudeDegrees": "",
+        "locationDescription": "",
+        "longitudeDecimal": "",
+        "longitudeDegrees": "",
+        "spatialReferenceSystem": ""
+      }
+    },
+    "commonCropName": "",
+    "countryOfOrigin": "USA",
+    "donorInfo": {
+      "donorAccessionNumber": "",
+      "donorAccessionPui": "",
+      "donorInstitute": {
+        "instituteCode": "USA029",
+        "instituteName": "National Small Grains Collection"
+      }
+    },
+    "genus": "Phaseolus",
+    "germplasmDbId": "1003924",
+    "germplasmPUI": "",
+    "instituteCode": "USA022",
+    "mlsStatus": null,
+    "remarks": "",
+    "safetyDuplicateInstitutes": [],
+    "species": "vulgaris",
+    "speciesAuthority": "L.",
+    "storageTypeCodes": [],
+    "subtaxon": "",
+    "subtaxonAuthority": ""
+  },
+  {
+    "accessionNames": [
+      "Laker"
+    ],
+    "accessionNumber": "CSR 173 ",
+    "acquisitionDate": "1989-11-01T00:00:00",
+    "acquisitionSourceCode": null,
+    "alternateIDs": [],
+    "ancestralData": "",
+    "biologicalStatusOfAccessionCode": 500,
+    "breedingInstitutes": [],
+    "collectingInfo": {
+      "collectingDate": null,
+      "collectingInstitutes": [],
+      "collectingMissionIdentifier": "",
+      "collectingNumber": "",
+      "collectingSite": {
+        "coordinateUncertainty": "",
+        "elevation": "",
+        "georeferencingMethod": "",
+        "latitudeDecimal": "",
+        "latitudeDegrees": "",
+        "locationDescription": "",
+        "longitudeDecimal": "",
+        "longitudeDegrees": "",
+        "spatialReferenceSystem": ""
+      }
+    },
+    "commonCropName": "",
+    "countryOfOrigin": "USA",
+    "donorInfo": {
+      "donorAccessionNumber": "",
+      "donorAccessionPui": "",
+      "donorInstitute": {
+        "instituteCode": "USA029",
+        "instituteName": "National Small Grains Collection"
+      }
+    },
+    "genus": "Phaseolus",
+    "germplasmDbId": "1003939",
+    "germplasmPUI": "",
+    "instituteCode": "USA022",
+    "mlsStatus": null,
+    "remarks": "",
+    "safetyDuplicateInstitutes": [],
+    "species": "vulgaris",
+    "speciesAuthority": "L.",
+    "storageTypeCodes": [],
+    "subtaxon": "",
+    "subtaxonAuthority": ""
+  },
+  {
+    "accessionNames": [
+      "Florigraze"
+    ],
+    "accessionNumber": "CSR 174 ",
+    "acquisitionDate": "1939-07-06T00:00:00",
+    "acquisitionSourceCode": null,
+    "alternateIDs": [],
+    "ancestralData": "",
+    "biologicalStatusOfAccessionCode": 500,
+    "breedingInstitutes": [],
+    "collectingInfo": {
+      "collectingDate": null,
+      "collectingInstitutes": [],
+      "collectingMissionIdentifier": "",
+      "collectingNumber": "",
+      "collectingSite": {
+        "coordinateUncertainty": "",
+        "elevation": "",
+        "georeferencingMethod": "",
+        "latitudeDecimal": "",
+        "latitudeDegrees": "",
+        "locationDescription": "",
+        "longitudeDecimal": "",
+        "longitudeDegrees": "",
+        "spatialReferenceSystem": ""
+      }
+    },
+    "commonCropName": "",
+    "countryOfOrigin": "USA",
+    "donorInfo": {
+      "donorAccessionNumber": "",
+      "donorAccessionPui": "",
+      "donorInstitute": {
+        "instituteCode": "USA029",
+        "instituteName": "National Small Grains Collection"
+      }
+    },
+    "genus": "Arachis",
+    "germplasmDbId": "1003961",
+    "germplasmPUI": "",
+    "instituteCode": "USA016",
+    "mlsStatus": null,
+    "remarks": "",
+    "safetyDuplicateInstitutes": [],
+    "species": "glabrata",
+    "speciesAuthority": "Benth.",
+    "storageTypeCodes": [],
+    "subtaxon": "",
+    "subtaxonAuthority": ""
+  },
+  {
+    "accessionNames": [
+      "SC-1"
+    ],
+    "accessionNumber": "CSR 175 ",
+    "acquisitionDate": "1978-01-01T00:00:00",
+    "acquisitionSourceCode": null,
+    "alternateIDs": [],
+    "ancestralData": "",
+    "biologicalStatusOfAccessionCode": 400,
+    "breedingInstitutes": [],
+    "collectingInfo": {
+      "collectingDate": null,
+      "collectingInstitutes": [],
+      "collectingMissionIdentifier": "",
+      "collectingNumber": "",
+      "collectingSite": {
+        "coordinateUncertainty": "",
+        "elevation": "",
+        "georeferencingMethod": "",
+        "latitudeDecimal": "",
+        "latitudeDegrees": "",
+        "locationDescription": "",
+        "longitudeDecimal": "",
+        "longitudeDegrees": "",
+        "spatialReferenceSystem": ""
+      }
+    },
+    "commonCropName": "",
+    "countryOfOrigin": "USA",
+    "donorInfo": {
+      "donorAccessionNumber": "",
+      "donorAccessionPui": "",
+      "donorInstitute": {
+        "instituteCode": "USA126",
+        "instituteName": "Database Management Unit"
+      }
+    },
+    "genus": "Trifolium",
+    "germplasmDbId": "1003979",
+    "germplasmPUI": "",
+    "instituteCode": "USA022",
+    "mlsStatus": null,
+    "remarks": "",
+    "safetyDuplicateInstitutes": [],
+    "species": "repens",
+    "speciesAuthority": "L.",
+    "storageTypeCodes": [],
+    "subtaxon": "",
+    "subtaxonAuthority": ""
+  },
+  {
+    "accessionNames": [
+      "SC-2"
+    ],
+    "accessionNumber": "CSR 176 ",
+    "acquisitionDate": "1939-07-06T00:00:00",
+    "acquisitionSourceCode": null,
+    "alternateIDs": [],
+    "ancestralData": "",
+    "biologicalStatusOfAccessionCode": 400,
+    "breedingInstitutes": [],
+    "collectingInfo": {
+      "collectingDate": null,
+      "collectingInstitutes": [],
+      "collectingMissionIdentifier": "",
+      "collectingNumber": "",
+      "collectingSite": {
+        "coordinateUncertainty": "",
+        "elevation": "",
+        "georeferencingMethod": "",
+        "latitudeDecimal": "",
+        "latitudeDegrees": "",
+        "locationDescription": "",
+        "longitudeDecimal": "",
+        "longitudeDegrees": "",
+        "spatialReferenceSystem": ""
+      }
+    },
+    "commonCropName": "",
+    "countryOfOrigin": "USA",
+    "donorInfo": {
+      "donorAccessionNumber": "",
+      "donorAccessionPui": "",
+      "donorInstitute": {
+        "instituteCode": "USA126",
+        "instituteName": "Database Management Unit"
+      }
+    },
+    "genus": "Trifolium",
+    "germplasmDbId": "1003982",
+    "germplasmPUI": "",
+    "instituteCode": "USA016",
+    "mlsStatus": null,
+    "remarks": "",
+    "safetyDuplicateInstitutes": [],
+    "species": "spp.",
+    "speciesAuthority": "",
+    "storageTypeCodes": [],
+    "subtaxon": "",
+    "subtaxonAuthority": ""
+  },
+  {
+    "accessionNames": [
+      "SC-3"
+    ],
+    "accessionNumber": "CSR 177 ",
+    "acquisitionDate": "1939-07-06T00:00:00",
+    "acquisitionSourceCode": null,
+    "alternateIDs": [],
+    "ancestralData": "",
+    "biologicalStatusOfAccessionCode": 400,
+    "breedingInstitutes": [],
+    "collectingInfo": {
+      "collectingDate": null,
+      "collectingInstitutes": [],
+      "collectingMissionIdentifier": "",
+      "collectingNumber": "",
+      "collectingSite": {
+        "coordinateUncertainty": "",
+        "elevation": "",
+        "georeferencingMethod": "",
+        "latitudeDecimal": "",
+        "latitudeDegrees": "",
+        "locationDescription": "",
+        "longitudeDecimal": "",
+        "longitudeDegrees": "",
+        "spatialReferenceSystem": ""
+      }
+    },
+    "commonCropName": "",
+    "countryOfOrigin": "USA",
+    "donorInfo": {
+      "donorAccessionNumber": "",
+      "donorAccessionPui": "",
+      "donorInstitute": {
+        "instituteCode": "USA126",
+        "instituteName": "Database Management Unit"
+      }
+    },
+    "genus": "Trifolium",
+    "germplasmDbId": "1004010",
+    "germplasmPUI": "",
+    "instituteCode": "USA016",
+    "mlsStatus": null,
+    "remarks": "",
+    "safetyDuplicateInstitutes": [],
+    "species": "spp.",
+    "speciesAuthority": "",
+    "storageTypeCodes": [],
+    "subtaxon": "",
+    "subtaxonAuthority": ""
+  }
+]

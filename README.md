@@ -1,5 +1,5 @@
 # lis_gis
-Map viewer for and search interface for USDA/GRIN germplasm accessions and traits. See http://legumeinfo.org/germplasm/map for a live demo.
+Map viewer for and search interface for USDA/GRIN germplasm accessions and traits. See http://germplasm-map.legumeinfo.org/ for a live demo.
 server requirements
 * Python >= 3.5.x
 * Django
@@ -10,19 +10,20 @@ server requirements
 Docker can be used to start Django and Postgres, loading an example data set from PeanutBase:
 
 ```
-docker-compose up --build
+docker compose up -d --build
 ```
 
 Point your browser to http://localhost:8000/
 
 The lis_gis git working tree is bind-mounted at /app in the container, so changes to source files will be immediatey reflected in the container.
 
-### Running Unit Tests
+### Running Tests
 
-Django unit tests can be executed thus:
+Django tests can be executed thus:
 
 ```
-docker compose run -u postgres web python3 manage.py test
+docker compose run test # can be run multiple times
+docker compose --profile test down -v # remove test-db when finished
 ```
 
 ### Loading your own data

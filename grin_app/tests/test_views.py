@@ -1,15 +1,33 @@
+import gzip
 import logging
 import json
+import subprocess
 
 from lis_germplasm import settings
 from unittest import TestCase
 from django.test import Client
+
+SCHEMA = 'scripts/schema.sql'
+DATA = 'grin_app/tests/test_sql.txt'
+
+# NOTE: assumes empty database dedicated for testing!
+test_db = settings.DATABASES['default']
 
 logger = logging.getLogger(__name__)
 
 c = Client()
 
 class TestViews(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        subprocess.check_call(['psql', '-f', SCHEMA])
+        subprocess.check_call(['psql', '-f', DATA])
+        subprocess.check_call('scripts/load.py', stdin=open('grin_app/tests/germplasm-mcpd.json'))
+
+    @classmethod
+    def tearDownClass(cls):
+        subprocess.check_call(['psql', '-c', 'DROP SCHEMA lis_germplasm CASCADE'])
+
     def test_index(self):
         """Fetch the index.html and make sure the Django templating is working
         (see branding section of settings.py)
@@ -24,7 +42,6 @@ class TestViews(TestCase):
         assert settings.BRANDING['home_url'].encode() in html
         assert settings.BRANDING['logo_url'].encode() in html
         assert settings.BRANDING['site_subheading'].encode() in html
-
 
     def test_search(self):
         query = '''

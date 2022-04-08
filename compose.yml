@@ -1,4 +1,22 @@
 # local development deployment
+x-db: &db
+  environment:
+    POSTGRES_PASSWORD: unused
+    POSTGRES_INITDB_ARGS: --auth=peer
+  healthcheck:
+    test: "su-exec postgres pg_isready || exit 1"
+    start_period: 1s
+    retries: 10
+  volumes:
+    - type: volume
+      source: postgres-socket
+      target: /run/postgresql
+# don't listen on TCP port; write optimizations
+  command: ["-c", "listen_addresses=",
+            "-c", "wal_level=minimal",
+            "-c", "max_wal_senders=0",
+            "-c", "synchronous_commit=off"]
+
 services:
   web:
     build:
@@ -26,25 +44,39 @@ services:
         target: /run/postgresql
 
   db:
+    <<: *db
     build:
       context: .
       target: db
+
+#### services for running tests
+
+  test:
+    build:
+      context: .
+      target: dev
     environment:
-      POSTGRES_PASSWORD: unused
-      POSTGRES_INITDB_ARGS: --auth=peer
-    healthcheck:
-      test: "su-exec postgres pg_isready || exit 1"
-      start_period: 1s
-      retries: 10
+      PGHOST: /run/postgresql
+      PGDATABASE: postgres
+    depends_on:
+      test-db:
+        condition: service_healthy
     volumes:
+      - type: bind
+        source: .
+        target: /app
+        read_only: true
       - type: volume
         source: postgres-socket
         target: /run/postgresql
-# don't listen on TCP port; write optimizations
-    command: ["-c", "listen_addresses=",
-              "-c", "wal_level=minimal",
-              "-c", "max_wal_senders=0",
-              "-c", "synchronous_commit=off"]
+    user: postgres
+    command: ["python3", "manage.py", "test"]
+    profiles: ["test"]
+
+  test-db:
+    <<: *db
+    image: postgis/postgis:12-2.5-alpine 
+    profiles: ["test"]
 
 volumes:
   postgres-socket:
