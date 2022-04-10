@@ -82,8 +82,8 @@
 	</span>
             </td>
             <td class="nowrap"
-                ng-bind-html="rec.properties.cropname"></td>
-            <td class="nowrap">{{rec.properties.origcty}}</td>
+                ng-bind-html="rec.properties.commonCropName"></td>
+            <td class="nowrap">{{rec.properties.countryOfOrigin}}</td>
             <td>
                 <button class="btn btn-xs btn-default acc-select-button"
                         ng-click="onGoInternalMap(rec)">
@@ -92,9 +92,9 @@
             aria-hidden="true"></span>
                 </button>
             </td>
-            <td class="trim-ellipsis" ng-bind-html="rec.properties.collsite">
+            <td class="trim-ellipsis" ng-bind-html="rec.properties.locationDescription">
             </td>
-            <td class="nowrap">{{rec.properties.acqdate}}</td>
+            <td class="nowrap">{{rec.properties.acquisitionDate}}</td>
             <td class="nowrap">
 	<span ng-if="rec.properties.elevation">
 	  {{rec.properties.elevation | number }}

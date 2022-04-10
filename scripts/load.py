@@ -35,7 +35,6 @@ def main():
     germplasm = json.load(sys.stdin)
     inserts = 0
     for n in germplasm:
-#       n["collsrc"] = int(n["collsrc"] or 0) # TODO
         if n["acquisitionDate"]: 
             n["acquisitionDate"] = n["acquisitionDate"].replace("--", "01")
             try:
@@ -60,11 +59,11 @@ def main():
             geographic_coord = None
 
         sql = """INSERT INTO lis_germplasm.grin_accession
-        (taxon,genus,species,spauthor,subtaxa,subtauthor,
-        cropname,instcode,accenumb,acckey,collnumb,collcode,
-        accename,acqdate,origcty,collsite,elevation,
-        colldate,bredcode,sampstat,ancest,collsrc,donorcode,donornumb,
-        duplsite,storage,latdec,longdec,geographic_coord,remarks,
+        (taxon,genus,species,speciesAuthority,subtaxon,subtaxonAuthority,
+        commonCropName,instituteCode,accenumb,germplasmDbId,collectingNumber,collectingInstitutes,
+        accessionNames,acquisitionDate,countryOfOrigin,locationDescription,elevation,
+        collectingDate,breedingInstitutes,biologicalStatusOfAccessionCode,ancestralData,acquisitionSourceCode,donorInstitute,donorAccessionNumber,
+        safetyDuplicateInstitutes,storageTypeCodes,latitudeDecimal,longitudeDecimal,geographic_coord,remarks,
         history)
         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
         %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
@@ -72,7 +71,7 @@ def main():
         values = (
             # taxon: BrAPI v2 mcpd doesn"t have an equivalent, so we"re faking it
             " ".join(filter(None, (n["genus"], n["species"],
-                     (n["subtaxon"] and f"subsp. {n['subtaxon']}") or None))),
+                     (n["subtaxon"] and f"subsp. {n['subtaxon']}") or None))), # TODO
             n["genus"], # genus
             n["species"], # species
             n["speciesAuthority"], # spauthor
@@ -80,10 +79,10 @@ def main():
             n["subtaxonAuthority"], # subtauthor
             n["commonCropName"], # cropname
             n["instituteCode"], # instcode
-            (n.get("accessionNumber", "").rstrip() or None), # accenumb (NOTE: notified Pete of trailing space issue)
+            (n.get("accessionNumber", "").rstrip() or None), # accenumb (NOTE: notified Pete of trailing space issue) # TODO
             int(n["germplasmDbId"]), # acckey
             n["collectingInfo"]["collectingNumber"], # collnumb
-            "", # FIXME: collcode
+            ";".join((institute["instituteCode"] for institute in n["collectingInfo"]["collectingInstitutes"])), # collcode
             ";".join(n["accessionNames"]), # accename
             n["acquisitionDate"], #acqdate
             n["countryOfOrigin"], #origcty
@@ -92,8 +91,8 @@ def main():
             n["collectingInfo"]["collectingDate"], # colldate
             ";".join(n["breedingInstitutes"]), # bredcode
             int(n["biologicalStatusOfAccessionCode"] or 0), # sampstat
-            "", # FIXME: ancest; looks like germplasm.pedigree should work, but this isn"t in the BrAPI v2 mcpd API?
-            0, # FIXME: collsrc
+            n["ancestralData"], # ancest
+            int(n["acquisitionSourceCode"] or 0), # collsrc
             n["donorInfo"]["donorInstitute"]["instituteCode"], # donorcode
             n["donorInfo"]["donorAccessionNumber"], # donornumb
             ";".join(n["safetyDuplicateInstitutes"]), # duplsite

@@ -11,7 +11,7 @@ import math
 
 PSQL_DB = 'dbname=drupal user=www'
 DATE_FMT = '%Y%m%d'
-PNT_FMT = "ST_GeographyFromText('SRID=4326;POINT(%(longdec)s %(latdec)s)')"
+PNT_FMT = "ST_GeographyFromText('SRID=4326;POINT(%(longitudeDecimal)s %(latitudeDecimal)s)')"
 
 if not hasattr(math, 'isclose'):
     # monkey patch for python2
@@ -24,97 +24,97 @@ def main():
     print('making lat/long consensus...')
     conn = psycopg2.connect(PSQL_DB)
     cur = conn.cursor()
-    sql = '''SELECT distinct origcty 
+    sql = '''SELECT distinct countryOfOrigin 
     FROM lis_germplasm.grin_accession
-    ORDER BY origcty
+    ORDER BY countryOfOrigin
     '''
     cur.execute(sql)
     countries = [row[0] for row in cur.fetchall()]
     for country in countries:
         print(country)
         cons = {
-            'latdec': {
+            'latitudeDecimal': {
                 'pos_count': 0,
                 'neg_count': 0,
             },
-            'longdec': {
+            'longitudeDecimal': {
                 'pos_count': 0,
                 'neg_count': 0,
             },
         }
         sql = '''
-        SELECT latdec, longdec, origcty
+        SELECT latitudeDecimal, longitudeDecimal, countryOfOrigin
         FROM lis_germplasm.grin_accession 
-        WHERE origcty = %(country)s
+        WHERE countryOfOrigin = %(country)s
         '''
         params = {'country': country}
         cur.execute(sql, params)
         recs = _dictfetchall(cur)
         for rec in recs:
-            if not math.isclose(rec['longdec'], 0.0, abs_tol=0.00001):
+            if not math.isclose(rec['longitudeDecimal'], 0.0, abs_tol=0.00001):
                 # have a nonzero longitude
-                if rec['longdec'] > 0:
-                    cons['longdec']['pos_count'] += 1
-                elif rec['longdec'] < 0:
-                    cons['longdec']['neg_count'] += 1
-            if not math.isclose(rec['latdec'], 0.0, abs_tol=0.00001):
+                if rec['longitudeDecimal'] > 0:
+                    cons['longitudeDecimal']['pos_count'] += 1
+                elif rec['longitudeDecimal'] < 0:
+                    cons['longitudeDecimal']['neg_count'] += 1
+            if not math.isclose(rec['latitudeDecimal'], 0.0, abs_tol=0.00001):
                 # have a nonzero longitude
-                if rec['latdec'] > 0:
-                    cons['latdec']['pos_count'] += 1
-                elif rec['latdec'] < 0:
-                    cons['latdec']['neg_count'] += 1
+                if rec['latitudeDecimal'] > 0:
+                    cons['latitudeDecimal']['pos_count'] += 1
+                elif rec['latitudeDecimal'] < 0:
+                    cons['latitudeDecimal']['neg_count'] += 1
         # update latitudes
-        if cons['latdec']['pos_count'] > 0 and cons['latdec']['neg_count'] > 0:
+        if cons['latitudeDecimal']['pos_count'] > 0 and cons['latitudeDecimal']['neg_count'] > 0:
             print(country)
             print(cons)
             # need to update in light of consensus
-            if cons['latdec']['pos_count'] == cons['latdec']['neg_count']:
+            if cons['latitudeDecimal']['pos_count'] == cons['latitudeDecimal']['neg_count']:
                 print('****** warning-- no consensus! *******')
                 continue
 
-            neg_sign = (cons['latdec']['pos_count'] < cons['latdec']['neg_count'])
+            neg_sign = (cons['latitudeDecimal']['pos_count'] < cons['latitudeDecimal']['neg_count'])
             if neg_sign:  # consensus is negative signed latitude
                 sql = '''
                 UPDATE lis_germplasm.grin_accession
-                SET latdec = latdec * -1 
-                WHERE latdec > 0
-                AND origcty = %(country)s
+                SET latitudeDecimal = latitudeDecimal * -1 
+                WHERE latitudeDecimal > 0
+                AND countryOfOrigin = %(country)s
                 '''
             else:  # consensus is positive signed latitude
                 sql = '''
                 UPDATE lis_germplasm.grin_accession
-                SET latdec = latdec * -1 
-                WHERE latdec < 0
-                AND origcty = %(country)s
+                SET latitudeDecimal = latitudeDecimal * -1 
+                WHERE latitudeDecimal < 0
+                AND countryOfOrigin = %(country)s
                 '''
             cur.execute(sql, params)
             conn.commit()
             print('updated latitudes for %s' % country)
         # update longitudes
-        if cons['longdec']['pos_count'] > 0 and cons['longdec']['neg_count'] > 0:
+        if cons['longitudeDecimal']['pos_count'] > 0 and cons['longitudeDecimal']['neg_count'] > 0:
             print(country)
             print(cons)
 
             # need to update in light of consensus
-            if cons['longdec']['pos_count'] == cons['longdec']['neg_count']:
+            if cons['longitudeDecimal']['pos_count'] == cons['longitudeDecimal']['neg_count']:
                 print('****** warning-- no consensus! *******')
                 continue
 
             neg_sign = (
-                cons['longdec']['pos_count'] < cons['longdec']['neg_count'])
+                cons['longitudeDecimal']['pos_count'] < cons['longitudeDecimal']['neg_count'])
             if neg_sign:  # consensus is negative signed latitude
                 sql = '''
                 UPDATE lis_germplasm.grin_accession
-                SET longdec = longdec * -1 
-                WHERE longdec > 0
-                AND origcty = %(country)s
+                SET longitudeDecimal = longitudeDecimal * -1 
+                WHERE longitudeDecimal > 0
+                AND countryOfOrigin = %(country)s
                 '''
             else:  # consensus is positive signed latitude
                 sql = '''
                 UPDATE lis_germplasm.grin_accession
-                SET longdec = longdec * -1 
-                WHERE longdec < 0
-                AND origcty = %(country)s
+                SET longitudeDecimal = longitudeDecimal * -1 
+                WHERE longitudeDecimal < 0
+                AND countryOfOrigin = %(country)s
                 '''
             cur.execute(sql, params)
             conn.commit()
@@ -123,7 +123,7 @@ def main():
     print('updating geographic_coord column...')
     sql = '''
     UPDATE lis_germplasm.grin_accession
-    SET geographic_coord = ST_SetSRID(ST_MakePoint(longdec, latdec), 4326);
+    SET geographic_coord = ST_SetSRID(ST_MakePoint(longitudeDecimal, latitudeDecimal), 4326);
     '''
     cur.execute(sql)
     conn.commit()

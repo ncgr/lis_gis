@@ -86,7 +86,7 @@ def get_accession_info(acc_id):
     :return: CurrentGeocodingStatus
     """
     sql = """
-    select latdec, longdec, origcty, collsite from lis_germplasm.grin_accession
+    select latitudeDecimal, longitudeDecimal, countryOfOrigin, locationDescription from lis_germplasm.grin_accession
     where accenumb = %(acc_id)s
     """
     params = {'acc_id': acc_id}

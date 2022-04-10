@@ -17,8 +17,8 @@ DEFAULT_LIMIT = 200
 TWO_PLACES = Decimal('0.01')
 ACCESSION_TAB = 'lis_germplasm.grin_accession'
 ACC_SELECT_COLS = (
-    'gid', 'taxon', 'latdec', 'longdec', 'accenumb', 'elevation', 'cropname',
-    'collsite', 'acqdate', 'origcty'
+    'gid', 'taxon', 'latitudeDecimal', 'longitudeDecimal', 'accenumb', 'elevation', 'commonCropName',
+    'locationDescription', 'acquisitionDate', 'countryOfOrigin'
 )
 # Brewer nominal category colors from chroma.js set1,2,3 concatenated:
 NOMINAL_COLORS = [
@@ -57,17 +57,17 @@ GRIN_ACC_WHERE_FRAGS = {
     },
     'country': {
         'include': lambda p: p.get('country', None),
-        'sql': 'origcty = %(country)s',
+        'sql': 'countryOfOrigin = %(country)s',
     },
     'geocoded_only': {
         'include': lambda p: p.get('limit_geo_bounds', None) in (
             True, 'true') or p.get('geocoded_only', None) in (True, 'true'),
-        'sql': 'latdec <> 0 AND longdec <> 0',
+        'sql': 'latitudeDecimal <> 0 AND longitudeDecimal <> 0',
     },
     'limit_geo_bounds': {
         'include': lambda p: p.get('limit_geo_bounds', None) in (True, 'true'),
         'sql': '''
-           latdec <> 0 AND longdec <> 0 AND
+           latitudeDecimal <> 0 AND longitudeDecimal <> 0 AND
            ST_Contains(
             ST_MakeEnvelope(%(minx)s, %(miny)s, %(maxx)s, %(maxy)s, %(srid)s),
             geographic_coord::geometry
@@ -388,7 +388,7 @@ def countries(req):
     """
     cursor = connection.cursor()
     sql = '''
-    SELECT DISTINCT origcty FROM lis_germplasm.grin_accession ORDER by origcty
+    SELECT DISTINCT countryOfOrigin FROM lis_germplasm.grin_accession ORDER by countryOfOrigin
     '''
     cursor.execute(sql)
     # flatten into array, filter out bogus records like '' or 3 number codes
@@ -479,25 +479,25 @@ def _acc_search_response(rows):
     # logger.info('results: %d' % len(rows))
     for rec in rows:
         # fix up properties which are not json serializable
-        if rec.get('acqdate', None):
-            rec['acqdate'] = str(rec['acqdate'])
+        if rec.get('acquisitionDate', None):
+            rec['acquisitionDate'] = str(rec['acquisitionDate'])
         else:
-            rec['acqdate'] = None
-        if rec.get('colldate', None):
-            rec['colldate'] = str(rec['colldate'])
+            rec['acquisitionDate'] = None
+        if rec.get('collectingDate', None):
+            rec['collectingDate'] = str(rec['collectingDate'])
         else:
-            rec['colldate'] = None
+            rec['collectingDate'] = None
         # geojson can have null coords, so output this for
         # non-geocoded search results (e.g. full text search w/ limit
         # to current map extent turned off
-        if rec.get('longdec', 0) == 0 and rec.get('latdec', 0) == 0:
+        if rec.get('longitudeDecimal', 0) == 0 and rec.get('latitudeDecimal', 0) == 0:
             coords = None
         else:
-            lat = Decimal(rec['latdec']).quantize(TWO_PLACES)
-            lng = Decimal(rec['longdec']).quantize(TWO_PLACES)
+            lat = Decimal(rec['latitudeDecimal']).quantize(TWO_PLACES)
+            lng = Decimal(rec['longitudeDecimal']).quantize(TWO_PLACES)
             coords = [lng, lat]
-            del rec['latdec']  # have been translated into geojson coords, 
-            del rec['longdec']  # so these keys are extraneous now.
+            del rec['latitudeDecimal']  # have been translated into geojson coords, 
+            del rec['longitudeDecimal']  # so these keys are extraneous now.
         geo_json_frag = {
             'type': 'Feature',
             'geometry': {

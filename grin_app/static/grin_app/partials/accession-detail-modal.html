@@ -50,9 +50,9 @@
       <td>taxon</td>
       <td ng-bind-html="model.acc.properties.taxon"></td>
     </tr>
-    <tr ng-if="model.acc.properties.subtaxa">
-      <td>subtaxa</td>
-      <td ng-bind-html="model.acc.properties.subtaxa"></td>
+    <tr ng-if="model.acc.properties.subtaxon">
+      <td>subtaxon</td>
+      <td ng-bind-html="model.acc.properties.subtaxon"></td>
     </tr>
     <tr ng-if="model.acc.properties.genus">
       <td>genus</td>
@@ -62,25 +62,25 @@
       <td>species</td>
       <td ng-bind-html="model.acc.properties.species"></td>
     </tr>
-    <tr ng-if="model.acc.properties.cropname">
-      <td>cropname</td>
-      <td ng-bind-html="model.acc.properties.cropname"></td>
+    <tr ng-if="model.acc.properties.commonCropName">
+      <td>commonCropName</td>
+      <td ng-bind-html="model.acc.properties.commonCropName"></td>
     </tr>
-    <tr ng-if="model.acc.properties.acqdate">
-      <td>acqdate</td>
-      <td>{{model.acc.properties.acqdate}}</td>
+    <tr ng-if="model.acc.properties.acquisitionDate">
+      <td>acquisitionDate</td>
+      <td>{{model.acc.properties.acquisitionDate}}</td>
     </tr>
-    <tr ng-if="model.acc.properties.colldate">
-      <td>colldate</td>
-      <td>{{model.acc.properties.colldate}}</td>
+    <tr ng-if="model.acc.properties.collectingDate">
+      <td>collectingDate</td>
+      <td>{{model.acc.properties.collectingDate}}</td>
     </tr>
-    <tr ng-if="model.acc.properties.origcty">
-      <td>origcty</td>
-      <td>{{model.acc.properties.origcty}}</td>
+    <tr ng-if="model.acc.properties.countryOfOrigin">
+      <td>countryOfOrigin</td>
+      <td>{{model.acc.properties.countryOfOrigin}}</td>
     </tr>
-    <tr ng-if="model.acc.properties.collsite">
-      <td>collsite</td>
-      <td ng-bind-html="model.acc.properties.collsite">
+    <tr ng-if="model.acc.properties.locationDescription">
+      <td>locationDescription</td>
+      <td ng-bind-html="model.acc.properties.locationDescription">
       </td>
     </tr>
     <tr ng-if="model.acc.geometry.coordinates">
@@ -102,53 +102,53 @@
       <td>elevation (m.)</td>
       <td>{{model.acc.properties.elevation}}</td>
     </tr>
-    <tr ng-if="model.acc.properties.collnumb">
-      <td>collnumb</td>
-      <td>{{model.acc.properties.collnumb}}</td>
+    <tr ng-if="model.acc.properties.collectingNumber">
+      <td>collectingNumber</td>
+      <td>{{model.acc.properties.collectingNumber}}</td>
     </tr>
     <tr ng-if="model.acc.properties.collcode">
       <td>collcode</td>
       <td>{{model.acc.properties.collcode}}</td>
     </tr>
-    <tr ng-if="model.acc.properties.spauthor">
-      <td>spauthor</td>
-      <td>{{model.acc.properties.spauthor}}</td>
+    <tr ng-if="model.acc.properties.speciesAuthority">
+      <td>speciesAuthority</td>
+      <td>{{model.acc.properties.speciesAuthority}}</td>
     </tr>
-    <tr ng-if="model.acc.properties.subtauthor">
-      <td>subtauthor</td>
-      <td>{{model.acc.properties.subtauthor}}</td>
+    <tr ng-if="model.acc.properties.subtaxonAuthority">
+      <td>subtaxonAuthority</td>
+      <td>{{model.acc.properties.subtaxonAuthority}}</td>
     </tr>
-    <tr ng-if="model.acc.properties.instcode">
-      <td>instcode</td>
-      <td>{{model.acc.properties.instcode}}</td>
+    <tr ng-if="model.acc.properties.instituteCode">
+      <td>instituteCode</td>
+      <td>{{model.acc.properties.instituteCode}}</td>
     </tr>
-    <tr ng-if="model.acc.properties.bredcode">
-      <td>bredcode</td>
-      <td>{{model.acc.properties.bredcode}}</td>
+    <tr ng-if="model.acc.properties.breedingInstitutes">
+      <td>breedingInstitutes</td>
+      <td>{{model.acc.properties.breedingInstitutes}}</td>
     </tr>
-    <tr ng-if="model.acc.properties.ancest">
-      <td>ancest</td>
-      <td>{{model.acc.properties.ancest}}</td>
+    <tr ng-if="model.acc.properties.ancestralData">
+      <td>ancestralData</td>
+      <td>{{model.acc.properties.ancestralData}}</td>
     </tr>
-    <tr ng-if="model.acc.properties.donorcode">
-      <td>donorcode</td>
-      <td>{{model.acc.properties.donorcode}}</td>
+    <tr ng-if="model.acc.properties.donorInstitute">
+      <td>donorInstitute</td>
+      <td>{{model.acc.properties.donorInstitute}}</td>
     </tr>
-    <tr ng-if="model.acc.properties.donornumb">
-      <td>donornumb</td>
-      <td>{{model.acc.properties.donornumb}}</td>
+    <tr ng-if="model.acc.properties.donorAccessionNumber">
+      <td>donorAccessionNumber</td>
+      <td>{{model.acc.properties.donorAccessionNumber}}</td>
     </tr>
-    <tr ng-if="model.acc.properties.duplsite">
-      <td>duplsite</td>
-      <td>{{model.acc.properties.duplsite}}</td>
+    <tr ng-if="model.acc.properties.safetyDuplicateInstitutes">
+      <td>safetyDuplicateInstitutes</td>
+      <td>{{model.acc.properties.safetyDuplicateInstitutes}}</td>
     </tr>      
-    <tr ng-if="model.acc.properties.storage">
-      <td>storage</td>
-      <td>{{model.acc.properties.storage}}</td>
+    <tr ng-if="model.acc.properties.storageTypeCodes">
+      <td>storageTypeCodes</td>
+      <td>{{model.acc.properties.storageTypeCodes}}</td>
     </tr>
-    <tr ng-if="model.acc.properties.accename">
-      <td>accename</td>
-      <td>{{model.acc.properties.accename}}</td>
+    <tr ng-if="model.acc.properties.accessionNames">
+      <td>accessionNames</td>
+      <td>{{model.acc.properties.accessionNames}}</td>
     </tr>
   </table>
 

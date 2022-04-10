@@ -328,13 +328,13 @@ app.controller('userDataController',
                         properties: {
                             accenumb : rec.accession_id,
                             gid: Math.random().toString(16).substr(2,8),
-                            acqdate: rec.acqdate,
-                            colldate: rec.colldate,
-                            collsite: rec.collsite,
+                            acquisitionDate: rec.acquisitionDate,
+                            collectingDate: rec.collectingDate,
+                            locationDescription: rec.locationDescription,
                             color: rec.color,
-                            cropname: rec.cropname,
+                            commonCropName: rec.commonCropName,
                             elevation: rec.elevation,
-                            origcty: rec.origcty,
+                            countryOfOrigin: rec.countryOfOrigin,
                             taxon: rec.taxon
                         }
                     };
