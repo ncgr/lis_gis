@@ -23,6 +23,7 @@ class TestViews(TestCase):
         subprocess.check_call('scripts/load.py', stdin=open('grin_app/tests/germplasm-mcpd.json'))
         subprocess.check_call('scripts/load-observations.py', stdin=open('grin_app/tests/observations.json'))
         subprocess.check_call('scripts/evaluation_metadata.py')
+        subprocess.check_call('scripts/fts_index.py')
 
     @classmethod
     def tearDownClass(cls):
