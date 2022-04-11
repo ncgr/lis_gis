@@ -8,7 +8,6 @@ from unittest import TestCase
 from django.test import Client
 
 SCHEMA = 'scripts/schema.sql'
-DATA = 'grin_app/tests/test_sql.txt'
 
 # NOTE: assumes empty database dedicated for testing!
 test_db = settings.DATABASES['default']
@@ -21,8 +20,8 @@ class TestViews(TestCase):
     @classmethod
     def setUpClass(cls):
         subprocess.check_call(['psql', '-f', SCHEMA])
-        subprocess.check_call(['psql', '-f', DATA])
         subprocess.check_call('scripts/load.py', stdin=open('grin_app/tests/germplasm-mcpd.json'))
+        subprocess.check_call('scripts/load-observations.py', stdin=open('grin_app/tests/observations.json'))
         subprocess.check_call('scripts/evaluation_metadata.py')
 
     @classmethod
@@ -72,7 +71,7 @@ class TestViews(TestCase):
     def test_accession_detail(self):
         # this accession number exists in test.sql (or should)
         accession = 'Ames 22714'
-        res = c.get('/accession_detail', {'accenumb': accession})
+        res = c.get('/accession_detail', {'accessionNumber': accession})
         self.assertEqual(res.status_code, 200)
         assert len(res.content) > 0
         results = json.loads(res.content)
@@ -95,19 +94,19 @@ class TestViews(TestCase):
 
     def test_evaluation_detail(self):
         # this accession number comes from test.sql
-        accession = 'Grif 12202'
-        res = c.get('/evaluation_detail', {'accenumb' : accession })
+        accession = 'Ames 30707'
+        res = c.get('/evaluation_detail', {'accessionNumber' : accession })
         self.assertEqual(res.status_code, 200)
         assert len(res.content) > 0
         results = json.loads(res.content)
-        assert 'Nigeria' == results[0]['origin']
+        assert 'USA' == results[0]['countryOfOrigin']
         pass
 
 
     def test_evaluation_search(self):
-        # this trait evaluation data comes from test.sql
+        # this trait evaluation data comes from observations.sql
         query = '''
-        {"accession_ids":["Grif 12202", "Grif 12197"],"descriptor_name":"PODPLACE"}
+        {"accession_ids":["Ames 22714", "Ames 30707"],"observationVariableName":"IMAGE-2"}
         '''
         res = c.post('/evaluation_search', 
                      content_type='application/json',
@@ -115,8 +114,8 @@ class TestViews(TestCase):
         self.assertEqual(res.status_code, 200)
         assert len(res.content) > 0
         results = json.loads(res.content)
-        assert 'observation_value' in results[0]
-        assert 'PODPLACE' == results[0]['descriptor_name']
+        assert 'value' in results[0]
+        assert 'IMAGE-2' == results[0]['observationVariableName']
         pass
 
 
@@ -128,7 +127,7 @@ class TestViews(TestCase):
         """
         query = '''
         {"taxon":"Vigna",
-         "descriptor_name":"PODPLACE",
+         "observationVariableName":"PODPLACE",
          "accession_ids":[],"trait_scale":"global"}
         '''
         res = c.post('/evaluation_metadata', 

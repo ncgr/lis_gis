@@ -60,7 +60,7 @@ def main():
 
         sql = """INSERT INTO lis_germplasm.grin_accession
         (taxon,genus,species,speciesAuthority,subtaxon,subtaxonAuthority,
-        commonCropName,instituteCode,accenumb,germplasmDbId,collectingNumber,collectingInstitutes,
+        commonCropName,instituteCode,accessionNumber,germplasmDbId,collectingNumber,collectingInstitutes,
         accessionNames,acquisitionDate,countryOfOrigin,locationDescription,elevation,
         collectingDate,breedingInstitutes,biologicalStatusOfAccessionCode,ancestralData,acquisitionSourceCode,donorInstitute,donorAccessionNumber,
         safetyDuplicateInstitutes,storageTypeCodes,latitudeDecimal,longitudeDecimal,geographic_coord,remarks,

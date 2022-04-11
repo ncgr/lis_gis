@@ -83,7 +83,7 @@ app.controller('listController',
             /* user hit a map marker button in the results table */
 
             // convert from geoJson point to leafletjs point
-            var accNum = accDetail.properties.accenumb;
+            var accNum = accDetail.properties.accessionNumber;
             var lng = accDetail.geometry.coordinates[0];
             var lat = accDetail.geometry.coordinates[1];
             var center = {'lat': lat, 'lng': lng};
@@ -126,7 +126,7 @@ app.controller('listController',
 
         function onGoExternalLISGRIN(accDetail) {
             var url = 'https://npgsweb.ars-grin.gov/gringlobal/accessiondetail.aspx?accid=' +
-                encodeURIComponent(accDetail.properties.accenumb);
+                encodeURIComponent(accDetail.properties.accessionNumber);
             $window.open(url, 'LIS');
         }
 

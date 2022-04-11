@@ -87,7 +87,7 @@ def get_accession_info(acc_id):
     """
     sql = """
     select latitudeDecimal, longitudeDecimal, countryOfOrigin, locationDescription from lis_germplasm.grin_accession
-    where accenumb = %(acc_id)s
+    where accessionNumber = %(acc_id)s
     """
     params = {'acc_id': acc_id}
     # print cur.mogrify(sql, params)

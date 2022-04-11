@@ -30,21 +30,6 @@ CREATE TYPE grin_observation_type AS ENUM (
 
 
 
---
--- Name: grin_evaluation_data_concat_accenumb(); Type: FUNCTION; Schema: lis_germplasm; Owner: www
---
-
-CREATE FUNCTION grin_evaluation_data_concat_accenumb() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-  BEGIN
-      NEW.accenumb = NEW.accession_prefix || ' ' || NEW.accession_number;
-      RETURN NEW;
-  END
-  $$;
-
-
-
 SET default_tablespace = '';
 
 SET default_with_oids = false;
@@ -64,7 +49,7 @@ CREATE TABLE grin_accession (
     subtaxonAuthority text,
     commonCropName text,
     instituteCode text,
-    accenumb text,
+    accessionNumber text,
     collectingNumber text,
     collectingInstitutes text,
     accessionNames text,
@@ -94,35 +79,34 @@ CREATE TABLE grin_accession (
 --
 
 CREATE TABLE grin_evaluation_metadata (
-    id integer NOT NULL,
+    id SERIAL PRIMARY KEY,
     taxon text,
-    descriptor_name text,
+    observationVariableName text,
     obs_type grin_observation_type,
     obs_min double precision,
     obs_max double precision,
     obs_nominal_values text[]
 );
 
-
-
 --
--- Name: grin_evaluation_metadata_id_seq; Type: SEQUENCE; Schema: lis_germplasm; Owner: www
+-- Name: grin_evaluation_data_concat_accenumb(); Type: FUNCTION; Schema: lis_germplasm; Owner: www
 --
+/* FIXME: this is a minor compatibility stopgap. Instead of replicating this
+ *        data, queries should be updated to retrieve it from grin_accession.
+ */
 
-CREATE SEQUENCE grin_evaluation_metadata_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-
---
--- Name: grin_evaluation_metadata_id_seq; Type: SEQUENCE OWNED BY; Schema: lis_germplasm; Owner: www
---
-
-ALTER SEQUENCE grin_evaluation_metadata_id_seq OWNED BY grin_evaluation_metadata.id;
+CREATE FUNCTION grin_evaluation_data_concat_accenumb() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+      SELECT accessionNumber, taxon, countryOfOrigin
+        -- TODO: is countryOfOrigin
+        INTO NEW.accessionNumber, NEW.taxon, NEW.countryOfOrigin
+        FROM lis_germplasm.grin_accession
+        WHERE lis_germplasm.grin_accession.germplasmDbId = NEW.germplasmDbId;
+      RETURN NEW;
+  END
+  $$;
 
 
 --
@@ -130,51 +114,25 @@ ALTER SEQUENCE grin_evaluation_metadata_id_seq OWNED BY grin_evaluation_metadata
 --
 
 CREATE TABLE legumes_grin_evaluation_data (
-    accession_prefix character varying(16),
-    accession_number character varying(16),
-    observation_value character varying(64),
-    descriptor_name character varying(64),
-    method_name character varying(255),
-    accession_surfix character varying(255),
-    plant_name character varying(255),
+    observationDbId integer PRIMARY KEY,
+    germplasmDbId integer NOT NULL,
+    value character varying(64),
+    observationVariableName character varying(64),
+    -- plant_name character varying(255), /* FIXME */
     taxon character varying(64),
-    origin character varying(255),
-    original_value character varying(64),
-    frequency character varying(16),
-    low character varying(16),
-    hign character varying(16),
-    mean character varying(16),
-    sdev character varying(16),
-    ssize character varying(16),
-    inventory_prefix character varying(16),
-    inventory_number character varying(16),
-    inventory_suffix character varying(64),
-    accession_comment text,
-    accenumb text
+    countryOfOrigin character varying(255),
+    additionalInfo text,
+    accessionNumber text,
+    FOREIGN KEY (germplasmDbId) REFERENCES grin_accession(germplasmDbId)
 );
 
-
-
---
--- Name: id; Type: DEFAULT; Schema: lis_germplasm; Owner: www
---
-
-ALTER TABLE ONLY grin_evaluation_metadata ALTER COLUMN id SET DEFAULT nextval('grin_evaluation_metadata_id_seq'::regclass);
-
-
---
--- Name: grin_evaluation_metadata_pkey; Type: CONSTRAINT; Schema: lis_germplasm; Owner: www; Tablespace: 
---
-
-ALTER TABLE ONLY grin_evaluation_metadata
-    ADD CONSTRAINT grin_evaluation_metadata_pkey PRIMARY KEY (id);
 
 
 --
 -- Name: grin_accession_accenumb_idx; Type: INDEX; Schema: lis_germplasm; Owner: www; Tablespace: 
 --
 
-CREATE UNIQUE INDEX grin_accession_accenumb_idx ON grin_accession USING btree (accenumb);
+CREATE UNIQUE INDEX grin_accession_accenumb_idx ON grin_accession USING btree (accessionNumber);
 
 
 --
@@ -209,7 +167,7 @@ CREATE INDEX grin_accession_taxon_fts_idx ON grin_accession USING gin (taxon_fts
 -- Name: grin_evaluation_metadata_descriptor_name_idx; Type: INDEX; Schema: lis_germplasm; Owner: www; Tablespace: 
 --
 
-CREATE INDEX grin_evaluation_metadata_descriptor_name_idx ON grin_evaluation_metadata USING btree (descriptor_name);
+CREATE INDEX grin_evaluation_metadata_descriptor_name_idx ON grin_evaluation_metadata USING btree (observationVariableName);
 
 
 --
@@ -223,42 +181,28 @@ CREATE INDEX grin_evaluation_metadata_taxon_idx ON grin_evaluation_metadata USIN
 -- Name: legumes_grin_evaluation_data_accenumb_descriptor_name_idx; Type: INDEX; Schema: lis_germplasm; Owner: www; Tablespace: 
 --
 
-CREATE INDEX legumes_grin_evaluation_data_accenumb_descriptor_name_idx ON legumes_grin_evaluation_data USING btree (accenumb, descriptor_name);
+CREATE INDEX legumes_grin_evaluation_data_accenumb_descriptor_name_idx ON legumes_grin_evaluation_data USING btree (accessionNumber, observationVariableName);
 
 
 --
 -- Name: legumes_grin_evaluation_data_accenumb_idx; Type: INDEX; Schema: lis_germplasm; Owner: www; Tablespace: 
 --
 
-CREATE INDEX legumes_grin_evaluation_data_accenumb_idx ON legumes_grin_evaluation_data USING btree (accenumb);
-
-
---
--- Name: legumes_grin_evaluation_data_accession_number_idx; Type: INDEX; Schema: lis_germplasm; Owner: www; Tablespace: 
---
-
-CREATE INDEX legumes_grin_evaluation_data_accession_number_idx ON legumes_grin_evaluation_data USING btree (accession_number);
-
-
---
--- Name: legumes_grin_evaluation_data_accession_prefix_idx; Type: INDEX; Schema: lis_germplasm; Owner: www; Tablespace: 
---
-
-CREATE INDEX legumes_grin_evaluation_data_accession_prefix_idx ON legumes_grin_evaluation_data USING btree (accession_prefix);
+CREATE INDEX legumes_grin_evaluation_data_accenumb_idx ON legumes_grin_evaluation_data USING btree (accessionNumber);
 
 
 --
 -- Name: legumes_grin_evaluation_data_descr_name_idx; Type: INDEX; Schema: lis_germplasm; Owner: www; Tablespace: 
 --
 
-CREATE INDEX legumes_grin_evaluation_data_descr_name_idx ON legumes_grin_evaluation_data USING btree (descriptor_name);
+CREATE INDEX legumes_grin_evaluation_data_descr_name_idx ON legumes_grin_evaluation_data USING btree (observationVariableName);
 
 
 --
 -- Name: legumes_grin_evaluation_data_full_accnumb; Type: INDEX; Schema: lis_germplasm; Owner: www; Tablespace: 
 --
 
-CREATE INDEX legumes_grin_evaluation_data_full_accnumb ON legumes_grin_evaluation_data USING btree (lower(accenumb));
+CREATE INDEX legumes_grin_evaluation_data_full_accnumb ON legumes_grin_evaluation_data USING btree (lower(accessionNumber));
 
 
 --

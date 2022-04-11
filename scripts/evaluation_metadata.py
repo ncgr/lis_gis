@@ -18,28 +18,30 @@ def main():
     cur.execute('DELETE FROM lis_germplasm.grin_evaluation_metadata')
     print('updating evaluation metadata...')
     sql = '''
-    SELECT DISTINCT taxon, descriptor_name
-    FROM lis_germplasm.legumes_grin_evaluation_data
-    WHERE taxon IS NOT NULL AND descriptor_name IS NOT NULL
+    SELECT DISTINCT germplasm.taxon, observations.observationVariableName
+    FROM lis_germplasm.legumes_grin_evaluation_data AS observations
+    JOIN lis_germplasm.grin_accession AS germplasm
+    USING (germplasmDbId)
+    WHERE germplasm.taxon IS NOT NULL AND observations.observationVariableName IS NOT NULL
     '''
     cur.execute(sql)
     rows = cur.fetchall()
-    for taxon, descriptor_name in rows:
-        print('%s : %s...' % (taxon, descriptor_name))
+    for taxon, observationVariableName in rows:
+        print('%s : %s...' % (taxon, observationVariableName))
         sql = '''
-        SELECT DISTINCT observation_value
+        SELECT DISTINCT value
         FROM lis_germplasm.legumes_grin_evaluation_data
-        WHERE descriptor_name = %(q)s
-        AND observation_value IS NOT NULL
+        WHERE observationVariableName = %(q)s
+        AND value IS NOT NULL
         '''
-        cur.execute(sql, {'q': descriptor_name})
+        cur.execute(sql, {'q': observationVariableName})
         obs_values = [_string2num(row[0]) for row in cur.fetchall()]
         if _detect_numeric_trait(obs_values):
             handler = _update_numeric_trait_metadata
         else:
             handler = _update_nominal_trait_metadata
         handler(taxon=taxon,
-                descriptor_name=descriptor_name,
+                observationVariableName=observationVariableName,
                 obs_values=obs_values)
     print('committing...')
     conn.commit()
@@ -51,9 +53,9 @@ def _update_numeric_trait_metadata(**params):
     """
     sql = '''
     INSERT INTO lis_germplasm.grin_evaluation_metadata
-      (taxon, descriptor_name, obs_type, obs_min, obs_max)
+      (taxon, observationVariableName, obs_type, obs_min, obs_max)
     VALUES
-      (%(taxon)s, %(descriptor_name)s, 'numeric', %(min)s, %(max)s)
+      (%(taxon)s, %(observationVariableName)s, 'numeric', %(min)s, %(max)s)
     '''
     params['min'] = min(params['obs_values'])
     params['max'] = max(params['obs_values'])
@@ -68,9 +70,9 @@ def _update_nominal_trait_metadata(**params):
     """
     sql = '''
     INSERT INTO lis_germplasm.grin_evaluation_metadata
-      (taxon, descriptor_name, obs_type, obs_nominal_values)
+      (taxon, observationVariableName, obs_type, obs_nominal_values)
     VALUES
-      (%(taxon)s, %(descriptor_name)s, 'nominal', %(nominal_values)s)
+      (%(taxon)s, %(observationVariableName)s, 'nominal', %(nominal_values)s)
     '''
     params['nominal_values'] = sorted([str(x) for x in params['obs_values']])
     cur = conn.cursor()

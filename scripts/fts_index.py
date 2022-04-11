@@ -7,14 +7,13 @@ genera are loaded/updated.
 
 import psycopg2
 
-PSQL_DB = 'dbname=drupal user=www'
 DATE_FMT = '%Y%m%d'
 PNT_FMT = "ST_GeographyFromText('SRID=4326;POINT(%(longitudeDecimal)s %(latitudeDecimal)s)')"
 
 
 def main():
     print('updating full text search index...')
-    conn = psycopg2.connect(PSQL_DB)
+    conn = psycopg2.connect()
     cur = conn.cursor()
     sql = '''UPDATE lis_germplasm.grin_accession
              SET taxon_fts = to_tsvector('english', coalesce(taxon,'')) '''

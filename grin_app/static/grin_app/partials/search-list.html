@@ -54,19 +54,19 @@
             <th>elev&nbsp;(m.)</th>
         </tr>
         <tr ng-repeat="rec in model.geoJsonService.data"
-            ng-class="{'hilite-row' : model.geoJsonService.selectedAccession == rec.properties.accenumb}">
+            ng-class="{'hilite-row' : model.geoJsonService.selectedAccession == rec.properties.accessionNumber}">
             <td class="nowrap">
                 <button class="btn btn-xs btn-default accdetail-button"
                         ng-if="rec.properties.from_api"
-                        ng-click="onAccessionDetail(rec.properties.accenumb)"
-                        ng-bind-html="rec.properties.accenumb | highlight: model.searchHilite">
+                        ng-click="onAccessionDetail(rec.properties.accessionNumber)"
+                        ng-bind-html="rec.properties.accessionNumber | highlight: model.searchHilite">
                 </button>
                 <span ng-if="! rec.properties.from_api"
-                      ng-bind-html="rec.properties.accenumb | highlight: model.searchHilite">
+                      ng-bind-html="rec.properties.accessionNumber | highlight: model.searchHilite">
                 </span>
             </td>
             <td ng-if="model.geoJsonService.traitHash">
-                <span ng-repeat="(subdescriptor, values) in model.geoJsonService.traitHash[rec.properties.accenumb]">
+                <span ng-repeat="(subdescriptor, values) in model.geoJsonService.traitHash[rec.properties.accessionNumber]">
                     <span ng-if="subdescriptor !== model.geoJsonService.DEFAULT_TRAIT">
                         {{subdescriptor}}:
                     </span>

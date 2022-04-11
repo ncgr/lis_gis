@@ -17,8 +17,16 @@ DEFAULT_LIMIT = 200
 TWO_PLACES = Decimal('0.01')
 ACCESSION_TAB = 'lis_germplasm.grin_accession'
 ACC_SELECT_COLS = (
-    'germplasmDbId', 'taxon', 'latitudeDecimal', 'longitudeDecimal', 'accenumb', 'elevation', 'commonCropName',
-    'locationDescription', 'acquisitionDate', 'countryOfOrigin'
+    'germplasmDbId AS "germplasmDbId"',
+    'taxon',
+    'latitudeDecimal AS "latitudeDecimal"',
+    'longitudeDecimal AS "longitudeDecimal"',
+    'accessionNumber AS "accessionNumber"',
+    'elevation',
+    'commonCropName AS "commonCropName"',
+    'locationDescription AS "locationDescription"',
+    'acquisitionDate AS "acquisitionDate"',
+    'countryOfOrigin AS "countryOfOrigin"'
 )
 # Brewer nominal category colors from chroma.js set1,2,3 concatenated:
 NOMINAL_COLORS = [
@@ -76,21 +84,13 @@ GRIN_ACC_WHERE_FRAGS = {
 }
 
 GRIN_EVAL_WHERE_FRAGS = {
-    'descriptor_name': {
-        'include': lambda p: p.get('descriptor_name', None),
-        'sql': 'descriptor_name = %(descriptor_name)s',
+    'observationVariableName': {
+        'include': lambda p: p.get('observationVariableName', None),
+        'sql': 'observationVariableName = %(observationVariableName)s',
     },
-    'accession prefix': {
-        'include': lambda p: p.get('prefix', None),
-        'sql': 'accession_prefix = %(prefix)s',
-    },
-    'accession number': {
-        'include': lambda p: p.get('acc_num', None),
-        'sql': 'accession_number = %(acc_num)s',
-    },
-    'accession surfix': {
-        'include': lambda p: p.get('suffix', None),
-        'sql': 'accession_surfix = %(suffix)s',
+    'accessionNumber': {
+        'include': lambda p: p.get('accessionNumber', None),
+        'sql': 'accessionNumber = %(accessionNumber)s',
     },
 }
 
@@ -125,12 +125,12 @@ def evaluation_descr_names(req):
     else:
         where_sql = 'WHERE %s' % ' AND '.join(where_clauses)
     sql = '''
-    SELECT DISTINCT descriptor_name
+    SELECT DISTINCT observationVariableName AS "observationVariableName"
     FROM lis_germplasm.legumes_grin_evaluation_data
     JOIN lis_germplasm.grin_accession
-    USING (accenumb)
+    USING (accessionNumber)
     %s
-    ORDER BY descriptor_name
+    ORDER BY observationVariableName
     ''' % where_sql
     sql_params = {'taxon_query': params['taxon']}
     cursor = connection.cursor()
@@ -145,33 +145,33 @@ def evaluation_descr_names(req):
 @ensure_csrf_cookie
 @ensure_nocache
 def evaluation_search(req):
-    """Return JSON array of observation_value for all trait records
-    matching a set of accession ids, and matching the descriptor_name
+    """Return JSON array of value for all trait records
+    matching a set of accession ids, and matching the observationVariableName
     field. Used for creating map markers or map overlays with specific
     accesions' trait data.
     """
     assert req.method == 'POST', 'POST request method required'
     params = json.loads(req.body)
     assert 'accession_ids' in params, 'missing accession_ids param'
-    assert 'descriptor_name' in params, 'missing descriptor_name param'
+    assert 'observationVariableName' in params, 'missing observationVariableName param'
     sql = '''
-    SELECT accenumb, descriptor_name, observation_value
+    SELECT accessionNumber AS "accessionNumber", observationVariableName AS "observationVariableName", value
      FROM lis_germplasm.legumes_grin_evaluation_data
-     WHERE descriptor_name = %(descriptor_name)s 
-     AND accenumb IN %(accession_ids)s
+     WHERE observationVariableName = %(observationVariableName)s 
+     AND accessionNumber IN %(accession_ids)s
     '''
     sql_params = {
-        'descriptor_name': params['descriptor_name'],
+        'observationVariableName': params['observationVariableName'],
         'accession_ids': tuple(params['accession_ids'])
     }
     cursor = connection.cursor()
     # logger.info(cursor.mogrify(sql, sql_params))
     cursor.execute(sql, sql_params)
     rows = _dictfetchall(cursor)
-    # observation_value is a string field, so cast to int or float as necessary
+    # value is a string field, so cast to int or float as necessary
     rows_clean = []
     for row in rows:
-        row['observation_value'] = _string2num(row['observation_value'])
+        row['value'] = _string2num(row['value'])
         rows_clean.append(row)
     result = json.dumps(rows_clean, use_decimal=True)
     response = HttpResponse(result, content_type='application/json')
@@ -197,13 +197,13 @@ def _string2num(s):
 @ensure_nocache
 def evaluation_metadata(req):
     """Return JSON with trait metadata for the given taxon and trait
-    descriptor_name. This enables the client to display a legend, and
+    observationVariableName. This enables the client to display a legend, and
     colorize accessions by either numeric or category traits.
     """
     assert req.method == 'POST', 'POST request method required'
     params = json.loads(req.body)
     assert 'taxon' in params, 'missing taxon param'
-    assert 'descriptor_name' in params, 'missing descriptor_name param'
+    assert 'observationVariableName' in params, 'missing observationVariableName param'
     assert 'trait_scale' in params, 'missing trait_scale param'
     assert 'accession_ids' in params, 'missing accession_ids param'
     assert params['taxon'], 'empty taxon param'
@@ -213,7 +213,7 @@ def evaluation_metadata(req):
     # joining on taxon to get relevant evaluation metadata.
     sql_params = {
         'taxon_query': params['taxon'],
-        'descriptor_name': params['descriptor_name']
+        'observationVariableName': params['observationVariableName']
     }
     where_clauses = [
         val['sql'] for
@@ -225,7 +225,7 @@ def evaluation_metadata(req):
     else:
         where_sql = 'WHERE %s' % ' AND '.join(where_clauses)
     sql = '''
-    SELECT DISTINCT taxon, descriptor_name, obs_type, obs_min, obs_max, 
+    SELECT DISTINCT taxon, observationVariableName AS "observationVariableName", obs_type, obs_min, obs_max, 
            obs_nominal_values
     FROM lis_germplasm.grin_evaluation_metadata
     JOIN lis_germplasm.grin_accession
@@ -245,13 +245,13 @@ def evaluation_metadata(req):
             # must perform another query to restrict observations to this
             # set of accessions (local, not global)
             sql = '''
-            SELECT observation_value 
+            SELECT value 
             FROM lis_germplasm.legumes_grin_evaluation_data
-            WHERE accenumb IN %(accession_ids)s
-            AND descriptor_name = %(descriptor_name)s
+            WHERE accessionNumber IN %(accession_ids)s
+            AND observationVariableName = %(observationVariableName)s
             '''
             sql_params = {
-                'descriptor_name': params['descriptor_name'],
+                'observationVariableName': params['observationVariableName'],
                 'accession_ids': tuple(params['accession_ids'])
             }
             # logger.info(cursor.mogrify(sql, sql_params))
@@ -259,7 +259,7 @@ def evaluation_metadata(req):
             obs_values = [_string2num(row[0]) for row in cursor.fetchall()]
             result = {
                 'taxon_query': params['taxon'],
-                'descriptor_name': params['descriptor_name'],
+                'observationVariableName': params['observationVariableName'],
                 'trait_type': 'numeric',
                 'min': min(obs_values) if obs_values else 0,
                 'max': max(obs_values) if obs_values else 0,
@@ -269,7 +269,7 @@ def evaluation_metadata(req):
             maxes = [rec['obs_max'] for rec in trait_metadata]
             result = {
                 'taxon_query': params['taxon'],
-                'descriptor_name': params['descriptor_name'],
+                'observationVariableName': params['observationVariableName'],
                 'trait_type': 'numeric',
                 'min': reduce(lambda x, y: x + y, mins) / len(mins),
                 'max': reduce(lambda x, y: x + y, maxes) / len(maxes),
@@ -287,7 +287,7 @@ def evaluation_metadata(req):
                 colors[val] = DEFAULT_COLOR
         result = {
             'taxon_query': params['taxon'],
-            'descriptor_name': params['descriptor_name'],
+            'observationVariableName': params['observationVariableName'],
             'trait_type': 'nominal',
             'obs_nominal_values': sorted(vals),
             'colors': colors,
@@ -304,26 +304,11 @@ def evaluation_detail(req):
     """
     assert req.method == 'GET', 'GET request method required'
     params = req.GET.dict()
-    assert 'accenumb' in params, 'missing accenumb param'
-    prefix = ''
-    acc_num = ''
-    suffix = ''
-    parts = params['accenumb'].split()
-    parts_len = len(parts)
-    if parts_len > 2:
-        prefix, acc_num, rest = parts[0], parts[1], parts[2:]  # suffix optional
-        suffix = ' '.join(rest)
-    elif parts_len == 2:
-        prefix, acc_num = parts[0], parts[1]
-    elif parts_len == 1:
-        acc_num = parts[0]
-    else:
-        acc_num = params['accenumb']
+    assert 'accessionNumber' in params, 'missing accessionNumber param'
+    accessionNumber = params['accessionNumber']
     cursor = connection.cursor()
     sql_params = {
-        'prefix': prefix,
-        'acc_num': acc_num,
-        'suffix': suffix,
+        'accessionNumber': accessionNumber,
     }
     where_clauses = [
         val['sql'] for key, val in GRIN_EVAL_WHERE_FRAGS.items()
@@ -331,29 +316,16 @@ def evaluation_detail(req):
         ]
     where_sql = ' AND '.join(where_clauses)
     sql = '''
-    SELECT accession_prefix,
-           accession_number,
-           accession_surfix,
-           observation_value,
-           descriptor_name,
-           method_name,
-           plant_name,
+    SELECT accessionNumber AS "accessionNumber",
+           value,
+           observationVariableName AS "observationVariableName",
+--         plant_name, /* FIXME */
            taxon,
-           origin,
-           original_value,
-           frequency,
-           low,
-           hign,
-           mean,
-           sdev,
-           ssize,
-           inventory_prefix,
-           inventory_number,
-           inventory_suffix,
-           accession_comment
+           countryOfOrigin AS "countryOfOrigin",
+           additionalInfo AS "additionalInfo"
     FROM lis_germplasm.legumes_grin_evaluation_data
     WHERE %s
-    ORDER BY descriptor_name
+    ORDER BY observationVariableName
     ''' % where_sql
     # logger.info(cursor.mogrify(sql, sql_params))
     cursor.execute(sql, sql_params)
@@ -369,10 +341,10 @@ def accession_detail(req):
     """Return JSON for all columns for a accession id."""
     assert req.method == 'GET', 'GET request method required'
     params = req.GET.dict()
-    assert 'accenumb' in params, 'missing accenumb param'
+    assert 'accessionNumber' in params, 'missing accessionNumber param'
     # fix me: name the columns dont select *!
     sql = '''
-    SELECT * FROM lis_germplasm.grin_accession WHERE accenumb = %(accenumb)s
+    SELECT * FROM lis_germplasm.grin_accession WHERE accessionNumber = %(accessionNumber)s
     '''
     cursor = connection.cursor()
     # logger.info(cursor.mogrify(sql, params))
@@ -388,7 +360,7 @@ def countries(req):
     """
     cursor = connection.cursor()
     sql = '''
-    SELECT DISTINCT countryOfOrigin FROM lis_germplasm.grin_accession ORDER by countryOfOrigin
+    SELECT DISTINCT countryOfOrigin AS "countryOfOrigin" FROM lis_germplasm.grin_accession ORDER by countryOfOrigin
     '''
     cursor.execute(sql)
     # flatten into array, filter out bogus records like '' or 3 number codes
@@ -447,7 +419,7 @@ def search(req):
             sql_params = {'accession_ids': params['accession_ids'].split(',')}
         else:
             sql_params = {'accession_ids': [params['accession_ids']]}
-        where_sql = 'WHERE accenumb = ANY( %(accession_ids)s )'
+        where_sql = 'WHERE accessionNumber = ANY( %(accession_ids)s )'
         sql = 'SELECT %s FROM %s %s' % (
             cols_sql,
             ACCESSION_TAB,
@@ -460,7 +432,7 @@ def search(req):
             uniq = set()
 
             def is_unique(r):
-                k = r.get('accenumb', None)
+                k = r.get('accessionNumber', None)
                 if k in uniq:
                     return False
                 uniq.add(k)

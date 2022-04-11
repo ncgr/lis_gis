@@ -34,7 +34,7 @@ app.service('geoJsonService',
         s.selectedAccession = null; // single accession object currently select.
 
         s.traitData = []; // an array of json with observation_values
-        s.traitHash = {}; // lookup hash for accenumb to array of obs. values
+        s.traitHash = {}; // lookup hash for accessionNumber to array of obs. values
         s.traitMetadata = {};
         s.traitLegend = {}; // all the info for map.js to build a legend
 
@@ -53,7 +53,7 @@ app.service('geoJsonService',
             'traitOverlayUpdated'
         ];
 
-        // userData controller may set this descriptor_name for the edge case
+        // userData controller may set this observationVariableName for the edge case
         // where the user provided accession ids, but did not specifify the
         // taxon of the accessions in their data sets.
         s.bootSearchTaxonForTraitDescriptor = null;
@@ -278,7 +278,7 @@ app.service('geoJsonService',
                             method: 'POST',
                             data: {
                                 accession_ids: s.getAccessionIds(),
-                                descriptor_name: s.params.traitOverlay,
+                                observationVariableName: s.params.traitOverlay,
                             }
                         }).then(
                             function (resp) {
@@ -295,7 +295,7 @@ app.service('geoJsonService',
                             method: 'POST',
                             data: {
                                 taxon: s.params.taxonQuery,
-                                descriptor_name: s.params.traitOverlay,
+                                observationVariableName: s.params.traitOverlay,
                                 accession_ids: (s.params.traitScale === 'local') ? s.getAccessionIds() : [],
                                 trait_scale: s.params.traitScale,                                
                             }
@@ -325,7 +325,7 @@ app.service('geoJsonService',
         /* return array an of accession ids in the current geojson data set. */
         s.getAccessionIds = function () {
             return _.map(s.data, function (d) {
-                return d.properties.accenumb;
+                return d.properties.accessionNumber;
             });
         };
 
@@ -375,7 +375,7 @@ app.service('geoJsonService',
                 var apiDescriptors = response.data;
                 var userTraits = $localStorage.userTraitData;
                 var userDescriptors = _.map(userTraits, function(d) {
-                   return d.descriptor_name;
+                   return d.observationVariableName;
                 });
                 var result = _.union(apiDescriptors, _.uniq(userDescriptors));
                 result.sort();
@@ -393,7 +393,7 @@ app.service('geoJsonService',
             var changed = false;
             var prevAccId = s.selectedAccession;
             var accession = _.find(s.data, function (d) {
-                return (d.properties.accenumb === accId);
+                return (d.properties.accessionNumber === accId);
             });
             if (! accession) {
                 // the accession id is not in the current result set, or accId
@@ -515,7 +515,7 @@ app.service('geoJsonService',
             }
         };
 
-        /* set a trait descriptor_name to display for the taxon query. */
+        /* set a trait observationVariableName to display for the taxon query. */
         s.setTraitOverlay = function (trait, search) {
             $location.search('traitOverlay', trait);
             s.params = getSearchParams();
@@ -525,7 +525,7 @@ app.service('geoJsonService',
             }
         };
 
-        /* set whether to exclude descriptor_name uncharacterized accessions
+        /* set whether to exclude observationVariableName uncharacterized accessions
          from the map display. */
         s.setTraitExcludeUnchar = function (bool, search) {
             $location.search('traitExcludeUnchar', bool);
@@ -569,11 +569,11 @@ app.service('geoJsonService',
             };
             var data = s.data;
             _.each(data, function (d) {
-                allAccessions[d.properties.accenumb] = d;
+                allAccessions[d.properties.accessionNumber] = d;
             });
             var userData = $localStorage.userGeoJson;
             _.each(userData, function (d) {
-                var accId = d.properties.accenumb;
+                var accId = d.properties.accessionNumber;
                 userAccessions[accId] = d;
                 if (allAccessions[accId]) {
                     // user has searched for this accession id already, so
@@ -611,7 +611,7 @@ app.service('geoJsonService',
             var traits = $localStorage.userTraitData;
             var selectedTrait = s.params.traitOverlay;
             var selectedUserTraits = _.filter(traits, function(d) {
-                return (d.descriptor_name === selectedTrait);
+                return (d.observationVariableName === selectedTrait);
             });
             if(_.isEmpty(selectedUserTraits)) { return; }
 
@@ -620,7 +620,7 @@ app.service('geoJsonService',
 
             angular.extend(s.traitMetadata, {
                     colors : {},
-                    descriptor_name: selectedUserTraits[0].descriptor_name,
+                    observationVariableName: selectedUserTraits[0].observationVariableName,
                     taxon_query : s.params.taxonQuery
             });
 
@@ -631,7 +631,7 @@ app.service('geoJsonService',
             if(selectedUserTraits[0].is_nominal) {
                 traitMetadata.trait_type = TRAIT_TYPE.NOMINAL;
                 var values = _.map(traitData, function(d) {
-                    return d.observation_value;
+                    return d.value;
                 });
                 var uniqVals = _.uniq(values);
                 uniqVals.sort();
@@ -664,11 +664,11 @@ app.service('geoJsonService',
                      var min = traitMetadata.min || Number.POSITIVE_INFINITY;
                     var max = traitMetadata.max || Number.NEGATIVE_INFINITY;
                      _.each(selectedUserTraits, function(d) {
-                        if(d.observation_value < min) {
-                            min = d.observation_value;
+                        if(d.value < min) {
+                            min = d.value;
                         }
-                        else if(d.observation_value > max) {
-                            max = d.observation_value;
+                        else if(d.value > max) {
+                            max = d.value;
                         }
                     });
                     traitMetadata.min = min;
@@ -688,17 +688,17 @@ app.service('geoJsonService',
             // make a dict of all the observations for each accession id
             // multi-keyed like: accession id -> subdescriptor -> value
             _.each(traitData, function (d) {
-                var accId = d.accenumb;
+                var accId = d.accessionNumber;
                 var subDescriptor = (d.sub_descriptor_name) ?
                     d.sub_descriptor_name : DEFAULT_TRAIT;
                 if(! traitHash[accId]) {
                     traitHash[accId] = {};
                 }
                 if (traitHash[accId][subDescriptor]) {
-                    traitHash[accId][subDescriptor].push(d.observation_value);
+                    traitHash[accId][subDescriptor].push(d.value);
                 }
                 else {
-                    traitHash[accId][subDescriptor] = [d.observation_value];
+                    traitHash[accId][subDescriptor] = [d.value];
                 }
             });
             s.traitHash = traitHash;
@@ -710,7 +710,7 @@ app.service('geoJsonService',
 
             _.each(data, function (acc) {
                 var props = acc.properties;
-                var accId = props.accenumb;
+                var accId = props.accessionNumber;
                 var traitDescriptors = traitHash[accId];
                 if(_.isEmpty(traitDescriptors) ||
                     DEFAULT_TRAIT in traitDescriptors) {
@@ -767,8 +767,8 @@ app.service('geoJsonService',
             var data = s.data;
 
             _.each(traitData, function (d) {
-                var accId = d.accenumb;
-                var value = d.observation_value;
+                var accId = d.accessionNumber;
+                var value = d.value;
                 var subDescriptor = (d.sub_descriptor_name) ?
                     d.sub_descriptor_name : DEFAULT_TRAIT;
                 if(! traitHash[accId]) {
@@ -787,7 +787,7 @@ app.service('geoJsonService',
             var defaultColor = taxonChroma.defaultColor;
             _.each(data, function (d) {
                 var props = d.properties;
-                valueLists.push(_.map(traitHash[props.accenumb],
+                valueLists.push(_.map(traitHash[props.accessionNumber],
                     function (value, key) {
                         return key;
                     }));
@@ -819,8 +819,8 @@ app.service('geoJsonService',
             var data = s.data;
 
             _.each(traitData, function (d) {
-                var accId = d.accenumb;
-                var value = d.observation_value;
+                var accId = d.accessionNumber;
+                var value = d.value;
                 var subDescriptor = (d.sub_descriptor_name) ?
                     d.sub_descriptor_name : DEFAULT_TRAIT;
                 if(! traitHash[accId]) {
@@ -836,7 +836,7 @@ app.service('geoJsonService',
              s.traitHash = traitHash;
             _.each(data, function (d) {
                 var props = d.properties;
-                var valueLists =  _.map(traitHash[props.accenumb],
+                var valueLists =  _.map(traitHash[props.accessionNumber],
                     function(value, key) {
                         return value;
                     });
@@ -905,7 +905,7 @@ app.service('geoJsonService',
             if (params.accessionIds && params.accessionIdsColor) {
                 var accIds = params.accessionIds.split(',');
                 _.each(data, function (acc) {
-                    if (accIds.indexOf(acc.properties.accenumb) !== -1) {
+                    if (accIds.indexOf(acc.properties.accessionNumber) !== -1) {
                         acc.properties.color = s.params.accessionIdsColor;
                     }
                 });
@@ -924,7 +924,7 @@ app.service('geoJsonService',
                 // default to circle marker
                 return circleMarkerMaker(feature.properties, latlng);
             }
-            var traitSubDescriptors = s.traitHash[feature.properties.accenumb];
+            var traitSubDescriptors = s.traitHash[feature.properties.accessionNumber];
             if(_.isEmpty(traitSubDescriptors) || _.size(traitSubDescriptors) < 2) {
                 // either this is either an uncharacterized accession, or
                 // there is no custom sub-descriptor, but anyways, use circle.
@@ -954,9 +954,9 @@ app.service('geoJsonService',
 
          var circleMarkerMaker = function(props, latlng) {
             // get a circle marker and tag it with the accession #.
-           var mouseOverLabel = '<b>'+props.accenumb + '</b>: '+ props.taxon;
+           var mouseOverLabel = '<b>'+props.accessionNumber + '</b>: '+ props.taxon;
             var marker = L.circleMarker(latlng, {
-                id: props.accenumb,
+                id: props.accessionNumber,
                 radius: MARKER_RADIUS,
                 fillColor: props.color,
                 color: '#000',
@@ -986,7 +986,7 @@ app.service('geoJsonService',
                 chartOpts[k] = {
                     fillColor: traitMetadata.colors[key],
                         displayText: function () {
-                            return props.accenumb;
+                            return props.accessionNumber;
                     }
                 }
             });
@@ -1024,7 +1024,7 @@ app.service('geoJsonService',
                 chartOpts[k] = {
                     fillColor: legend.colorScale(value).hex(),
                         displayText: function () {
-                            return props.accenumb;
+                            return props.accessionNumber;
                     }
                 }
             });
@@ -1065,7 +1065,7 @@ app.service('geoJsonService',
                     chartOpts[k] = {
                         fillColor: traitMetadata.colors[d],
                         displayText: function () {
-                            return props.accenumb;
+                            return props.accessionNumber;
                         }
                     }
                 });

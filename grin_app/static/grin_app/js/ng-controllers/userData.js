@@ -208,7 +208,7 @@ app.controller('userDataController',
         function updateSearchAccessionIds() {
             var userData = $localStorage.userGeoJson;
             var accIds = _.uniq(_.map(userData, function (o) {
-                return o.properties.accenumb;
+                return o.properties.accessionNumber;
             }));
             accIds = _.filter(accIds, function(s) {
                 return ! _.isEmpty(s);
@@ -229,7 +229,7 @@ app.controller('userDataController',
         function getUserTraitDescriptors() {
             var traitData = $localStorage.userTraitData;
             var res = _.uniq(_.map(traitData, function(o) {
-                return o.descriptor_name;
+                return o.observationVariableName;
             }));
             res = _.filter(res, function(s) {
                return ! _.isEmpty(s);
@@ -266,7 +266,7 @@ app.controller('userDataController',
                 }
 
         /* updateSearchTrait() : assist the user by filling in the search model
-         * with a trait descriptor_name from their data sets. If the trait is
+         * with a trait observationVariableName from their data sets. If the trait is
          * already in the search model, then check it's validity. */
         function updateSearchTrait() {
             var descrs = getUserTraitDescriptors();
@@ -284,7 +284,7 @@ app.controller('userDataController',
 
         function generateTraitJson() {
             // iterate the userData collections, build an array of
-            // {accenumb, descriptor_name, observation_value} properties.
+            // {accessionNumber, observationVariableName, value} properties.
             var traits = [];
             var userData = $localStorage.userData;
             _.each(userData, function(dataSet, setName) {
@@ -292,10 +292,10 @@ app.controller('userDataController',
                 _.each(data, function(rec) {
                     if(rec.trait_observation_value) {
                          var data = {
-                               accenumb: rec.accession_id,
-                               descriptor_name: rec.trait_descriptor,
+                               accessionNumber: rec.accession_id,
+                               observationVariableName: rec.trait_descriptor,
                                sub_descriptor_name: rec.trait_sub_descriptor,
-                               observation_value: rec.trait_observation_value,
+                               value: rec.trait_observation_value,
                                is_nominal: rec.trait_is_nominal,
                                data_set: setName
                          };
@@ -326,7 +326,7 @@ app.controller('userDataController',
                         },
                         type : 'Feature',
                         properties: {
-                            accenumb : rec.accession_id,
+                            accessionNumber : rec.accession_id,
                             gid: Math.random().toString(16).substr(2,8),
                             acquisitionDate: rec.acquisitionDate,
                             collectingDate: rec.collectingDate,

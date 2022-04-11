@@ -9,16 +9,16 @@ def main():
     conn = psycopg2.connect(PSQL_DB)
     cur = conn.cursor()
     sql = '''
-    select distinct descriptor_name
+    select distinct observationVariableName
     from lis_germplasm.legumes_grin_evaluation_data
     '''
     cur.execute(sql)
     descriptor_names = [row[0] for row in cur.fetchall()]
     for name in descriptor_names:
         sql = '''
-        select distinct observation_value 
+        select distinct value 
         from lis_germplasm.legumes_grin_evaluation_data
-        where descriptor_name = %(name)s
+        where observationVariableName = %(name)s
         '''
         cur.execute(sql, {'name': name})
         values = [row[0] for row in cur.fetchall()]

@@ -109,7 +109,7 @@ app.controller('mapController',
                 pointToLayer: geoJsonService.getFeatureMarker,
                 onEachFeature: function (feature, layer) {
                     // bind a popup to each feature
-                    var accId = feature.properties.accenumb;
+                    var accId = feature.properties.accessionNumber;
                   var content = '<b>'+ accId + '</b>: ' +
 											    feature.properties.taxon;
                     var popup = L.popup();
@@ -173,7 +173,7 @@ app.controller('mapController',
                     // exclude uncharacterized accessions for this trait
                     filteredGeoJson = _.filter(geoJsonService.data,
                         function (d) {
-                            var accId = d.properties.accenumb;
+                            var accId = d.properties.accessionNumber;
                             return accId in geoJsonService.traitHash;
                         });
                 }
@@ -378,7 +378,7 @@ app.controller('mapController',
             }
             $scope.model.map.eachLayer(function (l) {
                  if (selAccId &&
-                     selAccId === _.get(l, 'feature.properties.accenumb')) {
+                     selAccId === _.get(l, 'feature.properties.accessionNumber')) {
 									 // The selected accession should always be on top
 									 // override the logic below by dlaying the call to
 									 // bringToFront. This is pretty ugly, and should be
@@ -399,7 +399,7 @@ app.controller('mapController',
                     l.bringToFront();
                 }
                  else if(accIds &&
-                     accIds.indexOf(_.get(l, 'feature.properties.accenumb')) !== -1) {
+                     accIds.indexOf(_.get(l, 'feature.properties.accessionNumber')) !== -1) {
                     // if there is a set of user's accession ids,
                     // they should bubble to top of z.
                    l.bringToFront();
