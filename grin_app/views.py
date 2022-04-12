@@ -28,6 +28,32 @@ ACC_SELECT_COLS = (
     'acquisitionDate AS "acquisitionDate"',
     'countryOfOrigin AS "countryOfOrigin"'
 )
+# grin_app/static/grin_app/partials/accession-detail-modal.html
+ACC_DETAIL_COLS = (
+    'accessionNumber AS "accessionNumber"',
+    'genus',
+    'species',
+    'taxon',
+    'subtaxon',
+    'commonCropName AS "commonCropName"',
+    'acquisitionDate AS "acquisitionDate"',
+    'collectingDate AS "collectingDate"',
+    'countryOfOrigin AS "countryOfOrigin"',
+    'locationDescription AS "locationDescription"',
+    'remarks',
+    'history',
+    'elevation',
+    'collectingNumber AS "collectingNumber"',
+    'speciesAuthority AS "speciesAuthority"',
+    'subtaxonAuthority AS "subtaxonAuthority"',
+    'instituteCode AS "instituteCode"',
+    'breedingInstitutes AS "breedingInstitutes"',
+    'ancestralData AS "ancestralData"',
+    'donorInstitute AS "donorInstitute"',
+    'safetyDuplicateInstitutes AS "safetyDuplicateInstitutes"',
+    'storageTypeCodes AS "storageTypeCodes"',
+    'accessionNames AS "accessionNames"',
+)
 # Brewer nominal category colors from chroma.js set1,2,3 concatenated:
 NOMINAL_COLORS = [
     "#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#ffff33",
@@ -343,8 +369,8 @@ def accession_detail(req):
     params = req.GET.dict()
     assert 'accessionNumber' in params, 'missing accessionNumber param'
     # fix me: name the columns dont select *!
-    sql = '''
-    SELECT * FROM lis_germplasm.grin_accession WHERE accessionNumber = %(accessionNumber)s
+    sql = f'''
+    SELECT {','.join(ACC_DETAIL_COLS)} FROM lis_germplasm.grin_accession WHERE accessionNumber = %(accessionNumber)s
     '''
     cursor = connection.cursor()
     # logger.info(cursor.mogrify(sql, params))

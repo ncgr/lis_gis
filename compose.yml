@@ -77,6 +77,11 @@ services:
     <<: *db
     image: postgis/postgis:12-2.5-alpine 
     profiles: ["test"]
+    command: ["-c", "listen_addresses=",
+              "-c", "wal_level=minimal",
+              "-c", "max_wal_senders=0",
+              "-c", "synchronous_commit=off",
+              "-c", "log_statement=all"]
 
 volumes:
   postgres-socket:

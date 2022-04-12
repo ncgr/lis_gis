@@ -26,8 +26,6 @@ import psycopg2
 import sys
 from datetime import datetime as dt
 
-DATE_FMT = '%Y%m%d'
-
 
 def main():
     conn = psycopg2.connect()
@@ -38,7 +36,7 @@ def main():
         if n["acquisitionDate"]: 
             n["acquisitionDate"] = n["acquisitionDate"].replace("--", "01")
             try:
-                date = dt.strptime(n["acquisitionDate"], DATE_FMT).date()
+                date = dt.fromisoformat(n["acquisitionDate"]).date()
                 n["acquisitionDate"] = date
             except ValueError:
                 n["acquisitionDate"] = None
@@ -47,7 +45,7 @@ def main():
         if n["collectingInfo"]["collectingDate"]:
             n["collectingInfo"]["collectingDate"] = n["collectingInfo"]["collectingDate"].replace("--", "01") 
             try: 
-                date = dt.strptime(n["collectingInfo"]["collectingDate"], DATE_FMT).date()
+                date = dt.fromisoformat(n["collectingInfo"]["collectingDate"]).date()
                 n["collectingInfo"]["collectingDate"] = date
             except ValueError:
                 n["collectingInfo"]["collectingDate"] = None
