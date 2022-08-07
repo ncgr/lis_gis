@@ -133,7 +133,7 @@ LOGGING = {
 }
 
 BRANDING = {
-    'home_url': '/',
+    'home_url': 'https://www.legumeinfo.org/',
     'logo_url': STATIC_URL + 'grin_app/images/legumeinfo_logo.png',
     'site_heading': 'Legume Information System',
     'site_subheading': 'Germplasm Map',
