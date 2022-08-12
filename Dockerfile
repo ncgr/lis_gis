@@ -4,7 +4,7 @@ COPY ./docker-entrypoint-initdb.d/ /docker-entrypoint-initdb.d/
 
 ########################################
 
-FROM python:3.9-alpine3.15 AS build
+FROM python:3.9 AS build
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
@@ -26,7 +26,7 @@ EXPOSE 8000
 
 ########################################
 
-FROM nginx:1.20-alpine AS nginx
+FROM nginx:1.22-alpine AS nginx
 
 # remove "worker_processes auto;" & use default (1)
 RUN sed -i'' '/^worker_processes/d' /etc/nginx/nginx.conf
