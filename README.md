@@ -83,3 +83,12 @@ The required python modules are in the requirements.txt
 
 This command will run Nose test, first populating the test db with subset of the legume accessions. All of views.py is covered. Note: Client side javascript code is not yet covered by this test suite. TODO: implement Selenium or something to test the angular-js application itself.
 
+## Azure App Service
+
+To deploy in [Azure App Service](https://azure.microsoft.com/en-us/services/app-service/) using the 
+
+1. Edit the compose.azure.yml in this repo, updating `image` value and `ALLOWED_HOSTS` environment variable appropriately.
+  - *Important: environment variables defined in an `environment` section that are to be null must be explicitly set to an empty string (""); otherwise, it seems that **no** environment variables defined in that service's environment section are defined in the container's environment!*
+2. `docker compose -f compose.azure.yml build && docker compose -f compose.azure.yml push`
+  - `az acr build --target ...` with this repo's multi-stage Dockerfile seems to result in the wrong images/targets being built!
+3. Create an Azure App Service [multi-container app](https://docs.microsoft.com/en-us/azure/app-service/tutorial-multi-container-app), copying/pasting the (edited) compose.azure.yml in the Deployment Center > Settings > Registry Settings > Config textarea box.

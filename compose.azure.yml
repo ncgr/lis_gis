@@ -1,0 +1,63 @@
+services:
+  nginx:
+    build:
+      context: .
+      target: nginx
+    image: legumeinfo.azurecr.us/lis-germplasm:nginx
+    environment:
+      SCRIPT_NAME: '' # can be null (i.e., ''), but not unset for envsubst
+    ports:
+      - "80:80"
+# documentation only; depends_on parsed but ignored by Azure App Service
+# "wait-for-it"-like script run in nginx service's entrypoint
+    depends_on:
+      - django
+    restart: always
+    volumes:
+      - gunicorn-socket:/run/gunicorn
+
+  django:
+    build:
+      context: .
+      target: prod
+    image: legumeinfo.azurecr.us/lis-germplasm:django 
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+    environment:
+      ALLOWED_HOSTS: lis-germplasm.azurewebsites.us
+      DEBUG: ""
+      PGHOST: /run/postgresql
+      PGPORT: ""
+      PGPASSWORD: ""
+      PGUSER: ""
+      PGDATABASE: postgres
+      SCRIPT_NAME: ""
+    volumes:
+      - gunicorn-socket:/run/gunicorn
+      - postgres-socket:/run/postgresql
+
+  db:
+    build:
+      context: .
+      target: db
+    image: legumeinfo.azurecr.us/lis-germplasm:db
+    healthcheck:
+      test: "su-exec postgres pg_isready || exit 1"
+      retries: 10
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: unused
+      POSTGRES_INITDB_ARGS: --auth=peer
+    volumes:
+      - postgres-socket:/run/postgresql
+# don't listen on TCP port; write optimizations
+    command: ["-c", "listen_addresses=",
+              "-c", "wal_level=minimal",
+              "-c", "max_wal_senders=0",
+              "-c", "synchronous_commit=off"]
+
+volumes:
+  gunicorn-socket:
+  postgres-socket:

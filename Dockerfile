@@ -32,6 +32,9 @@ FROM nginx:1.22-alpine AS nginx
 RUN sed -i'' '/^worker_processes/d' /etc/nginx/nginx.conf
 COPY ./nginx/ /etc/nginx/templates
 COPY ./grin_app/static/ /usr/share/nginx/html/static/
+# Avoid "connect() to unix:/run/gunicorn/gunicorn.sock failed (2: No such file or directory) while connecting to upstream" errors
+RUN printf '#!/bin/sh\nwhile [ ! -e /run/gunicorn/gunicorn.sock ]; do sleep 1; done\n' > /docker-entrypoint.d/99-wait-for-django.sh \
+  && chmod +x /docker-entrypoint.d/99-wait-for-django.sh
 
 ########################################
 
