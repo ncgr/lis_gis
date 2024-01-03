@@ -13,8 +13,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 FROM build AS dev
 
-RUN apk add --no-cache postgresql-client \
- && pip install --no-cache-dir 'Werkzeug==2.*'
+RUN pip install --no-cache-dir 'Werkzeug==2.*'
 
 WORKDIR /app
 

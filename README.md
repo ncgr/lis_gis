@@ -10,7 +10,7 @@ server requirements
 Docker can be used to start Django and Postgres, loading an example data set from PeanutBase:
 
 ```
-docker-compose up --build
+docker compose up --wait --build
 ```
 
 Point your browser to http://localhost:8000/
@@ -22,7 +22,7 @@ The lis_gis git working tree is bind-mounted at /app in the container, so change
 After building container images & running containers with `docker-compose up --build`, Django unit tests can be executed thus:
 
 ```
-docker-compose exec web python3 manage.py test
+docker compose exec web python3 manage.py test
 ```
 
 ### Loading your own data
@@ -42,7 +42,7 @@ The name of the file does not matter, as long as the extension is `*.sql.gz`, `*
 lis_gis can be built & deployed on a remote node (after setting DOCKER_HOST or docker context, and editing `prod.env`) thus:
 
 ```
-docker-compose --env-file prod.env up -d --build
+docker compose --env-file prod.env up --wait --build
 ```
 
 ## PostgreSQL setup
