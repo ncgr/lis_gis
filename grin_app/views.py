@@ -1,6 +1,7 @@
 import logging
 import simplejson as json
 import re
+import requests
 from functools import reduce
 from decimal import Decimal
 from django.conf import settings
@@ -305,62 +306,88 @@ def evaluation_detail(req):
     assert req.method == 'GET', 'GET request method required'
     params = req.GET.dict()
     assert 'accenumb' in params, 'missing accenumb param'
-    prefix = ''
-    acc_num = ''
-    suffix = ''
-    parts = params['accenumb'].split()
-    parts_len = len(parts)
-    if parts_len > 2:
-        prefix, acc_num, rest = parts[0], parts[1], parts[2:]  # suffix optional
-        suffix = ' '.join(rest)
-    elif parts_len == 2:
-        prefix, acc_num = parts[0], parts[1]
-    elif parts_len == 1:
-        acc_num = parts[0]
-    else:
-        acc_num = params['accenumb']
-    cursor = connection.cursor()
-    sql_params = {
-        'prefix': prefix,
-        'acc_num': acc_num,
-        'suffix': suffix,
-    }
-    where_clauses = [
-        val['sql'] for key, val in GRIN_EVAL_WHERE_FRAGS.items()
-        if val['include'](sql_params)
-        ]
-    where_sql = ' AND '.join(where_clauses)
-    sql = '''
-    SELECT accession_prefix,
-           accession_number,
-           accession_surfix,
-           observation_value,
-           descriptor_name,
-           method_name,
-           plant_name,
-           taxon,
-           origin,
-           original_value,
-           frequency,
-           low,
-           hign,
-           mean,
-           sdev,
-           ssize,
-           inventory_prefix,
-           inventory_number,
-           inventory_suffix,
-           accession_comment
-    FROM lis_germplasm.legumes_grin_evaluation_data
-    WHERE %s
-    ORDER BY descriptor_name
-    ''' % where_sql
-    # logger.info(cursor.mogrify(sql, sql_params))
-    cursor.execute(sql, sql_params)
-    rows = _dictfetchall(cursor)
-    result = json.dumps(rows, use_decimal=True)
-    response = HttpResponse(result, content_type='application/json')
+    query = f"https://npgsweb.ars-grin.gov/gringlobal/brapi/v2/germplasm"
+    params = {"accessionNumber": params.get('accenumb')}
+    brapi_response = requests.get(query, params)  # get brapi data
+    brapi_json = json.loads(brapi_response.text)
+    brapi_results = brapi_json.get("result", {})
+    if not brapi_results.get("data"):
+        result = json.dumps([], use_decimal=True)
+        response = HttpResponse(result, content_type='application/json')
+        return response
+    brapi_germplasm_id = brapi_results["data"][0]["germplasmDbId"]  # get id to query observations
+    query = f"https://npgsweb.ars-grin.gov/gringlobal/brapi/v2/observations"  # ?germplasmDbId=1198325
+    params = {"germplasmDbId": brapi_germplasm_id}
+    brapi_response = requests.get(query, params)  # get brapi data
+    brapi_json = json.loads(brapi_response.text)
+    brapi_results = brapi_json.get("result", {})
+    if not brapi_results.get("data"):
+        result = json.dumps([], use_decimal=True)
+        response = HttpResponse(result, content_type='application/json')
+        return response
+    
+ #   response = HttpResponse(json.dumps(lisgis_object), content_type='application/json')
+ #   return response
+    #return _process_brapi_germplasm(brapi_results)  # process brapi data
+    response = HttpResponse(json.dumps(brapi_results.get("data", [])), content_type='application/json')
     return response
+
+#    prefix = ''
+#    acc_num = ''
+#    suffix = ''
+#    parts = params['accenumb'].split()
+#    parts_len = len(parts)
+#    if parts_len > 2:
+#        prefix, acc_num, rest = parts[0], parts[1], parts[2:]  # suffix optional
+#        suffix = ' '.join(rest)
+#    elif parts_len == 2:
+#        prefix, acc_num = parts[0], parts[1]
+#    elif parts_len == 1:
+#        acc_num = parts[0]
+#    else:
+#        acc_num = params['accenumb']
+#    cursor = connection.cursor()
+#    sql_params = {
+#        'prefix': prefix,
+#        'acc_num': acc_num,
+#        'suffix': suffix,
+#    }
+#    where_clauses = [
+#        val['sql'] for key, val in GRIN_EVAL_WHERE_FRAGS.items()
+#        if val['include'](sql_params)
+#        ]
+#    where_sql = ' AND '.join(where_clauses)
+#    sql = '''
+#    SELECT accession_prefix,
+#           accession_number,
+#           accession_surfix,
+#           observation_value,
+#           descriptor_name,
+#           method_name,
+#           plant_name,
+#           taxon,
+#           origin,
+#           original_value,
+#           frequency,
+#           low,
+#           hign,
+#           mean,
+#           sdev,
+#           ssize,
+#           inventory_prefix,
+#           inventory_number,
+#           inventory_suffix,
+#           accession_comment
+#    FROM lis_germplasm.legumes_grin_evaluation_data
+#    WHERE %s
+#    ORDER BY descriptor_name
+#    ''' % where_sql
+#    # logger.info(cursor.mogrify(sql, sql_params))
+#    cursor.execute(sql, sql_params)
+#    rows = _dictfetchall(cursor)
+#    result = json.dumps(rows, use_decimal=True)
+#    response = HttpResponse(result, content_type='application/json')
+#    return response
 
 
 @ensure_csrf_cookie
@@ -371,14 +398,21 @@ def accession_detail(req):
     params = req.GET.dict()
     assert 'accenumb' in params, 'missing accenumb param'
     # fix me: name the columns dont select *!
-    sql = '''
-    SELECT * FROM lis_germplasm.grin_accession WHERE accenumb = %(accenumb)s
-    '''
-    cursor = connection.cursor()
+    #sql = '''
+    #SELECT * FROM lis_germplasm.grin_accession WHERE accenumb = %(accenumb)s
+    #'''
+    #cursor = connection.cursor()
     # logger.info(cursor.mogrify(sql, params))
-    cursor.execute(sql, params)
-    rows = _dictfetchall(cursor)
-    return _acc_search_response(rows)
+    #cursor.execute(sql, params)
+    #rows = _dictfetchall(cursor)
+    query = f"https://npgsweb.ars-grin.gov/gringlobal/brapi/v2/germplasm"
+    params = {"accessionNumber": params.get('accenumb')}
+    brapi_response = requests.get(query, params)  # get brapi data
+    brapi_results = json.loads(brapi_response.text)
+ #   response = HttpResponse(json.dumps(lisgis_object), content_type='application/json')
+ #   return response
+    return _process_brapi_germplasm(brapi_results)  # process brapi data
+#    return _acc_search_response(rows)
 
 
 @ensure_csrf_cookie
@@ -472,6 +506,93 @@ def search(req):
             # simple replace with these results
             rows = rows_with_requested_accessions
     return _acc_search_response(rows)
+
+
+def _process_brapi_germplasm(brapi_germplasm_json):
+    """Processes brapi JSON germplasm response from:
+
+       https://npgsweb.ars-grin.gov/gringlobal/brapi/v2/germplasm
+    """
+    brapi_results = brapi_germplasm_json.get("result", {})
+    if not brapi_results.get("data"):
+        result = json.dumps([], use_decimal=True)
+        response = HttpResponse(result, content_type='application/json')
+        return response
+    lis_gis_object = [{  # Example Object that will be populated for lisgis angular frontend
+               "type": "Feature",
+               "geometry": {
+                 "type": "Point",
+                 "coordinates": [
+                   -109.55,
+                   36.15
+                 ]
+               },
+               "properties": {
+#                 "gid": 1260084,
+#                 "taxon": "Phaseolus vulgaris", # create with Genus species
+#                 "taxon_fts": "'phaseolus':1 'vulgari':2", # skip
+#                 "is_legume": True, # skip
+                 "genus": "Phaseolus",
+                 "species": "vulgaris",
+#                 "spauthor": "L.",
+#                 "subtaxa": "",
+#                 "subtauthor": "",
+#                 "cropname": "bean",
+#                 "avail": "N", # skip
+#                 "instcode": "",
+#                 "accenumb": "PI 353595",
+#                 "acckey": 1264145, # skip
+#                 "collnumb": "444",# skip
+#                 "collcode": "",# skip maybe "countryOfOriginCode"?????
+#                 "taxno": 27632,# "taxonIds"[0]['taxonId']
+#                 "accename": "444",# skip
+#                 "acqdate": "1970-04-24",
+#                 "origcty": "USA",# skip
+#                 "collsite": "Chinle ",
+#                 "latitude": "3609--N",
+#                 "longitude": "10933--W",
+#                 "elevation": 1830,
+                 "nonsense": "Fake Stuff",
+                 "colldate": None,
+                 "bredcode": "",
+                 "sampstat": 999,
+                 "ancest": "",
+                 "collsrc": 99,
+                 "donorcode": "",
+                 "donornumb": "",
+                 "othernumb": ":444",
+                 "duplsite": "",
+                 "storage": "",
+#                 "geographic_coord": "0101000020E61000003333333333635BC03333333333134240",
+#                 "remarks": "Seed medium, tan, flat 10 ",
+#                 "history": "COLLECTED   Arizona, United States by. DONATED  04/24/1970 Wyoming, United States by Hildreth, A., Cheyenne Horticultural Field Station",
+                 "released": "",
+                 "from_api": True
+               }
+             }]
+#    brapi_to_lis_gis = {
+#                        "germplasmDbId": "gid", "accessionNumber": "accenumb",
+#                        "acquisitionDate": "acqdate", "germplasmDbId": "gid",
+#                        "genus": "genus", "species": "species", 
+#                        "speciesAuthority": "spauthor", "subtaxa": "subtaxa",
+#                        "subtaxaAuthority": "subtauthor", "commonCropName": "cropname",
+#                        "instituteCode": "instcode", "seedSource": "collsite",
+#                       }
+    lis_gis_object = [
+                       {
+                        "type": "Feature",
+                        "geometry": brapi_results["data"][0]["germplasmOrigin"][0]["coordinates"]["geometry"],
+                        "properties": brapi_results["data"][0]
+                       }
+                    ]
+    genus = brapi_results["data"][0]["genus"]
+    species = brapi_results["data"][0]["species"]
+    lis_gis_object[0]["properties"]["from_api"] = True  # not sure what this does exactly hoping it trigerrs render on frontend
+    lis_gis_object[0]["properties"]["taxon"] = f"{genus} {species}"  # not sure what this does exactly hoping it trigerrs render on frontend
+    lis_gis_object[0]["properties"]["taxonId"] = brapi_results["data"][0]["taxonIds"][0]["taxonId"]  # not sure what this does exactly hoping it trigerrs render on frontend
+    result = json.dumps(lis_gis_object, use_decimal=True)
+    response = HttpResponse(result, content_type='application/json')
+    return response
 
 
 def _acc_search_response(rows):

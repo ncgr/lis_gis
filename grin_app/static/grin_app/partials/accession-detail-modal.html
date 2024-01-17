@@ -66,9 +66,21 @@
       <td>cropname</td>
       <td ng-bind-html="model.acc.properties.cropname"></td>
     </tr>
+    <tr ng-if="model.acc.properties.commonCropName">
+      <td>crop name</td>
+      <td ng-bind-html="model.acc.properties.commonCropName"></td>
+    </tr>
+    <tr ng-if="model.acc.properties.taxonId">
+      <td>taxon id</td>
+      <td>{{model.acc.properties.taxonId}}</td>
+    </tr>
     <tr ng-if="model.acc.properties.acqdate">
       <td>acqdate</td>
       <td>{{model.acc.properties.acqdate}}</td>
+    </tr>
+    <tr ng-if="model.acc.properties.acquisitionDate">
+      <td>acquisition date</td>
+      <td ng-bind-html="model.acc.properties.acquisitionDate"></td>
     </tr>
     <tr ng-if="model.acc.properties.colldate">
       <td>colldate</td>
@@ -81,6 +93,11 @@
     <tr ng-if="model.acc.properties.collsite">
       <td>collsite</td>
       <td ng-bind-html="model.acc.properties.collsite">
+      </td>
+    </tr>
+    <tr ng-if="model.acc.properties.seedSource">
+      <td>seed source</td>
+      <td ng-bind-html="model.acc.properties.seedSource">
       </td>
     </tr>
     <tr ng-if="model.acc.geometry.coordinates">
@@ -114,10 +131,19 @@
       <td>spauthor</td>
       <td>{{model.acc.properties.spauthor}}</td>
     </tr>
+    <tr ng-if="model.acc.properties.speciesAuthority">
+      <td>species authority</td>
+      <td>{{model.acc.properties.speciesAuthority}}</td>
+    </tr>
     <tr ng-if="model.acc.properties.subtauthor">
       <td>subtauthor</td>
       <td>{{model.acc.properties.subtauthor}}</td>
     </tr>
+    <tr ng-if="model.acc.properties.subtaxaAuthority">
+      <td>subtaxa authority</td>
+      <td>{{model.acc.properties.subtaxaAuthority}}</td>
+    </tr>
+
     <tr ng-if="model.acc.properties.avail">
       <td>avail</td>
       <td>{{model.acc.properties.avail}}</td>
@@ -125,6 +151,14 @@
     <tr ng-if="model.acc.properties.instcode">
       <td>instcode</td>
       <td>{{model.acc.properties.instcode}}</td>
+    </tr>
+    <tr ng-if="model.acc.properties.instituteName">
+      <td>institute name</td>
+      <td>{{model.acc.properties.instituteName}}</td>
+    </tr>
+    <tr ng-if="model.acc.properties.instituteCode">
+      <td>institute code</td>
+      <td>{{model.acc.properties.instituteCode}}</td>
     </tr>
     <tr ng-if="model.acc.properties.bredcode">
       <td>bredcode</td>
@@ -166,10 +200,11 @@
 	 ng-if="model.evaluation.length">
     <caption>Trait/Evaluation Data for
       <span>
-	{{model.evaluation[0].accession_prefix}}
+<!--	{{model.evaluation[0].accession_prefix}}
 	{{model.evaluation[0].accession_number}}
-	{{model.evaluation[0].accession_surfix}}
-      </span> ;
+	{{model.evaluation[0].accession_surfix}}-->
+	{{model.evaluation[0].germplasmName}} ;
+      </span>
       <span>
 	{{model.evaluation[0].taxon}}
       </span>
@@ -178,8 +213,12 @@
       <td>
 	<span class="badge">
 	  {{rec.descriptor_name}}
+	  {{rec.observationVariableName}}
 	  <span ng-if="rec.observation_value">
 	    obs. value: {{rec.observation_value}} ;
+	  </span>
+          <span ng-if="rec.value">
+	    value: {{rec.value}} ;
 	  </span>
 	  <span ng-if="rec.original_value">
 	    original_value: {{rec.original_value}} ;
@@ -209,6 +248,13 @@
 	<span ng-if="rec.plant_name">
 	  plant name: {{rec.plant_name}} ;
 	</span>
+        <span ng-if="rec.collector">
+          Collected by: {{rec.collector}} ;
+        </span>
+	<span ng-if="rec.uploadedBy">
+          Uploaded by: {{rec.uploadedBy}} ;
+        </span>
+
 	<span ng-if="rec.origin">
 	  origin: {{rec.origin}} ;
 	</span>

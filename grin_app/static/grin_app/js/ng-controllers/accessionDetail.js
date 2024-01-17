@@ -23,11 +23,14 @@ app.controller('accessionDetailController',
         $scope.init = function () {
             $http({
                 url: API_PATH + '/accession_detail',
+//                url: 'https://npgsweb.ars-grin.gov/gringlobal/brapi/v2/germplasm?accessionNumber=' + $scope.accId,
                 method: 'GET',
                 params: { accenumb: $scope.accId, v: new Date().getTime() }
             }).then(function (resp) {
                 // success callback
-                $scope.model.acc = resp.data[0];
+		console.log('firing accession detail ' + $scope.accId);
+		console.log(resp)
+		$scope.model.acc = resp.data[0];
                 checkLISSpeciesPage();
             });
             $http({
@@ -36,7 +39,9 @@ app.controller('accessionDetailController',
                 params: {accenumb: $scope.accId, v: new Date().getTime() }
             }).then(function (resp) {
                 // success callback
+		console.log(resp.data)
                 $scope.model.evaluation = resp.data;
+		console.log($scope.model.evaluation);
             });
         };
 

@@ -7,7 +7,7 @@ COPY ./docker-entrypoint-initdb.d/ /docker-entrypoint-initdb.d/
 FROM python:3.9 AS build
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt requests  # CTC added as a cheat for now
 
 ########################################
 
