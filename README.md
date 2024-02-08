@@ -37,6 +37,12 @@ pg_dump --no-owner --no-privileges --schema=<SCHEMA_NAME> --compress=9 > z-SCHEM
 Move the .sql.gz file to ./postgres/docker-entrypoint-initdb.d/ before executing `docker-compose up --build`.
 The name of the file does not matter, as long as the extension is `*.sql.gz`, `*.sql.xz`, or `*.sql`, and as long as it lexicographically sorts after the `/docker-entrypoint-initdb.d/10_postgis.sh` script from the container image, which must be executed first.
 
+**Example:** A database dump with accession data acquired from a BrAPI endpoint lives at
+```
+/falafel/svengato/brapi-to-postgresql/lis_germplasm.sql.gz
+```
+Copy `lis_germplasm.sql.gz` to your `docker-entrypoint-initdb.d/` subdirectory, then build the container as described above in **Docker quick start**.
+
 ### Production Docker Compose
 
 lis_gis can be built & deployed on a remote node (after setting DOCKER_HOST or docker context, and editing `prod.env`) thus:
