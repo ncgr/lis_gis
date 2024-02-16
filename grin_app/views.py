@@ -585,6 +585,8 @@ def _process_brapi_germplasm(brapi_germplasm_json):
                         "properties": brapi_results["data"][0]
                        }
                     ]
+    accenumb = brapi_results["data"][0]["accessionNumber"].strip()
+    lis_gis_object[0]["properties"]["accenumb"] = accenumb
     genus = brapi_results["data"][0]["genus"]
     species = brapi_results["data"][0]["species"]
     lis_gis_object[0]["properties"]["from_api"] = True  # not sure what this does exactly hoping it trigerrs render on frontend
