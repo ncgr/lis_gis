@@ -1,3 +1,4 @@
+#!/usr/bin/env Rscript
 # --------------------------------------------------------------
 library(jsonlite)
 library(DBI)
@@ -49,16 +50,15 @@ to_geographic_coord <- function(longdec, latdec) {
 # --------------------------------------------------------------
 
 # Download BrAPI data from brapi_url, pageSize results at a time,
-# and store in a PostgreSQL database
-# (database = db_name, accession table = table_name, gid in gid_sequence)
-brapi_to_sql_all <- function(brapi_url, db_name, table_name, gid_sequence, pageSize = 1000) {
+# and store in a PostgreSQL database associated with connection conn
+# (accession table = table_name, gid in gid_sequence)
+brapi_to_sql_all <- function(brapi_url, conn, table_name, gid_sequence, pageSize = 1000) {
   # Determine number of rows and pages
   json <- fromJSON(brapi_url)
   num_rows <- json$metadata$pagination$totalCount
   num_pages <- json$metadata$pagination$totalPages
 
-  # Download and combine each page (assumes that database db_name exists)
-  conn <- dbConnect(RPostgres::Postgres(), dbname = db_name)
+  # Download and combine each page (assumes that database PGDATABASE exists)
   for (p in 1:num_pages) {
     # Download data from the BrAPI endpoint
     json <- fromJSON(sprintf("%s&page=%d&pageSize=%d", brapi_url, p - 1, pageSize))
@@ -84,16 +84,15 @@ brapi_to_sql_all <- function(brapi_url, db_name, table_name, gid_sequence, pageS
     results <- data.frame(
       gid = new_gids,
       taxon = sprintf("%s %s", data$genus, data$species),
-      taxon_fts = sprintf("'%s':2 '%s':1", data$species, tolower(data$genus)), # type is tsvector
       is_legume = TRUE,
       genus = data$genus,
       species = data$species,
-      spauthor = "",
-      subtaxa = "",
-      subtauthor = "",
+      spauthor = data$speciesAuthority,
+      subtaxa = data$subtaxa,
+      subtauthor = data$speciesAuthority,
       cropname = data$commonCropName,
       avail = "",
-      instcode = "",
+      instcode = data$instituteCode,
       accenumb = trimws(data$accessionNumber),
       acckey = new_gids,
       collnumb = "",
@@ -133,9 +132,6 @@ brapi_to_sql_all <- function(brapi_url, db_name, table_name, gid_sequence, pageS
 
   # Also update curr_gid in gid_sequence (a sequence)
   dbSendQuery(conn, sprintf("SELECT setval('%s', %d, true)", gid_sequence, curr_gid))
-
-  # Done
-  dbDisconnect(conn)
 }
 
 # --------------------------------------------------------------
@@ -155,11 +151,15 @@ for (g in genera) {
   print(g)
   brapi_url <- sprintf("https://npgsweb.ars-grin.gov/gringlobal/brapi/v2/germplasm?genus=%s", g)
   # use SQL() to escape hidden table names
+  conn <- dbConnect(RPostgres::Postgres(), host = Sys.getenv("PGHOST"), dbname = Sys.getenv("PGDATABASE"))
   brapi_to_sql_all(brapi_url,
-    db_name = "lis_germplasm",
+    conn,
     table_name = SQL('"lis_germplasm"."grin_accession"'),
     gid_sequence = SQL('"lis_germplasm"."grin_accession_gid_seq"')
   )
+  # Done
+  dbSendQuery(conn, sprintf("UPDATE lis_germplasm.grin_accession SET taxon_fts = to_tsvector('english', coalesce(taxon,''))"))
+  dbDisconnect(conn)
 }
 
 # To check the new row count,

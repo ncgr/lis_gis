@@ -26,9 +26,7 @@ services:
         target: /run/postgresql
 
   db:
-    build:
-      context: .
-      target: db
+    image: postgis/postgis:12-2.5-alpine
     environment:
       POSTGRES_PASSWORD: unused
       POSTGRES_INITDB_ARGS: --auth=peer
@@ -39,11 +37,42 @@ services:
       - type: volume
         source: postgres-socket
         target: /run/postgresql
+      - type: bind
+        read_only: true
+        source: ./docker-entrypoint-initdb.d/schema.sql
+        target: /docker-entrypoint-initdb.d/schema.sql
+      - type: bind
+        read_only: true
+        source: ./docker-entrypoint-initdb.d/zz-create-role-nobody.sql
+        target: /docker-entrypoint-initdb.d/zz-create-role-nobody.sql
 # don't listen on TCP port; write optimizations
     command: ["-c", "listen_addresses=",
               "-c", "wal_level=minimal",
               "-c", "max_wal_senders=0",
               "-c", "synchronous_commit=off"]
+
+  load:
+    # https://wave.seqera.io/view/builds/bd-1bf61377f721e179_1
+    image: community.wave.seqera.io/library/r-jsonlite_r-rpostgres_r-sf:1bf61377f721e179
+    # one conda package doesn't have linux/arm64 build
+    platform: linux/amd64
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGHOST: /run/postgresql
+      PGDATABASE: postgres
+    volumes:
+      - type: bind
+        read_only: true
+        source: ./R/brapi-to-postgresql.R
+        target: /usr/local/bin/brapi-to-postgresql.R
+      - type: volume
+        source: postgres-socket
+        target: /run/postgresql
+    user: uucp
+    entrypoint: ["brapi-to-postgresql.R"]
+    profiles: ["load"]
 
 volumes:
   postgres-socket:

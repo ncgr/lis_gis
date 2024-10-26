@@ -3,7 +3,7 @@ COPY ./docker-entrypoint-initdb.d/ /docker-entrypoint-initdb.d/
 
 ########################################
 
-FROM python:3.9 AS build
+FROM python:3.9-alpine AS build
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt requests  # CTC added as a cheat for now
@@ -12,7 +12,8 @@ RUN pip install --no-cache-dir -r requirements.txt requests  # CTC added as a ch
 
 FROM build AS dev
 
-RUN pip install --no-cache-dir 'Werkzeug==2.*'
+RUN apk add --no-cache postgresql-client \
+ && pip install --no-cache-dir 'Werkzeug==2.*'
 
 WORKDIR /app
 
