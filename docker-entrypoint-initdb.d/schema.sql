@@ -53,7 +53,7 @@ SET default_with_oids = false;
 --
 
 CREATE TABLE grin_accession (
-    gid integer NOT NULL,
+    acckey integer,
     taxon text,
     taxon_fts tsvector,
     is_legume boolean,
@@ -66,7 +66,6 @@ CREATE TABLE grin_accession (
     avail text,
     instcode text,
     accenumb text,
-    acckey integer,
     collnumb text,
     collcode text,
     taxno integer,
@@ -94,26 +93,6 @@ CREATE TABLE grin_accession (
     history text,
     released text
 );
-
-
---
--- Name: grin_accession_gid_seq; Type: SEQUENCE; Schema: lis_germplasm; Owner: www
---
-
-CREATE SEQUENCE grin_accession_gid_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: grin_accession_gid_seq; Type: SEQUENCE OWNED BY; Schema: lis_germplasm; Owner: www
---
-
-ALTER SEQUENCE grin_accession_gid_seq OWNED BY grin_accession.gid;
-
 
 --
 -- Name: grin_evaluation_metadata; Type: TABLE; Schema: lis_germplasm; Owner: www; Tablespace: 
@@ -179,13 +158,6 @@ CREATE TABLE legumes_grin_evaluation_data (
 
 
 --
--- Name: gid; Type: DEFAULT; Schema: lis_germplasm; Owner: www
---
-
-ALTER TABLE ONLY grin_accession ALTER COLUMN gid SET DEFAULT nextval('grin_accession_gid_seq'::regclass);
-
-
---
 -- Name: id; Type: DEFAULT; Schema: lis_germplasm; Owner: www
 --
 
@@ -197,7 +169,7 @@ ALTER TABLE ONLY grin_evaluation_metadata ALTER COLUMN id SET DEFAULT nextval('g
 --
 
 ALTER TABLE ONLY grin_accession
-    ADD CONSTRAINT grin_accession_pkey PRIMARY KEY (gid);
+    ADD CONSTRAINT grin_accession_pkey PRIMARY KEY (acckey);
 
 
 --

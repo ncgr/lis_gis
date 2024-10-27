@@ -51,8 +51,8 @@ to_geographic_coord <- function(longdec, latdec) {
 
 # Download BrAPI data from brapi_url, pageSize results at a time,
 # and store in a PostgreSQL database associated with connection conn
-# (accession table = table_name, gid in gid_sequence)
-brapi_to_sql_all <- function(brapi_url, conn, table_name, gid_sequence, pageSize = 1000) {
+# (accession table = table_name )
+brapi_to_sql_all <- function(brapi_url, conn, table_name, pageSize = 1000) {
   # Determine number of rows and pages
   json <- fromJSON(brapi_url)
   num_rows <- json$metadata$pagination$totalCount
@@ -77,12 +77,10 @@ brapi_to_sql_all <- function(brapi_url, conn, table_name, gid_sequence, pageSize
 
     # Create data frame (results) whose columns match the database table,
     # using default values for those that do not exist in the BrAPI data
-    n <- length(data$genus)
-    new_gids <- curr_gid + 0:(n - 1)
     latdec <- as.numeric(lat_long[, 2])
     longdec <- as.numeric(lat_long[, 1])
     results <- data.frame(
-      gid = new_gids,
+      acckey = data$germplasmDbId,
       taxon = sprintf("%s %s", data$genus, data$species),
       is_legume = TRUE,
       genus = data$genus,
@@ -94,7 +92,6 @@ brapi_to_sql_all <- function(brapi_url, conn, table_name, gid_sequence, pageSize
       avail = "",
       instcode = data$instituteCode,
       accenumb = trimws(data$accessionNumber),
-      acckey = new_gids,
       collnumb = "",
       collcode = "",
       taxno = taxonId,
@@ -122,16 +119,11 @@ brapi_to_sql_all <- function(brapi_url, conn, table_name, gid_sequence, pageSize
       history = "",
       released = ""
     )
-    # increment curr_gid
-    curr_gid <<- curr_gid + n
 
     # Append the data to the database
     dbWriteTable(conn, table_name, results, append = TRUE, row.names = FALSE)
     print(paste("Page", p, "of", num_pages))
   }
-
-  # Also update curr_gid in gid_sequence (a sequence)
-  dbSendQuery(conn, sprintf("SELECT setval('%s', %d, true)", gid_sequence, curr_gid))
 }
 
 # --------------------------------------------------------------
@@ -146,7 +138,6 @@ genera <- c("Apios", "Arachis", "Cajanus", "Chamaecrista", "Cicer", "Glycine", "
 # DELETE FROM lis_germplasm.grin_accession;
 
 # Loop over all genera, the genus goes in brapi_url
-curr_gid <- 1
 for (g in genera) {
   print(g)
   brapi_url <- sprintf("https://npgsweb.ars-grin.gov/gringlobal/brapi/v2/germplasm?genus=%s", g)
@@ -155,7 +146,6 @@ for (g in genera) {
   brapi_to_sql_all(brapi_url,
     conn,
     table_name = SQL('"lis_germplasm"."grin_accession"'),
-    gid_sequence = SQL('"lis_germplasm"."grin_accession_gid_seq"')
   )
   # Done
   dbSendQuery(conn, sprintf("UPDATE lis_germplasm.grin_accession SET taxon_fts = to_tsvector('english', coalesce(taxon,''))"))

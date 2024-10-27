@@ -18,7 +18,7 @@ DEFAULT_LIMIT = 200
 TWO_PLACES = Decimal('0.01')
 ACCESSION_TAB = 'lis_germplasm.grin_accession'
 ACC_SELECT_COLS = (
-    'gid', 'taxon', 'latdec', 'longdec', 'accenumb', 'elevation', 'cropname',
+    'acckey', 'taxon', 'latdec', 'longdec', 'accenumb', 'elevation', 'cropname',
     'collsite', 'acqdate', 'origcty'
 )
 # Brewer nominal category colors from chroma.js set1,2,3 concatenated:
@@ -37,7 +37,7 @@ ORDER_BY_FRAG = '''
   ST_Centroid(
    ST_MakeEnvelope(%(minx)s, %(miny)s, %(maxx)s, %(maxy)s, %(srid)s)
   )
- ) ASC, taxon, gid
+ ) ASC, taxon, acckey
 '''
 LIMIT_FRAG = 'LIMIT %(limit)s'
 COUNTRY_REGEX = re.compile(r'[a-z]{3}', re.I)
