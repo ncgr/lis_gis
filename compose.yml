@@ -5,6 +5,7 @@ services:
       context: .
       target: dev
     environment:
+      BRAPI_URL: https://arsiaamp3ggrpts.agron.iastate.edu/gringlobal/brapi/v2
       DEBUG: '1'
       PGHOST: /run/postgresql
       PGPORT:
@@ -20,30 +21,44 @@ services:
       - type: bind
         source: .
         target: /app
-        read_only: true
       - type: volume
         source: postgres-socket
         target: /run/postgresql
 
   db:
-    build:
-      context: .
-      target: db
+    image: postgis/postgis:17-3.5-alpine
     environment:
       POSTGRES_PASSWORD: unused
       POSTGRES_INITDB_ARGS: --auth=peer
     healthcheck:
-      test: "su-exec postgres pg_isready || exit 1"
+      test: "gosu postgres pg_isready || exit 1"
       retries: 10
+      start_period: "5s"
     volumes:
       - type: volume
         source: postgres-socket
         target: /run/postgresql
+      - type: bind
+        read_only: true
+        source: ./docker-entrypoint-initdb.d/schema.sql
+        target: /docker-entrypoint-initdb.d/schema.sql
+      - type: bind
+        read_only: true
+        source: ./docker-entrypoint-initdb.d/zz-create-role-nobody.sql
+        target: /docker-entrypoint-initdb.d/zz-create-role-nobody.sql
 # don't listen on TCP port; write optimizations
     command: ["-c", "listen_addresses=",
+              "-c", "fsync=off",
+              "-c", "full_page_writes=off",
               "-c", "wal_level=minimal",
               "-c", "max_wal_senders=0",
               "-c", "synchronous_commit=off"]
+
+  load:
+    extends: web
+    user: guest
+    entrypoint: ["/app/scripts/load-all.sh"]
+    profiles: ["load"]
 
 volumes:
   postgres-socket:

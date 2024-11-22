@@ -9,7 +9,7 @@ import subprocess
 
 from django_nose.runner import settings
 
-SCHEMA = 'scripts/schema.sql'
+SCHEMA = 'docker-entrypoint-initdb.d/schema.sql'
 DATA = 'grin_app/tests/test_sql.txt'
 
 test_db = settings.DATABASES['default']

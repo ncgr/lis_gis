@@ -1,34 +1,32 @@
-on:
-  push:
-    branches:
-      - germplasm-map.legumeinfo.org
+on: [workflow_dispatch]
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
+      packages: write
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2 
-  
-      - name: Add SSH key
+      - uses: actions/checkout@v4
+      - uses: actions/cache/restore@v4
+        id: grin-cache-restore
+        with:
+          path: ./data
+          key: grin-brapi-data
+      - name: Download JSON
         env:
-            SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+          BRAPI_URL: https://arsiaamp3ggrpts.agron.iastate.edu/gringlobal/brapi/v2
+        run: PATH=$PWD/scripts:$PATH bash ./scripts/load-all.sh -d
+      - uses: actions/cache/save@v4
+        if: always()
+        id: save-grin-cache
+        with:
+          path: ./data
+          key: grin-brapi-data
+      - uses: oras-project/setup-oras@v1
+      - name: Publish
+        shell: bash
         run: |
-            chmod 700 ${HOME}
-            mkdir -m 700 -p ${HOME}/.ssh
-            echo '${{ secrets.DOCKER_SSH_CONFIG }}' > ${HOME}/.ssh/config
-            echo '${{ secrets.DOCKER_SSH_KNOWN_HOSTS }}' >> ${HOME}/.ssh/known_hosts
-            chmod 400 ${HOME}/.ssh/*
-            ssh-agent -a ${SSH_AUTH_SOCK} > /dev/null   
-            ssh-add - <<< '${{ secrets.DOCKER_HOST_SSH_PRIVATE_KEY }}'
-  
-      - name: Build container image and deploy image
-        env:
-            SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-            DOCKER_BUILDKIT: 1
-            DOCKER_HOST: ssh://docker
-        run: |
-          docker compose --env-file prod.env up --detach --build --remove-orphans
+          echo "${{ secrets.GITHUB_TOKEN }}" | oras login -u ${{ github.actor }} --password-stdin ghcr.io
+          oras push ghcr.io/${GITHUB_REPOSITORY,,}:data-latest ./data

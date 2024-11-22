@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 QA the data, update db wit a concensus for sign of latitude and
@@ -9,20 +9,9 @@ missing or wrong, locating the accessions in the wrong hemisphere.
 import psycopg2
 import math
 
-PSQL_DB = 'dbname=drupal user=www'
-DATE_FMT = '%Y%m%d'
-PNT_FMT = "ST_GeographyFromText('SRID=4326;POINT(%(longdec)s %(latdec)s)')"
-
-if not hasattr(math, 'isclose'):
-    # monkey patch for python2
-    def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
-        return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
-    math.isclose = isclose
-
-
 def main():
     print('making lat/long consensus...')
-    conn = psycopg2.connect(PSQL_DB)
+    conn = psycopg2.connect()
     cur = conn.cursor()
     sql = '''SELECT distinct origcty 
     FROM lis_germplasm.grin_accession
