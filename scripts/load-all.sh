@@ -55,7 +55,7 @@ then
     echo "loading data/germplasm-${genus}.json" 1>&2
     gzip -dc data/germplasm-${genus}.json.gz | load.py
     echo "loading data/observations-${genus}.json" 1>&2
-    gzip -dc data/observations-${genus}.json.gz | load_observations.py
+    load_observations.py data/traits-${genus}.json.gz data/observations-${genus}.json.gz
   done
   latlng_consensus.py
   fts_index.py
