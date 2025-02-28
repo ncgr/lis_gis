@@ -37,6 +37,7 @@ FROM build AS prod
 
 WORKDIR /app
 
+RUN apk add --no-cache oras-cli
 COPY manage.py ./
 COPY grin_app ./grin_app
 COPY lis_germplasm ./lis_germplasm

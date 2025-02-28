@@ -14,7 +14,8 @@ services:
     ports:
       - "${PORT:-80}:8080"
     depends_on:
-      - django
+      load:
+        condition: service_completed_successfully
     restart: always
     volumes:
       - gunicorn-socket:/run/gunicorn
@@ -29,7 +30,6 @@ services:
     restart: always
     environment:
       ALLOWED_HOSTS:
-      BRAPI_URL: https://arsiaamp3ggrpts.agron.iastate.edu/gringlobal/brapi/v2
       DEBUG:
       PGHOST: /run/postgresql
       PGPORT:
@@ -37,10 +37,10 @@ services:
       PGUSER:
       PGDATABASE: postgres
       SCRIPT_NAME: ''
+    network_mode: "none"
     volumes:
       - gunicorn-socket:/run/gunicorn
       - postgres-socket:/run/postgresql
-      - /app/data
 
   db:
     build:
@@ -49,6 +49,7 @@ services:
     healthcheck:
       test: "gosu postgres pg_isready || exit 1"
     restart: always
+    network_mode: "none"
     environment:
       PGDATA: /var/lib/postgresql/data/pgdata
       POSTGRES_PASSWORD: unused
@@ -58,9 +59,19 @@ services:
       - /var/lib/postgresql/data
 # don't listen on TCP port; write optimizations
     command: ["-c", "listen_addresses=",
+              "-c", "fsync=off",
+              "-c", "full_page_writes=off",
               "-c", "wal_level=minimal",
               "-c", "max_wal_senders=0",
               "-c", "synchronous_commit=off"]
+
+  load:
+    extends: django
+    user: guest
+    entrypoint: ["/bin/sh", "-ec", "env HOME=/tmp oras pull ghcr.io/legumeinfo/lis_gis:data-latest && /app/scripts/load-all.sh"]
+    network_mode: "bridge"
+    volumes:
+      - /app/data
 
 volumes:
   gunicorn-socket:
